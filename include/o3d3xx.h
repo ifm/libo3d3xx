@@ -21,5 +21,6 @@
 #include "o3d3xx/version.h"
 #include "o3d3xx/err.h"
 #include "o3d3xx/util.h"
+#include "o3d3xx/camera.hpp"
 
 #endif // __O3D3XX_H__

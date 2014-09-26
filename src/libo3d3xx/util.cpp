@@ -15,25 +15,46 @@
  */
 
 #include "o3d3xx/util.h"
-#include <boost/thread/once.hpp>
+#include <mutex>
+#include <string>
+#include <unordered_map>
 #include <glog/logging.h>
+#include <xmlrpc-c/base.hpp>
 #include "o3d3xx/version.h"
 
 //--------------------------------------------------
 // Logging-related
 //--------------------------------------------------
 
-boost::once_flag o3d3xx::Logging::init_ = BOOST_ONCE_INIT;
+std::once_flag o3d3xx::Logging::init_;
 
 void
 o3d3xx::Logging::Init()
 {
-  boost::call_once(o3d3xx::Logging::_Init,
-		   o3d3xx::Logging::init_);
+  std::call_once(o3d3xx::Logging::init_, o3d3xx::Logging::_Init);
 }
 
 void
 o3d3xx::Logging::_Init()
 {
   google::InitGoogleLogging(O3D3XX_LIBRARY_NAME);
+}
+
+//--------------------------------------------------
+// XMLRPC utilities
+//--------------------------------------------------
+
+std::unordered_map<std::string, std::string> const
+o3d3xx::value_struct_to_map(const xmlrpc_c::value_struct& vs)
+{
+  std::map<std::string, xmlrpc_c::value> const
+    resmap(static_cast<std::map<std::string, xmlrpc_c::value> >(vs));
+
+  std::unordered_map<std::string, std::string> retval;
+  for (auto& kv : resmap)
+    {
+      retval[kv.first] = std::string(xmlrpc_c::value_string(kv.second));
+    }
+
+  return retval;
 }

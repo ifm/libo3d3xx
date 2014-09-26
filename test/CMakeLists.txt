@@ -1,8 +1,6 @@
 add_subdirectory(${GTEST_CMAKE_DIR} gtest_bin)
-add_executable(o3d3xx-tests
-  o3d3xx-testrunner.cpp
-  o3d3xx-basic-tests.cpp
-  )
+file(GLOB TEST_SOURCES *.cpp)
+add_executable(o3d3xx-tests ${TEST_SOURCES})
 target_link_libraries(o3d3xx-tests gtest_main o3d3xx)
 
 #

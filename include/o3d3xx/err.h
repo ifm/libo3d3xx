@@ -21,6 +21,7 @@
 #include <exception>
 
 extern const int O3D3XX_NO_ERRORS;
+extern const int O3D3XX_XMLRPC_FAILURE;
 
 namespace o3d3xx
 {

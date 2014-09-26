@@ -18,12 +18,15 @@
 #include <cstring>
 
 const int O3D3XX_NO_ERRORS = 0;
+const int O3D3XX_XMLRPC_FAILURE = -9000;
 
 const char *o3d3xx::strerror(int errnum)
 {
   switch (errnum) {
   case O3D3XX_NO_ERRORS:
     return "OK";
+  case O3D3XX_XMLRPC_FAILURE:
+    return "XMLRPC communications failure";
   default:
     return ::strerror(errnum);
   }

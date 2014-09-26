@@ -13,8 +13,8 @@ include(MacroOutOfSourceBuild)
 macro_ensure_out_of_source_build("Please build ${PROJECT_NAME} out-of-source")
 
 # settings for controlling debug vs. release builds
-set(CMAKE_BUILD_TYPE Release)
-#set(CMAKE_BUILD_TYPE Debug)
+#set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug)
 
 # if you want to customize the compiler flags based on build type, do that here
 set(CMAKE_CXX_FLAGS "-std=c++11") # turn on C++11 for g++
@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11") # turn on C++11 for g++
 
 # This is the single place to manage API version numbers
 set(O3D3XX_VERSION_MAJOR 0)
-set(O3D3XX_VERSION_MINOR 1)
+set(O3D3XX_VERSION_MINOR 0)
 set(O3D3XX_VERSION_PATCH 0)
 file(COPY ${O3D3XX_SOURCE_DIR}/include
   DESTINATION ${O3D3XX_BINARY_DIR}
@@ -128,8 +128,10 @@ set(CPACK_PACKAGE_FILE_NAME
   "${GIT_PROJECT_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libboost-thread-dev (>= 1.46),
-   libboost-system-dev (>= 1.46),
-   libboost-program-options-dev (>= 1.46),
-   libgoogle-glog-dev")
+  "libboost-dev,
+   libboost-system-dev,
+   libboost-program-options-dev,
+   libgoogle-glog-dev,
+   libxmlrpc-c++,
+   libxmlrpc-c++-dev")
 include(CPack)

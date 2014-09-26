@@ -18,7 +18,10 @@
 #ifndef __O3D3XX_UTIL_H__
 #define __O3D3XX_UTIL_H__
 
-#include <boost/thread/once.hpp>
+#include <mutex>
+#include <string>
+#include <unordered_map>
+#include <xmlrpc-c/base.hpp>
 
 namespace o3d3xx
 {
@@ -45,9 +48,20 @@ namespace o3d3xx
     /**
      * Flag indicating the initialization state of the logging subsystem.
      */
-    static boost::once_flag init_;
+    static std::once_flag init_;
 
   }; // end: class Logging
+
+  /**
+   * The function converts an xmlrpc_c::value_struct into a
+   * std::unordered_map. The assumption is that all keys and values are
+   * strings.
+   *
+   * @param[in] xmlrcp_c::value_struct Structure of strings mapped to strings
+   * @return std::unordered_map<std::string, std::string>
+   */
+  std::unordered_map<std::string, std::string> const
+  value_struct_to_map(const xmlrpc_c::value_struct& vs);
 
 } // end: namespace o3d3xx
 
