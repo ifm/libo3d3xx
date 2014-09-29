@@ -75,6 +75,9 @@ TEST(Camera_Tests, GetParameter)
       // values. e.g., in some cases 'true' vs. '1'.
       EXPECT_NO_THROW(cam->GetParameter(kv.first));
     }
+
+  EXPECT_THROW(cam->GetParameter("Bogus Parameter"),
+	       o3d3xx::error_t);
 }
 
 TEST(Camera_Tests, GetSWVersion)

@@ -247,5 +247,6 @@ o3d3xx::Camera::SetOperatingMode(const o3d3xx::Camera::operating_mode& mode)
   catch (const o3d3xx::error_t& ex)
     {
       LOG(ERROR) << "Failed to set operating mode!";
+      throw(ex);
     }
 }

@@ -19,6 +19,7 @@
 
 const int O3D3XX_NO_ERRORS = 0;
 const int O3D3XX_XMLRPC_FAILURE = -9000;
+const int O3D3XX_THREAD_INTERRUPTED = -9001;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -27,6 +28,8 @@ const char *o3d3xx::strerror(int errnum)
     return "OK";
   case O3D3XX_XMLRPC_FAILURE:
     return "XMLRPC communications failure";
+  case O3D3XX_THREAD_INTERRUPTED:
+    return "Thread interrupted";
   default:
     return ::strerror(errnum);
   }

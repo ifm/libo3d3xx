@@ -22,5 +22,6 @@
 #include "o3d3xx/err.h"
 #include "o3d3xx/util.h"
 #include "o3d3xx/camera.hpp"
+#include "o3d3xx/frame_grabber.h"
 
 #endif // __O3D3XX_H__

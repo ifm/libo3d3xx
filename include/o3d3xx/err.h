@@ -22,6 +22,7 @@
 
 extern const int O3D3XX_NO_ERRORS;
 extern const int O3D3XX_XMLRPC_FAILURE;
+extern const int O3D3XX_THREAD_INTERRUPTED;
 
 namespace o3d3xx
 {
