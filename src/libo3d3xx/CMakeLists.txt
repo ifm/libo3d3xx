@@ -12,6 +12,7 @@ target_link_libraries(
   ${LIB_boost_program_options}
   xmlrpc++
   xmlrpc_client++
+  ${PCL_COMMON_LIBRARIES}
   )
 set_target_properties(o3d3xx PROPERTIES
   VERSION

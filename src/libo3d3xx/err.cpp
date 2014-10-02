@@ -20,6 +20,7 @@
 const int O3D3XX_NO_ERRORS = 0;
 const int O3D3XX_XMLRPC_FAILURE = -9000;
 const int O3D3XX_THREAD_INTERRUPTED = -9001;
+const int O3D3XX_IMG_CHUNK_NOT_FOUND = -9002;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -30,6 +31,8 @@ const char *o3d3xx::strerror(int errnum)
     return "XMLRPC communications failure";
   case O3D3XX_THREAD_INTERRUPTED:
     return "Thread interrupted";
+  case O3D3XX_IMG_CHUNK_NOT_FOUND:
+    return "Image chunk not found";
   default:
     return ::strerror(errnum);
   }

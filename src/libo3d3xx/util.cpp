@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "o3d3xx/util.h"
+#include "o3d3xx/util.hpp"
 #include <mutex>
 #include <string>
 #include <unordered_map>

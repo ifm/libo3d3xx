@@ -34,12 +34,20 @@ configure_file(
   @ONLY
   )
 
+# bring in PCL
+find_package(PCL 1.7 REQUIRED COMPONENTS common visualization)
+
 # Manage compiler/linker flags
 include_directories(
   ${O3D3XX_BINARY_DIR}/include
+  ${PCL_INCLUDE_DIRS}
   )
 link_directories(
   ${O3D3XX_BINARY_DIR}/lib
+  ${PCL_LIBRARY_DIRS}
+  )
+add_definitions(
+  ${PCL_DEFINITIONS}
   )
 
 # turn on ctest (unit testing gives us `make test' in top-level)
@@ -133,5 +141,7 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS
    libboost-program-options-dev,
    libgoogle-glog-dev,
    libxmlrpc-c++,
-   libxmlrpc-c++-dev")
+   libxmlrpc-c++-dev,
+   libpcl-1.7-all,
+   libpcl-1.7-all-dev")
 include(CPack)

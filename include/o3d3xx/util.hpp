@@ -18,9 +18,11 @@
 #ifndef __O3D3XX_UTIL_H__
 #define __O3D3XX_UTIL_H__
 
+#include <algorithm>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <endian.h>
 #include <xmlrpc-c/base.hpp>
 
 namespace o3d3xx
@@ -62,6 +64,66 @@ namespace o3d3xx
    */
   std::unordered_map<std::string, std::string> const
   value_struct_to_map(const xmlrpc_c::value_struct& vs);
+
+  /**
+   * Create a value of type T from sizeof(T) bytes of the passed in byte
+   * buffer. This assumes the passed in byte buffer is holding the data in
+   * network byte order.
+   *
+   * @param[in] buff A pointer to a buffer in memory intended to be interpreted
+   * as data of type T and assuming the buffer is in network byte order (big
+   * endian).
+   *
+   * @return An interpretation of `buff` as type T with bytes swapped as
+   * appropriate for the host's byte ordering semantics.
+   */
+  template<typename T>
+  T ntohval(const unsigned char *buff)
+  {
+    union
+    {
+      T v;
+      unsigned char bytes[sizeof(T)];
+    } value;
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+    std::copy(buff, buff + sizeof(T), value.bytes);
+#else
+    std::reverse_copy(buff, buff + sizeof(T), value.bytes);
+#endif
+
+    return value.v;
+  }
+
+  /**
+   * Create a value of type T from sizeof(T) bytes of the passed in byte
+   * buffer. Given that the o3d3xx camera transmits data in little endian
+   * format, this function will swap bytes if necessary for the host
+   * representation of T.
+   *
+   * @param[in] buff A pointer to a buffer in memory intended to be interpreted
+   * as data of type T and assuming the buffer is little endian.
+   *
+   * @return An interpretation of `buff` as type T with bytes swapped as
+   * appropriate for the host's byte ordering semantics.
+   */
+  template<typename T>
+  T mkval(const unsigned char *buff)
+  {
+    union
+    {
+      T v;
+      unsigned char bytes[sizeof(T)];
+    } value;
+
+#if __BYTE_ORDER == __BIG_ENDIAN
+    std::reverse_copy(buff, buff + sizeof(T), value.bytes);
+#else
+    std::copy(buff, buff + sizeof(T), value.bytes);
+#endif
+
+    return value.v;
+  }
 
 } // end: namespace o3d3xx
 

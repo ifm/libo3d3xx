@@ -20,7 +20,8 @@
 
 #include "o3d3xx/version.h"
 #include "o3d3xx/err.h"
-#include "o3d3xx/util.h"
+#include "o3d3xx/util.hpp"
+#include "o3d3xx/image.h"
 #include "o3d3xx/camera.hpp"
 #include "o3d3xx/frame_grabber.h"
 

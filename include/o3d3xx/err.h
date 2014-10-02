@@ -23,6 +23,7 @@
 extern const int O3D3XX_NO_ERRORS;
 extern const int O3D3XX_XMLRPC_FAILURE;
 extern const int O3D3XX_THREAD_INTERRUPTED;
+extern const int O3D3XX_IMG_CHUNK_NOT_FOUND;
 
 namespace o3d3xx
 {

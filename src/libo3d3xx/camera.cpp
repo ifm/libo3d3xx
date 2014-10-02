@@ -24,7 +24,7 @@
 #include <glog/logging.h>
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/client_simple.hpp>
-#include "o3d3xx/util.h"
+#include "o3d3xx/util.hpp"
 
 const std::string o3d3xx::DEFAULT_PASSWORD = "";
 const std::string o3d3xx::DEFAULT_IP = "192.168.0.69";

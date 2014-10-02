@@ -26,10 +26,11 @@
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
 #include <glog/logging.h>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include "o3d3xx/image.h"
 #include "o3d3xx/camera.hpp"
 #include "o3d3xx/err.h"
-
-const std::size_t o3d3xx::IMG_TICKET_SZ = 16; // bytes
 
 o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam)
   : cam_(cam),
@@ -67,9 +68,6 @@ o3d3xx::FrameGrabber::WaitForFrame(std::vector<std::uint8_t>& client_buff,
   // mutex will unlock in `unique_lock' dtor
   std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
 
-  std::size_t sz = this->front_buffer_.size();
-  client_buff.resize(sz);
-
   try
     {
       if (timeout_millis <= 0)
@@ -94,11 +92,60 @@ o3d3xx::FrameGrabber::WaitForFrame(std::vector<std::uint8_t>& client_buff,
     }
 
   DLOG(INFO) << "Client fetching new image data";
+  std::size_t sz = this->front_buffer_.size();
+  client_buff.resize(sz);
+
   std::copy(this->front_buffer_.begin(),
 	    this->front_buffer_.begin() + sz,
 	    client_buff.begin());
   return true;
 }
+
+bool
+o3d3xx::FrameGrabber::WaitForCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud,
+				   long timeout_millis)
+{
+  // mutex will unlock in `unique_lock' dtor
+  std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
+
+  try
+    {
+      if (timeout_millis <= 0)
+	{
+	  this->front_buffer_cv_.wait(lock);
+	}
+      else
+	{
+	  if (this->front_buffer_cv_.wait_for(
+	       lock, std::chrono::milliseconds(timeout_millis)) ==
+	      std::cv_status::timeout)
+	    {
+	      LOG(WARNING) << "Timeout waiting for image buffer";
+	      return false;
+	    }
+	}
+    }
+  catch (const std::system_error& ex)
+    {
+      LOG(WARNING) << "WaitForPointCloud: " << ex.what();
+      return false;
+    }
+
+  DLOG(INFO) << "Client fetching new point cloud";
+
+  try
+    {
+      o3d3xx::image_buff_to_point_cloud(this->front_buffer_, cloud);
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "image_buff_to_point_cloud: " << ex.what();
+      return false;
+    }
+
+  return true;
+}
+
 
 void
 o3d3xx::FrameGrabber::Run()
@@ -173,13 +220,8 @@ o3d3xx::FrameGrabber::Run()
   	  DLOG(INFO) << "Got full image!";
   	  bytes_read = 0;
 
-	  // 1. verify the back buffer
-	  if ((std::string(this->back_buffer_.begin()+4,
-			   this->back_buffer_.begin()+8) == "star") &&
-	      (std::string(this->back_buffer_.end()-6,
-			   this->back_buffer_.end()-2) == "stop") &&
-	      (this->back_buffer_.at(buff_sz - 2) == '\r') &&
-	      (this->back_buffer_.at(buff_sz - 1) == '\n'))
+	  // 1. verify the data
+	  if (o3d3xx::verify_image_buffer(this->back_buffer_))
 	    {
 	      DLOG(INFO) << "Image OK";
 
@@ -233,15 +275,11 @@ o3d3xx::FrameGrabber::Run()
 	  DLOG(INFO) << "Got full ticket!";
 	  ticket_bytes_read = 0;
 
-	  if ((this->ticket_buffer_.at(4) == 'L') &&
-	      (this->ticket_buffer_.at(14) == '\r') &&
-	      (this->ticket_buffer_.at(15) == '\n'))
+	  if (o3d3xx::verify_ticket_buffer(this->ticket_buffer_))
 	    {
 	      DLOG(INFO) << "Ticket OK";
-	      buff_sz =
-		std::stoi(std::string(this->ticket_buffer_.begin()+5,
-	       			      this->ticket_buffer_.end()));
 
+	      buff_sz = o3d3xx::get_image_buffer_size(this->ticket_buffer_);
 	      DLOG(INFO) << "Image buffer size: " << buff_sz;
 	      this->back_buffer_.resize(buff_sz);
 
@@ -292,8 +330,5 @@ o3d3xx::FrameGrabber::Run()
       LOG(WARNING) << "Exception: " << ex.what();
     }
 
-  //
-  // settle the camera
-  //
   LOG(INFO) << "Framegrabber thread done.";
 }

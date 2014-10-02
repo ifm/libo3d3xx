@@ -26,12 +26,12 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
 #include "o3d3xx/camera.hpp"
 
 namespace o3d3xx
 {
-  extern const std::size_t IMG_TICKET_SZ; // bytes
-
   /**
    * The FrameGrabber is a class that, when given access to an
    * o3d3xx::Camera::Ptr, it will grab frames from the camera in a separate
@@ -74,6 +74,28 @@ namespace o3d3xx
     void Stop();
 
     /**
+     * This function is used by clients for retrieving point clouds from the
+     * FrameGrabber's wrapped camera instance. This function will block for up
+     * to `timeout_millis' milliseconds or possibly indefinitely if
+     * `timeout_millis' is set to 0.
+     *
+     * @param[out] cloud A (smart) pointer to a point cloud to fill will data
+     * from the last image frame captured off the camera.
+     *
+     * @param[in] timeout_millis Amount of time, in milliseconds, to wait for
+     * new image data from the FrameGrabber. If `timeout_millis' is set to 0,
+     * this function will block indefinitely.
+     *
+     * @return true if a point cloud was constructed from a new camera buffer
+     * acquired within `timeout_millis', false otherwise.
+     *
+     * NOTE: The `intensity' channel of the point cloud will be filled with
+     * data from the sensor's `Amplitude' image.
+     */
+    bool WaitForCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud,
+		      long timeout_millis = 0);
+
+    /**
      * This function is used by clients for retrieving image frames from the
      * FrameGrabber's wrapped Camera instance. This function will block for up
      * to `timeout_millis' milliseconds or possibly indefintely if
@@ -96,7 +118,7 @@ namespace o3d3xx
      * @see o3d3xx::FrameGrabber::WaitForCloud
      */
     bool WaitForFrame(std::vector<std::uint8_t>& client_buff,
-			long timeout_millis = 0);
+		      long timeout_millis = 0);
 
   protected:
     /**
@@ -152,7 +174,7 @@ namespace o3d3xx
     std::vector<std::uint8_t> front_buffer_;
 
     /**
-     * Protects front_buffer_mutex_
+     * Protects front_buffer_
      */
     std::mutex front_buffer_mutex_;
 
