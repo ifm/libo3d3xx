@@ -81,24 +81,24 @@ o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
   // NOTE: These can be discovered dynamically, however, for now
   // we use our apriori info of the pixel data types
   std::size_t xincr = 2; // int16_t
-    //    o3d3xx::get_num_bytes_in_pixel_format(
-    //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+xidx+24));
+    //o3d3xx::get_num_bytes_in_pixel_format(
+    //o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+xidx+24));
 
   std::size_t yincr = 2; // int16_t
-    //    o3d3xx::get_num_bytes_in_pixel_format(
-    //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+yidx+24));
+    //o3d3xx::get_num_bytes_in_pixel_format(
+    // o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+yidx+24));
 
   std::size_t zincr = 2; // int16_t
-    //    o3d3xx::get_num_bytes_in_pixel_format(
-    //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+zidx+24));
+    //o3d3xx::get_num_bytes_in_pixel_format(
+    //  o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+zidx+24));
 
   std::size_t aincr = 2; // uint16_t
-    //    o3d3xx::get_num_bytes_in_pixel_format(
-    //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+aidx+24));
+    //o3d3xx::get_num_bytes_in_pixel_format(
+    //  o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+aidx+24));
 
   std::size_t cincr = 1; // uint8_t
-    //    o3d3xx::get_num_bytes_in_pixel_format(
-    //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+cidx+24));
+    //o3d3xx::get_num_bytes_in_pixel_format(
+    //  o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+cidx+24));
 
   cloud->header.frame_id = "/o3d3xx";
   cloud->width = o3d3xx::mkval<std::uint32_t>(buff.data()+xidx+16);
@@ -131,13 +131,14 @@ o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
 	{
 	  // convert the units to meters and the coord frame
 	  // to a right-handed frame.
-	  //pt.x = o3d3xx::mkval<std::uint16_t>(buff.data()+zidx) / 1000.0f;
-	  //pt.y = -o3d3xx::mkval<std::uint16_t>(buff.data()+xidx) / 1000.0f;
-	  //pt.z = -o3d3xx::mkval<std::uint16_t>(buff.data()+yidx) / 1000.0f;
+	  pt.x = o3d3xx::mkval<std::int16_t>(buff.data()+zidx) / 1000.0f;
+	  pt.y = -o3d3xx::mkval<std::int16_t>(buff.data()+xidx) / 1000.0f;
+	  pt.z = -o3d3xx::mkval<std::int16_t>(buff.data()+yidx) / 1000.0f;
 
-	  pt.x = o3d3xx::mkval<std::int16_t>(buff.data()+xidx) / 1000.0f;
-	  pt.y = o3d3xx::mkval<std::int16_t>(buff.data()+yidx) / 1000.0f;
-	  pt.z = o3d3xx::mkval<std::int16_t>(buff.data()+zidx) / 1000.0f;
+	  // This would use the IFM image frame
+	  //pt.x = o3d3xx::mkval<std::int16_t>(buff.data()+xidx) / 1000.0f;
+	  //pt.y = o3d3xx::mkval<std::int16_t>(buff.data()+yidx) / 1000.0f;
+	  //pt.z = o3d3xx::mkval<std::int16_t>(buff.data()+zidx) / 1000.0f;
 	}
 
       pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;
