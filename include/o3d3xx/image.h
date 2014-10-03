@@ -25,6 +25,7 @@
 
 namespace o3d3xx
 {
+  using PointT = pcl::PointXYZI;
   extern const std::size_t IMG_TICKET_SZ; // bytes
 
   enum class pixel_format : std::uint8_t
@@ -96,7 +97,7 @@ namespace o3d3xx
    * @param[out] cloud The point cloud to fill with point data
    */
   void image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
-				 pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud);
+				 pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud);
 
   /**
    * Finds the index into the image buffer of where the chunk of `chunk_type'

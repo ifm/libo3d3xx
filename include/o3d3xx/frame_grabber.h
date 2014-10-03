@@ -28,6 +28,7 @@
 #include <boost/system/system_error.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
+#include "o3d3xx/image.h"
 #include "o3d3xx/camera.hpp"
 
 namespace o3d3xx
@@ -92,7 +93,7 @@ namespace o3d3xx
      * NOTE: The `intensity' channel of the point cloud will be filled with
      * data from the sensor's `Amplitude' image.
      */
-    bool WaitForCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud,
+    bool WaitForCloud(pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud,
 		      long timeout_millis = 0);
 
     /**

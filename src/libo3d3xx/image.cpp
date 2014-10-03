@@ -57,7 +57,7 @@ o3d3xx::get_image_buffer_size(const std::vector<std::uint8_t>& buff)
 
 void
 o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
-				  pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud)
+				  pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud)
 {
   // Get indices to the start of each chunk of interest in the image buffer
   std::size_t xidx =
@@ -80,15 +80,15 @@ o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
   // Get how many bytes to increment in the buffer for each pixel
   // NOTE: These can be discovered dynamically, however, for now
   // we use our apriori info of the pixel data types
-  std::size_t xincr = 2; // uint16_t
+  std::size_t xincr = 2; // int16_t
     //    o3d3xx::get_num_bytes_in_pixel_format(
     //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+xidx+24));
 
-  std::size_t yincr = 2; // uint16_t
+  std::size_t yincr = 2; // int16_t
     //    o3d3xx::get_num_bytes_in_pixel_format(
     //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+yidx+24));
 
-  std::size_t zincr = 2; // uint16_t
+  std::size_t zincr = 2; // int16_t
     //    o3d3xx::get_num_bytes_in_pixel_format(
     //      o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+zidx+24));
 
@@ -121,7 +121,7 @@ o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
        ++i, xidx += xincr, yidx += yincr, zidx += zincr,
 	 cidx += cincr, aidx += aincr)
     {
-      pcl::PointXYZI& pt = cloud->points[i];
+      o3d3xx::PointT& pt = cloud->points[i];
       if (buff.at(cidx) & 0x1 == 1)
 	{
 	  pt.x = pt.y = pt.z = bad_point;
@@ -131,9 +131,13 @@ o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
 	{
 	  // convert the units to meters and the coord frame
 	  // to a right-handed frame.
-	  pt.x = o3d3xx::mkval<std::uint16_t>(buff.data()+zidx) / 1000.0f;
-	  pt.y = -o3d3xx::mkval<std::uint16_t>(buff.data()+xidx) / 1000.0f;
-	  pt.z = -o3d3xx::mkval<std::uint16_t>(buff.data()+yidx) / 1000.0f;
+	  //pt.x = o3d3xx::mkval<std::uint16_t>(buff.data()+zidx) / 1000.0f;
+	  //pt.y = -o3d3xx::mkval<std::uint16_t>(buff.data()+xidx) / 1000.0f;
+	  //pt.z = -o3d3xx::mkval<std::uint16_t>(buff.data()+yidx) / 1000.0f;
+
+	  pt.x = o3d3xx::mkval<std::int16_t>(buff.data()+xidx) / 1000.0f;
+	  pt.y = o3d3xx::mkval<std::int16_t>(buff.data()+yidx) / 1000.0f;
+	  pt.z = o3d3xx::mkval<std::int16_t>(buff.data()+zidx) / 1000.0f;
 	}
 
       pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;

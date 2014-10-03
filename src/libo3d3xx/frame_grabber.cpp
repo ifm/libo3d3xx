@@ -102,7 +102,7 @@ o3d3xx::FrameGrabber::WaitForFrame(std::vector<std::uint8_t>& client_buff,
 }
 
 bool
-o3d3xx::FrameGrabber::WaitForCloud(pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud,
+o3d3xx::FrameGrabber::WaitForCloud(pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud,
 				   long timeout_millis)
 {
   // mutex will unlock in `unique_lock' dtor

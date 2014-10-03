@@ -46,8 +46,8 @@ TEST(FrameGrabber_Tests, WaitForCloud)
     o3d3xx::FrameGrabber::Ptr(new o3d3xx::FrameGrabber(cam));
 
   int i = 0;
-  pcl::PointCloud<pcl::PointXYZI>::Ptr
-    cloud(new pcl::PointCloud<pcl::PointXYZI>());
+  pcl::PointCloud<o3d3xx::PointT>::Ptr
+    cloud(new pcl::PointCloud<o3d3xx::PointT>());
 
   while (i < 10)
     {

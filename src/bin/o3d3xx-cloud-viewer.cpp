@@ -67,8 +67,8 @@ public:
   {
     o3d3xx::FrameGrabber::Ptr fg(new o3d3xx::FrameGrabber(cam));
 
-    pcl::PointCloud<pcl::PointXYZI>::Ptr
-      cloud(new pcl::PointCloud<pcl::PointXYZI>());
+    pcl::PointCloud<o3d3xx::PointT>::Ptr
+      cloud(new pcl::PointCloud<o3d3xx::PointT>());
 
     while (! viewer.wasStopped())
       {
