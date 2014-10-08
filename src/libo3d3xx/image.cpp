@@ -28,7 +28,7 @@
 #include "o3d3xx/util.hpp"
 #include "o3d3xx/err.h"
 
-const std::size_t o3d3xx::IMG_TICKET_SZ = 16; // bytes
+const std::size_t o3d3xx::IMG_TICKET_SZ = 16;
 
 bool
 o3d3xx::verify_ticket_buffer(const std::vector<std::uint8_t>& buff)
@@ -115,159 +115,6 @@ o3d3xx::get_num_bytes_in_pixel_format(o3d3xx::pixel_format f)
     }
 }
 
-void
-o3d3xx::image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
-				  pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud)
-{
-  // Get indices to the start of each chunk of interest in the image buffer
-  std::size_t xidx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::CARTESIAN_X);
-  std::size_t yidx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::CARTESIAN_Y);
-  std::size_t zidx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::CARTESIAN_Z);
-  std::size_t cidx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::CONFIDENCE);
-  std::size_t aidx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::AMPLITUDE);
-
-  DLOG(INFO) << "x_idx=" << xidx
-	     << ", y_idx=" << yidx
-	     << ", z_idx=" << zidx
-	     << ", a_idx=" << aidx
-	     << ", c_idx=" << cidx;
-
-  // Get how many bytes to increment in the buffer for each pixel
-  // NOTE: These can be discovered dynamically, however, for now
-  // we use our apriori info of the pixel data types
-  std::size_t xincr = 2; // int16_t
-    //o3d3xx::get_num_bytes_in_pixel_format(
-    //o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+xidx+24));
-
-  std::size_t yincr = 2; // int16_t
-    //o3d3xx::get_num_bytes_in_pixel_format(
-    // o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+yidx+24));
-
-  std::size_t zincr = 2; // int16_t
-    //o3d3xx::get_num_bytes_in_pixel_format(
-    //  o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+zidx+24));
-
-  std::size_t aincr = 2; // uint16_t
-    //o3d3xx::get_num_bytes_in_pixel_format(
-    //  o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+aidx+24));
-
-  std::size_t cincr = 1; // uint8_t
-    //o3d3xx::get_num_bytes_in_pixel_format(
-    //  o3d3xx::mkval<o3d3xx::pixel_format>(buff.data()+cidx+24));
-
-  cloud->header.frame_id = "/o3d3xx";
-  cloud->width = o3d3xx::mkval<std::uint32_t>(buff.data()+xidx+16);
-  cloud->height = o3d3xx::mkval<std::uint32_t>(buff.data()+xidx+20);
-  cloud->is_dense = true;
-
-  std::uint32_t num_points = cloud->height * cloud->width;
-  cloud->points.resize(num_points);
-
-  DLOG(INFO) << "width=" << cloud->width
-	     << ", height=" << cloud->height
-	     << ", num_points=" << num_points;
-
-  float bad_point = std::numeric_limits<float>::quiet_NaN();
-
-  // move all index pointers to where the pixel data starts
-  xidx += 36; yidx += 36; zidx += 36; aidx += 36; cidx += 36;
-
-  for (std::size_t i = 0; i < num_points;
-       ++i, xidx += xincr, yidx += yincr, zidx += zincr,
-	 cidx += cincr, aidx += aincr)
-    {
-      o3d3xx::PointT& pt = cloud->points[i];
-      if (buff.at(cidx) & 0x1 == 1)
-	{
-	  pt.x = pt.y = pt.z = bad_point;
-	  cloud->is_dense = false;
-	}
-      else
-	{
-	  // convert the units to meters and the coord frame
-	  // to a right-handed frame.
-	  pt.x = o3d3xx::mkval<std::int16_t>(buff.data()+zidx) / 1000.0f;
-	  pt.y = -o3d3xx::mkval<std::int16_t>(buff.data()+xidx) / 1000.0f;
-	  pt.z = -o3d3xx::mkval<std::int16_t>(buff.data()+yidx) / 1000.0f;
-
-	  // This would use the IFM image frame
-	  //pt.x = o3d3xx::mkval<std::int16_t>(buff.data()+xidx) / 1000.0f;
-	  //pt.y = o3d3xx::mkval<std::int16_t>(buff.data()+yidx) / 1000.0f;
-	  //pt.z = o3d3xx::mkval<std::int16_t>(buff.data()+zidx) / 1000.0f;
-	}
-
-      pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;
-      pt.intensity = o3d3xx::mkval<std::uint16_t>(buff.data()+aidx);
-    }
-
-  cloud->sensor_origin_.setZero();
-  cloud->sensor_orientation_.w() = 1.0f;
-  cloud->sensor_orientation_.x() = 0.0f;
-  cloud->sensor_orientation_.y() = 0.0f;
-  cloud->sensor_orientation_.z() = 0.0f;
-}
-
-void
-o3d3xx::image_buff_to_opencv_depth(const std::vector<std::uint8_t>& buff,
-				   cv::Mat& img)
-{
-  std::size_t idx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::RADIAL_DISTANCE);
-  std::size_t cidx =
-    o3d3xx::get_chunk_index(buff, o3d3xx::image_chunk::CONFIDENCE);
-
-  std::size_t incr = 2; // uint16_t
-  std::size_t cincr = 1;
-
-  std::uint32_t width = o3d3xx::mkval<std::uint32_t>(buff.data()+idx+16);
-  std::uint32_t height = o3d3xx::mkval<std::uint32_t>(buff.data()+idx+20);
-  std::uint32_t num_points = width * height;
-
-  DLOG(INFO) << "Distance index=" << idx
-	     << ", width=" << width
-	     << ", height=" << height;
-
-  std::uint16_t bad_point = std::numeric_limits<std::uint16_t>::quiet_NaN();
-
-  // move all index pointers to where the pixel data starts
-  idx += 36; cidx += 36;
-
-  // NOTE: create() will only allocate a new array when the shape or type of
-  // the current array are different from the specified ones.
-  img.create(height, width, CV_16UC1);
-
-  int col = 0;
-  int row = -1;
-  std::uint16_t* row_ptr;
-  for (std::size_t i = 0; i < num_points; ++i, idx += incr, cidx += cincr)
-    {
-      col = i % width;
-      if (col == 0)
-	{
-	  row += 1;
-	  row_ptr = img.ptr<std::uint16_t>(row);
-	}
-
-      if (buff.at(cidx) & 0x1 == 1)
-	{
-	  row_ptr[col] = bad_point;
-	}
-      else
-	{
-	  row_ptr[col] = o3d3xx::mkval<std::uint16_t>(buff.data()+idx);
-	}
-    }
-
-  DLOG(INFO) << "points= " << num_points
-	     << ", row=" << row
-	     << ", col=" << col;
-}
-
 o3d3xx::ImageBuffer::ImageBuffer()
   : dirty_(false),
     cloud_(new pcl::PointCloud<o3d3xx::PointT>())
@@ -281,16 +128,23 @@ o3d3xx::ImageBuffer::~ImageBuffer()
 }
 
 void
-o3d3xx::ImageBuffer::SetBytes(std::vector<std::uint8_t>& buff)
+o3d3xx::ImageBuffer::SetBytes(std::vector<std::uint8_t>& buff,
+			      bool copy)
 {
-  // std::size_t sz = buff.size();
-  // this->bytes_.resize(sz);
+  if (copy)
+    {
+      std::size_t sz = buff.size();
+      this->bytes_.resize(sz);
 
-  // std::copy(buff.begin(),
-  // 	    buff.begin() + sz,
-  // 	    this->bytes_.begin());
+      std::copy(buff.begin(),
+		buff.begin() + sz,
+		this->bytes_.begin());
+    }
+  else
+    {
+      buff.swap(this->bytes_);
+    }
 
-  buff.swap(this->bytes_);
   this->_SetDirty(true);
 }
 
@@ -306,18 +160,38 @@ o3d3xx::ImageBuffer::Dirty() const noexcept
   return this->dirty_;
 }
 
-cv::Mat&
+cv::Mat
 o3d3xx::ImageBuffer::DepthImage()
 {
   this->Organize();
   return this->depth_;
 }
 
-pcl::PointCloud<o3d3xx::PointT>::Ptr&
+cv::Mat
+o3d3xx::ImageBuffer::AmplitudeImage()
+{
+  this->Organize();
+  return this->amp_;
+}
+
+cv::Mat
+o3d3xx::ImageBuffer::ConfidenceImage()
+{
+  this->Organize();
+  return this->conf_;
+}
+
+pcl::PointCloud<o3d3xx::PointT>::Ptr
 o3d3xx::ImageBuffer::Cloud()
 {
   this->Organize();
   return this->cloud_;
+}
+
+std::vector<std::uint8_t>
+o3d3xx::ImageBuffer::Bytes()
+{
+  return this->bytes_;
 }
 
 void
@@ -329,6 +203,7 @@ o3d3xx::ImageBuffer::Organize()
     }
 
   // get indices to the start of each chunk of interest in the image buffer
+  // NOTE: These could get optimized by using apriori values if necessary
   std::size_t xidx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::CARTESIAN_X);
   std::size_t yidx =
@@ -342,6 +217,13 @@ o3d3xx::ImageBuffer::Organize()
   std::size_t didx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::RADIAL_DISTANCE);
 
+  DLOG(INFO) << "xidx=" << xidx
+	     << ", yidx=" << yidx
+	     << ", zidx=" << zidx
+	     << ", aidx=" << aidx
+	     << ", cidx=" << cidx
+	     << ", didx=" << didx;
+
   // Get how many bytes to increment in the buffer for each pixel
   // NOTE: These can be discovered dynamically, howver, for now we use our a
   // priori info of the pixel data types
@@ -352,6 +234,7 @@ o3d3xx::ImageBuffer::Organize()
   std::size_t cincr = 1; // uint8_t
   std::size_t dincr = 2; // uint16_t
 
+  // NOTE: These could get optimized by using apriori values if necessary
   std::uint32_t width =
     o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+xidx+16);
   std::uint32_t height =

@@ -23,13 +23,9 @@
 #include <mutex>
 #include <string>
 #include <system_error>
-#include <vector>
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
 #include <glog/logging.h>
-#include <opencv2/core/core.hpp>
-#include <pcl/point_cloud.h>
-#include <pcl/point_types.h>
 #include "o3d3xx/image.h"
 #include "o3d3xx/camera.hpp"
 #include "o3d3xx/err.h"
@@ -64,137 +60,8 @@ o3d3xx::FrameGrabber::Stop()
 }
 
 bool
-o3d3xx::FrameGrabber::WaitForFrame(std::vector<std::uint8_t>& client_buff,
+o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
 				   long timeout_millis)
-{
-  // mutex will unlock in `unique_lock' dtor
-  std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
-
-  try
-    {
-      if (timeout_millis <= 0)
-	{
-	  this->front_buffer_cv_.wait(lock);
-	}
-      else
-	{
-	  if (this->front_buffer_cv_.wait_for(
-	       lock, std::chrono::milliseconds(timeout_millis)) ==
-	      std::cv_status::timeout)
-	    {
-	      LOG(WARNING) << "Timeout waiting for image buffer";
-	      return false;
-	    }
-	}
-    }
-  catch (const std::system_error& ex)
-    {
-      LOG(WARNING) << "WaitForFrame: " << ex.what();
-      return false;
-    }
-
-  DLOG(INFO) << "Client fetching new image data";
-  std::size_t sz = this->front_buffer_.size();
-  client_buff.resize(sz);
-
-  std::copy(this->front_buffer_.begin(),
-	    this->front_buffer_.begin() + sz,
-	    client_buff.begin());
-  return true;
-}
-
-bool
-o3d3xx::FrameGrabber::WaitForCloud(pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud,
-				   long timeout_millis)
-{
-  // mutex will unlock in `unique_lock' dtor
-  std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
-
-  try
-    {
-      if (timeout_millis <= 0)
-	{
-	  this->front_buffer_cv_.wait(lock);
-	}
-      else
-	{
-	  if (this->front_buffer_cv_.wait_for(
-	       lock, std::chrono::milliseconds(timeout_millis)) ==
-	      std::cv_status::timeout)
-	    {
-	      LOG(WARNING) << "Timeout waiting for image buffer";
-	      return false;
-	    }
-	}
-    }
-  catch (const std::system_error& ex)
-    {
-      LOG(WARNING) << "WaitForPointCloud: " << ex.what();
-      return false;
-    }
-
-  DLOG(INFO) << "Client fetching new point cloud";
-
-  try
-    {
-      o3d3xx::image_buff_to_point_cloud(this->front_buffer_, cloud);
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "image_buff_to_point_cloud: " << ex.what();
-      return false;
-    }
-
-  return true;
-}
-
-bool
-o3d3xx::FrameGrabber::WaitForDepthImage(cv::Mat& img, long timeout_millis)
-{
-  // mutex will unlock in `unique_lock' dtor
-  std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
-
-  try
-    {
-      if (timeout_millis <= 0)
-	{
-	  this->front_buffer_cv_.wait(lock);
-	}
-      else
-	{
-	  if (this->front_buffer_cv_.wait_for(
-	       lock, std::chrono::milliseconds(timeout_millis)) ==
-	      std::cv_status::timeout)
-	    {
-	      LOG(WARNING) << "Timeout waiting for image buffer";
-	      return false;
-	    }
-	}
-    }
-  catch (const std::system_error& ex)
-    {
-      LOG(WARNING) << "WaitForDepthImage: " << ex.what();
-      return false;
-    }
-
-  DLOG(INFO) << "Client fetching new depth image";
-
-  try
-    {
-      o3d3xx::image_buff_to_opencv_depth(this->front_buffer_, img);
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "image_buff_to_openv_depth: " << ex.what();
-      return false;
-    }
-
-  return true;
-}
-
-bool
-o3d3xx::FrameGrabber::_WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
-				    long timeout_millis)
 {
   // mutex will unlock in `unique_lock' dtor if not explicitly unlocked prior
   std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
@@ -226,7 +93,7 @@ o3d3xx::FrameGrabber::_WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
   img->SetBytes(this->front_buffer_);
   lock.unlock();
 
-  // call `Organize' on the image
+  img->Organize();
 
   return true;
 }

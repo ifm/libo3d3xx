@@ -69,12 +69,9 @@ public:
     o3d3xx::FrameGrabber::Ptr fg(new o3d3xx::FrameGrabber(cam));
     o3d3xx::ImageBuffer::Ptr buff(new o3d3xx::ImageBuffer());
 
-    // pcl::PointCloud<o3d3xx::PointT>::Ptr
-    //     cloud(new pcl::PointCloud<o3d3xx::PointT>());
-
     while (! viewer.wasStopped())
       {
-	if (! fg->_WaitForFrame(buff, 1000))
+	if (! fg->WaitForFrame(buff, 1000))
 	  {
 	    continue;
 	  }

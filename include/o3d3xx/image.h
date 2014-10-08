@@ -88,14 +88,43 @@ namespace o3d3xx
     ImageBuffer& operator=(const ImageBuffer&) = delete;
 
     /**
-     * Returns a reference to the depth image
+     * Returns the wrapped depth image. This does NOT make a copy of the data.
+     *
+     * NOTE: Since the depth image is a cv::Mat the correct thing to do here is
+     * to return by value as cv::Mat does it's own memory management /
+     * reference counting.
      */
-    cv::Mat& DepthImage();
+    cv::Mat DepthImage();
 
     /**
-     * Returns a reference to the point cloud
+     * Returns the wrapped amplitude image. This does NOT make a copy of the
+     * data.
+     *
+     * NOTE: Since the amplitude image is a cv::Mat the correct thing to do
+     * here is to return by value as cv::Mat does it's own memory management /
+     * reference counting.
      */
-    pcl::PointCloud<o3d3xx::PointT>::Ptr& Cloud();
+    cv::Mat AmplitudeImage();
+
+    /**
+     * Returns the wrapped confidence image. This does NOT make a copy of the
+     * data.
+     *
+     * NOTE: Since the confidence image is a cv::Mat the correct thing to do
+     * here is to return by value as cv::Mat does it's own memory management /
+     * reference counting.
+     */
+    cv::Mat ConfidenceImage();
+
+    /**
+     * Returns the shared pointer to the wrapped point cloud
+     */
+    pcl::PointCloud<o3d3xx::PointT>::Ptr Cloud();
+
+    /**
+     * Returns (a copy of) the underlying byte buffer read from the camera.
+     */
+    std::vector<std::uint8_t> Bytes();
 
     /**
      * Returns the state of the `dirty' flag
@@ -110,15 +139,23 @@ namespace o3d3xx
     void Organize();
 
     /**
-     * Copies the data from the passed in `buff' to the internally wrapped byte
+     * Sets the data from the passed in `buff' to the internally wrapped byte
      * buffer. This function assumes the passed in `buff' is a valid byte
      * buffer from the camera.
+     *
+     * By default (see `copy' parameter below) this function will take in
+     * `buff' and `swap' contents with its internal buffer so that the
+     * operation is O(1). If you want copy behavior specify the copy flag and
+     * complexity will be linear in the size of the byte buffer.
      *
      * @see o3d3xx::verify_image_buffer
      *
      * @param[in] buff Raw data bytes to copy to internal buffers
+     *
+     * @param[in] copy If true the data are copied from `buff' to the
+     * internally wrapped buffer and `buff' will remain unchanged.
      */
-    void SetBytes(std::vector<std::uint8_t>& buff);
+    void SetBytes(std::vector<std::uint8_t>& buff, bool copy = false);
 
   private:
     /**
@@ -195,30 +232,6 @@ namespace o3d3xx
    * @return The expected size of the image buffer.
    */
   std::size_t get_image_buffer_size(const std::vector<std::uint8_t>& buff);
-
-  /**
-   * Converts an image buffer from the sensor into a PCL point cloud. The
-   * unit of measure of the points will be in meters and oriented in a
-   * right-handed coordinate frame.
-   *
-   * NOTE: For now, the intensity channel of the cloud will contain data from
-   * the amplitude image.
-   *
-   * @param[in] buff The image buffer to convert
-   * @param[out] cloud The point cloud to fill with point data
-   */
-  void image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
-				 pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud);
-
-  /**
-   * Converts an image buffer from the sensor into an OpenCV depth image. Units
-   * in the depth image will remain in mm as they are in the image buffer.
-   *
-   * @param[in] buff The image buffer to convert
-   * @param[out] img The OpenCV image to fill
-   */
-  void image_buff_to_opencv_depth(const std::vector<std::uint8_t>& buff,
-				  cv::Mat& img);
 
   /**
    * Finds the index into the image buffer of where the chunk of `chunk_type'

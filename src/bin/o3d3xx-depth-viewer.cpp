@@ -113,9 +113,10 @@ int main(int argc, const char **argv)
       cv::namedWindow("o3d3xx Depth Image", cv::WINDOW_NORMAL);
       double min, max;
 
+      int retval = 0;
       while (true)
 	{
-	  if (fg->_WaitForFrame(buff, 1000))
+	  if (fg->WaitForFrame(buff, 1000))
 	    {
 	      cv::minMaxIdx(buff->DepthImage(), &min, &max);
 	      cv::convertScaleAbs(buff->DepthImage(), colormap_img, 255.0 / max);
@@ -123,7 +124,9 @@ int main(int argc, const char **argv)
 	      cv::imshow("o3d3xx Depth Image", colormap_img);
 	    }
 
-	  if (cv::waitKey(33) == 27) // `ESC' to exit
+	  // `ESC', `q', or `Q' to exit
+	  retval = cv::waitKey(33);
+	  if ((retval == 27) || (retval == 113) || (retval == 81))
 	    {
 	      break;
 	    }
