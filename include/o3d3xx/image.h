@@ -19,7 +19,9 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <memory>
 #include <vector>
+#include <opencv2/core/core.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
@@ -58,6 +60,113 @@ namespace o3d3xx
   };
 
   /**
+   * The ImageBuffer class is used to hold time synchronized images from the
+   * camera. That is, to hold image data from a single buffer read off the
+   * wire but organized into its component parts.
+   *
+   * NOTE: The ImageBuffer class is NOT thread safe!
+   */
+  class ImageBuffer
+  {
+  public:
+    using Ptr = std::shared_ptr<ImageBuffer>;
+
+    /**
+     * Allocates space for the individual component images
+     */
+    ImageBuffer();
+
+    /**
+     * RAII deallocations
+     */
+    virtual ~ImageBuffer();
+
+    //! @todo sort out how we want copy and move semantics to work
+    ImageBuffer(ImageBuffer&&) = delete;
+    ImageBuffer& operator=(ImageBuffer&&) = delete;
+    ImageBuffer(ImageBuffer&) = delete;
+    ImageBuffer& operator=(const ImageBuffer&) = delete;
+
+    /**
+     * Returns a reference to the depth image
+     */
+    cv::Mat& DepthImage();
+
+    /**
+     * Returns a reference to the point cloud
+     */
+    pcl::PointCloud<o3d3xx::PointT>::Ptr& Cloud();
+
+    /**
+     * Returns the state of the `dirty' flag
+     */
+    bool Dirty() const noexcept;
+
+    /**
+     * Synchronizes the parsed out image data with the internally wrapped byte
+     * buffer. This call has been separated out from `SetBytes' in order to
+     * minimize mutex contention with the frame grabbers main thread.
+     */
+    void Organize();
+
+    /**
+     * Copies the data from the passed in `buff' to the internally wrapped byte
+     * buffer. This function assumes the passed in `buff' is a valid byte
+     * buffer from the camera.
+     *
+     * @see o3d3xx::verify_image_buffer
+     *
+     * @param[in] buff Raw data bytes to copy to internal buffers
+     */
+    void SetBytes(std::vector<std::uint8_t>& buff);
+
+  private:
+    /**
+     * Flag used to indicate if the wrapped byte buffer and the individual
+     * component images are in sync.
+     */
+    bool dirty_;
+
+    /**
+     * Raw bytes read off the wire from the camera
+     */
+    std::vector<std::uint8_t> bytes_;
+
+    /**
+     * Point cloud used to hold the cartesian xyz and amplitude data (intensity
+     * channel).
+     *
+     * NOTE: Data in the point cloud are converted to meters and utilize a
+     * right-handed coordinate frame.
+     */
+    pcl::PointCloud<o3d3xx::PointT>::Ptr cloud_;
+
+    /**
+     * OpenCV image encoding of the radial image data
+     *
+     * NOTE: Unlike the point cloude, the data in the depth image remain in
+     * millimeters.
+     */
+    cv::Mat depth_;
+
+    /**
+     * OpenCV image encoding of the amplitude data
+     */
+    cv::Mat amp_;
+
+    /**
+     * OpenCV image encoding of the confidence data
+     */
+    cv::Mat conf_;
+
+    /**
+     * Mutates the `dirty' flag
+     */
+    void _SetDirty(bool flg) noexcept;
+
+  }; // end: class ImageBuffer
+
+  /**
    * Verifies that the passed in buffer contains a valid "ticket" from the
    * sensor.
    *
@@ -81,6 +190,8 @@ namespace o3d3xx
    * exception may be thrown if an inappropriately sized buffer is passed in to
    * this function.
    *
+   * @param[in] buff A ticket buffer
+   *
    * @return The expected size of the image buffer.
    */
   std::size_t get_image_buffer_size(const std::vector<std::uint8_t>& buff);
@@ -98,6 +209,16 @@ namespace o3d3xx
    */
   void image_buff_to_point_cloud(const std::vector<std::uint8_t>& buff,
 				 pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud);
+
+  /**
+   * Converts an image buffer from the sensor into an OpenCV depth image. Units
+   * in the depth image will remain in mm as they are in the image buffer.
+   *
+   * @param[in] buff The image buffer to convert
+   * @param[out] img The OpenCV image to fill
+   */
+  void image_buff_to_opencv_depth(const std::vector<std::uint8_t>& buff,
+				  cv::Mat& img);
 
   /**
    * Finds the index into the image buffer of where the chunk of `chunk_type'

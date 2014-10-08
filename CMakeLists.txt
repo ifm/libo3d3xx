@@ -36,18 +36,22 @@ configure_file(
 
 # bring in PCL
 find_package(PCL 1.7 REQUIRED COMPONENTS common visualization)
+find_package(OpenCV REQUIRED)
 
 # Manage compiler/linker flags
 include_directories(
   ${O3D3XX_BINARY_DIR}/include
   ${PCL_INCLUDE_DIRS}
+  ${OpenCV_INCLUDE_DIRS}
   )
 link_directories(
   ${O3D3XX_BINARY_DIR}/lib
   ${PCL_LIBRARY_DIRS}
+  ${OpenCV_LIBRARY_DIRS}
   )
 add_definitions(
   ${PCL_DEFINITIONS}
+  ${OpenCV_DEFINITIONS}
   )
 
 # turn on ctest (unit testing gives us `make test' in top-level)

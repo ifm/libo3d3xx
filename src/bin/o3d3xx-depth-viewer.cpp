@@ -19,7 +19,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include <glog/logging.h>
-#include <pcl/visualization/cloud_viewer.h>
+#include <opencv2/opencv.hpp>
 #include "o3d3xx.h"
 
 namespace po = boost::program_options;
@@ -28,7 +28,7 @@ class CmdLineOpts
 {
 public:
   CmdLineOpts(int argc, const char **argv)
-    : visible("Visualize Point Clouds from O3D3XX Camera")
+    : visible("Visualize Depth Images from O3D3XX Camera")
   {
     // generic options
     po::options_description general("General");
@@ -57,33 +57,6 @@ public:
 
   po::variables_map vm;
   po::options_description visible;
-};
-
-class O3DViewer
-{
-public:
-  O3DViewer() : viewer("o3d3xx-toolbox Cloud Viewer") {}
-
-  void run(o3d3xx::Camera::Ptr cam)
-  {
-    o3d3xx::FrameGrabber::Ptr fg(new o3d3xx::FrameGrabber(cam));
-    o3d3xx::ImageBuffer::Ptr buff(new o3d3xx::ImageBuffer());
-
-    // pcl::PointCloud<o3d3xx::PointT>::Ptr
-    //     cloud(new pcl::PointCloud<o3d3xx::PointT>());
-
-    while (! viewer.wasStopped())
-      {
-	if (! fg->_WaitForFrame(buff, 1000))
-	  {
-	    continue;
-	  }
-
-	viewer.showCloud(buff->Cloud());
-      }
-  }
-
-  pcl::visualization::CloudViewer viewer;
 };
 
 int main(int argc, const char **argv)
@@ -130,15 +103,31 @@ int main(int argc, const char **argv)
       google::SetStderrLogging(google::FATAL);
 
       //
-      // instantiate the camera
+      // stream a depth image
       //
       o3d3xx::Camera::Ptr cam(new o3d3xx::Camera(camera_ip, xmlrpc_port));
+      o3d3xx::FrameGrabber::Ptr fg(new o3d3xx::FrameGrabber(cam));
+      o3d3xx::ImageBuffer::Ptr buff(new o3d3xx::ImageBuffer());
 
-      //
-      // run the viewer
-      //
-      O3DViewer v;
-      v.run(cam);
+      cv::Mat colormap_img;
+      cv::namedWindow("o3d3xx Depth Image", cv::WINDOW_NORMAL);
+      double min, max;
+
+      while (true)
+	{
+	  if (fg->_WaitForFrame(buff, 1000))
+	    {
+	      cv::minMaxIdx(buff->DepthImage(), &min, &max);
+	      cv::convertScaleAbs(buff->DepthImage(), colormap_img, 255.0 / max);
+	      cv::applyColorMap(colormap_img, colormap_img, cv::COLORMAP_JET);
+	      cv::imshow("o3d3xx Depth Image", colormap_img);
+	    }
+
+	  if (cv::waitKey(33) == 27) // `ESC' to exit
+	    {
+	      break;
+	    }
+	}
     }
   catch (const std::exception& e)
     {

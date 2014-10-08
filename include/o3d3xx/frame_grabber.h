@@ -26,6 +26,7 @@
 #include <vector>
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
+#include <opencv2/core/core.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include "o3d3xx/image.h"
@@ -75,6 +76,24 @@ namespace o3d3xx
     void Stop();
 
     /**
+     * This function is used by clients for retrieving depth images from the
+     * FrameGrabber's wrapped camera instance. This function will block for up
+     * to `timeout_millis' milliseconds or possibly indefinitely if
+     * `timeout_millis' is set to 0.
+     *
+     * @param[out] img An OpenCV image to fill with data from the last image
+     * captured off the camera.
+     *
+     * @param[in] timeout_millis Amount of time, in milliseconds, to wait for
+     * new image data from the FrameGrabber. If `timeout_millis' is set to 0,
+     * this function will block indefinitely.
+     *
+     * @return true if a depth image was constructed from a new camera buffer
+     * acquired within `timeout_millis', false otherwise.
+     */
+    bool WaitForDepthImage(cv::Mat& img, long timeout_millis = 0);
+
+    /**
      * This function is used by clients for retrieving point clouds from the
      * FrameGrabber's wrapped camera instance. This function will block for up
      * to `timeout_millis' milliseconds or possibly indefinitely if
@@ -120,6 +139,24 @@ namespace o3d3xx
      */
     bool WaitForFrame(std::vector<std::uint8_t>& client_buff,
 		      long timeout_millis = 0);
+
+    /**
+     * This function is used to grab and parse out time synchronized image data
+     * from the camera. It will call `SetBytes' on the passed in `ImageBuffer'
+     * as well as call `Organize', so the `img' output parameter is assumed to
+     * synchronized and ready for analysis provided this function returns true.
+     *
+     * @param[out] buff An o3d3xx::ImageBuffer object to update with the latest
+     * data from the camera.
+     *
+     * @param[in] timeout_millis Amount of time, in milliseconds, to wait for
+     * new image data from the FrameGrabber. If `timeout_millis' is set to 0,
+     * this function will block indefinitely.
+     *
+     * @return true if a new buffer was acquired within `timeout_millis', false
+     * otherwise.
+     */
+    bool _WaitForFrame(o3d3xx::ImageBuffer::Ptr& img, long timeout_millis = 0);
 
   protected:
     /**

@@ -17,6 +17,7 @@
 #include "o3d3xx/frame_grabber.h"
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include <exception>
 #include <functional>
 #include <mutex>
@@ -26,6 +27,7 @@
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
 #include <glog/logging.h>
+#include <opencv2/core/core.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include "o3d3xx/image.h"
@@ -146,6 +148,88 @@ o3d3xx::FrameGrabber::WaitForCloud(pcl::PointCloud<o3d3xx::PointT>::Ptr& cloud,
   return true;
 }
 
+bool
+o3d3xx::FrameGrabber::WaitForDepthImage(cv::Mat& img, long timeout_millis)
+{
+  // mutex will unlock in `unique_lock' dtor
+  std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
+
+  try
+    {
+      if (timeout_millis <= 0)
+	{
+	  this->front_buffer_cv_.wait(lock);
+	}
+      else
+	{
+	  if (this->front_buffer_cv_.wait_for(
+	       lock, std::chrono::milliseconds(timeout_millis)) ==
+	      std::cv_status::timeout)
+	    {
+	      LOG(WARNING) << "Timeout waiting for image buffer";
+	      return false;
+	    }
+	}
+    }
+  catch (const std::system_error& ex)
+    {
+      LOG(WARNING) << "WaitForDepthImage: " << ex.what();
+      return false;
+    }
+
+  DLOG(INFO) << "Client fetching new depth image";
+
+  try
+    {
+      o3d3xx::image_buff_to_opencv_depth(this->front_buffer_, img);
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "image_buff_to_openv_depth: " << ex.what();
+      return false;
+    }
+
+  return true;
+}
+
+bool
+o3d3xx::FrameGrabber::_WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
+				    long timeout_millis)
+{
+  // mutex will unlock in `unique_lock' dtor if not explicitly unlocked prior
+  std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
+
+  try
+    {
+      if (timeout_millis <= 0)
+	{
+	  this->front_buffer_cv_.wait(lock);
+	}
+      else
+	{
+	  if (this->front_buffer_cv_.wait_for(
+	       lock, std::chrono::milliseconds(timeout_millis)) ==
+	      std::cv_status::timeout)
+	    {
+	      LOG(WARNING) << "Timeout waiting for image buffer from camera";
+	      return false;
+	    }
+	}
+    }
+  catch (const std::system_error& ex)
+    {
+      LOG(WARNING) << "WaitForFrame: " << ex.what();
+      return false;
+    }
+
+  DLOG(INFO) << "Client fetching new image data";
+  img->SetBytes(this->front_buffer_);
+  lock.unlock();
+
+  // call `Organize' on the image
+
+  return true;
+}
 
 void
 o3d3xx::FrameGrabber::Run()

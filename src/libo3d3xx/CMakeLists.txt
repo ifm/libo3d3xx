@@ -13,6 +13,7 @@ target_link_libraries(
   xmlrpc++
   xmlrpc_client++
   ${PCL_COMMON_LIBRARIES}
+  ${OpenCV_LIBS}
   )
 set_target_properties(o3d3xx PROPERTIES
   VERSION
