@@ -25,10 +25,12 @@
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/client_simple.hpp>
 #include "o3d3xx/util.hpp"
+#include "o3d3xx/device_config.h"
 
 const std::string o3d3xx::DEFAULT_PASSWORD = "";
 const std::string o3d3xx::DEFAULT_IP = "192.168.0.69";
 const std::uint32_t o3d3xx::DEFAULT_XMLRPC_PORT = 80;
+const int o3d3xx::MAX_HEARTBEAT = 300;
 
 const std::string o3d3xx::XMLRPC_MAIN = "/api/rpc/v1/com.ifm.efector/";
 const std::string o3d3xx::XMLRPC_SESSION = "session_XXX/";
@@ -192,6 +194,7 @@ o3d3xx::Camera::RequestSession()
         this->_XCallMain("requestSession", "s", this->GetPassword().c_str()));
 
       this->SetSessionID(static_cast<std::string>(val_str));
+      this->Heartbeat(o3d3xx::MAX_HEARTBEAT);
     }
   catch (const o3d3xx::error_t& ex)
     {
@@ -248,5 +251,148 @@ o3d3xx::Camera::SetOperatingMode(const o3d3xx::Camera::operating_mode& mode)
     {
       LOG(ERROR) << "Failed to set operating mode!";
       throw(ex);
+    }
+}
+
+o3d3xx::DeviceConfig::Ptr
+o3d3xx::Camera::GetDeviceConfig()
+{
+  return o3d3xx::DeviceConfig::Ptr(
+	   new o3d3xx::DeviceConfig(this->GetAllParameters()));
+}
+
+void
+o3d3xx::Camera::ActivatePassword()
+{
+  try
+    {
+      this->_XCallDevice("activatePassword", "s",
+			 this->GetPassword().c_str());
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "ActivatePassword: "
+		 << ex.what();
+    }
+}
+
+void
+o3d3xx::Camera::DisablePassword()
+{
+  try
+    {
+      this->_XCallDevice("disablePassword");
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "DisablePassword: "
+		 << ex.what();
+    }
+}
+
+void
+o3d3xx::Camera::SaveDevice()
+{
+  try
+    {
+      this->_XCallDevice("save");
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "SaveDevice: "
+		 << ex.what();
+    }
+}
+
+void
+o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig::Ptr config)
+{
+  o3d3xx::DeviceConfig::Ptr dev = this->GetDeviceConfig();
+
+  // only check mutable parameters and only make the network call if they are
+  // different
+  if (dev->Name() != config->Name())
+    {
+      this->_XCallDevice("setParameter", "ss", "Name",
+			 config->Name().c_str());
+    }
+
+  if (dev->Description() != config->Description())
+    {
+      this->_XCallDevice("setParameter", "ss", "Description",
+			 config->Description().c_str());
+    }
+
+  if (dev->ActiveApplication() != config->ActiveApplication())
+    {
+      this->_XCallDevice("setParameter", "si", "ActiveApplication",
+			 config->ActiveApplication());
+    }
+
+  if (dev->PcicTCPPort() != config->PcicTCPPort())
+    {
+      this->_XCallDevice("setParameter", "si", "PcicTcpPort",
+			 config->PcicTCPPort());
+    }
+
+  if (dev->PcicProtocolVersion() != config->PcicProtocolVersion())
+    {
+      this->_XCallDevice("setParameter", "si", "PcicProtocolVersion",
+			 config->PcicProtocolVersion());
+    }
+
+  if (dev->IOLogicType() != config->IOLogicType())
+    {
+      this->_XCallDevice("setParameter", "si", "IOLogicType",
+			 config->IOLogicType());
+    }
+
+  if (dev->IOExternApplicationSwitch() !=
+      config->IOExternApplicationSwitch())
+    {
+      this->_XCallDevice("setParameter", "si", "IOExternApplicationSwitch",
+			 config->IOExternApplicationSwitch());
+    }
+
+  if (dev->SessionTimeout() != config->SessionTimeout())
+    {
+      this->_XCallDevice("setParameter", "si", "SessionTimeout",
+			 config->SessionTimeout());
+    }
+
+  if (dev->ExtrinsicCalibTransX() != config->ExtrinsicCalibTransX())
+    {
+      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibTransX",
+			 config->ExtrinsicCalibTransX());
+    }
+
+  if (dev->ExtrinsicCalibTransY() != config->ExtrinsicCalibTransY())
+    {
+      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibTransY",
+			 config->ExtrinsicCalibTransY());
+    }
+
+  if (dev->ExtrinsicCalibTransZ() != config->ExtrinsicCalibTransZ())
+    {
+      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibTransZ",
+			 config->ExtrinsicCalibTransZ());
+    }
+
+  if (dev->ExtrinsicCalibRotX() != config->ExtrinsicCalibRotX())
+    {
+      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibRotX",
+			 config->ExtrinsicCalibRotX());
+    }
+
+  if (dev->ExtrinsicCalibRotY() != config->ExtrinsicCalibRotY())
+    {
+      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibRotY",
+			 config->ExtrinsicCalibRotY());
+    }
+
+  if (dev->ExtrinsicCalibRotZ() != config->ExtrinsicCalibRotZ())
+    {
+      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibRotZ",
+			 config->ExtrinsicCalibRotZ());
     }
 }

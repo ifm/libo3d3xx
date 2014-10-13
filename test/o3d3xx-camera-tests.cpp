@@ -163,7 +163,6 @@ TEST(Camera_Tests, SetOperatingMode)
   // into RUN mode.
 }
 
-
 //---------------------------------------
 // Uncomment to test rebooting the camera
 //
@@ -178,3 +177,116 @@ TEST(Camera_Tests, SetOperatingMode)
 
 //   EXPECT_NO_THROW(cam->Reboot(o3d3xx::Camera::boot_mode::PRODUCTIVE));
 // }
+
+TEST(Camera_Tests, GetDeviceConfig)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+
+  // verify that all mutable parameters are correct
+  std::unordered_map<std::string, std::string> params =
+    cam->GetAllParameters();
+
+  EXPECT_EQ(params.at("Name"), dev->Name());
+  EXPECT_EQ(params.at("Description"), dev->Description());
+  EXPECT_EQ(std::stoi(params.at("ActiveApplication")),
+	    dev->ActiveApplication());
+  EXPECT_EQ(std::stoi(params.at("PcicTcpPort")), dev->PcicTCPPort());
+  EXPECT_EQ(std::stoi(params.at("PcicProtocolVersion")), dev->PcicProtocolVersion());
+  EXPECT_EQ(std::stoi(params.at("IOLogicType")), dev->IOLogicType());
+  EXPECT_EQ(o3d3xx::stob(params.at("IODebouncing")), dev->IODebouncing());
+  EXPECT_EQ(std::stoi(params.at("IOExternApplicationSwitch")),
+	    dev->IOExternApplicationSwitch());
+  EXPECT_EQ(std::stoi(params.at("SessionTimeout")), dev->SessionTimeout());
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransX")),
+	    dev->ExtrinsicCalibTransX());
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransY")),
+	    dev->ExtrinsicCalibTransY());
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransZ")),
+	    dev->ExtrinsicCalibTransZ());
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotX")),
+	    dev->ExtrinsicCalibRotX());
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
+	    dev->ExtrinsicCalibRotY());
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
+	    dev->ExtrinsicCalibRotY());
+}
+
+TEST(Camera_Tests, ActivateDisablePassword)
+{
+  std::string tmp_password = "foobar";
+
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  EXPECT_NO_THROW(cam->RequestSession());
+  EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
+  cam->SetPassword(tmp_password);
+  EXPECT_NO_THROW(cam->ActivatePassword());
+  //EXPECT_NO_THROW(cam->SaveDevice());
+
+  //o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+  //EXPECT_TRUE(dev->PasswordActivated());
+
+  EXPECT_NO_THROW(cam->DisablePassword());
+  //EXPECT_NO_THROW(cam->SaveDevice());
+  //dev = cam->GetDeviceConfig();
+  //EXPECT_FALSE(dev->PasswordActivated());
+}
+
+TEST(Camera_Tests, SetDeviceConfig)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+  std::string orig_name = dev->Name();
+  std::string tmp_name = "foobar";
+
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  dev->SetName(tmp_name);
+  EXPECT_NO_THROW(cam->SetDeviceConfig(dev));
+
+  dev = cam->GetDeviceConfig();
+  EXPECT_EQ(tmp_name, dev->Name());
+
+  dev->SetName(orig_name);
+  EXPECT_NO_THROW(cam->SetDeviceConfig(dev));
+
+  dev = cam->GetDeviceConfig();
+  EXPECT_EQ(orig_name, dev->Name());
+}
+
+TEST(Camera_Tests, DeviceConfig_JSON)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+  std::string json = dev->ToJSON();
+
+  o3d3xx::DeviceConfig::Ptr dev2 =
+    o3d3xx::DeviceConfig::FromJSON(json);
+
+  EXPECT_EQ(dev->Name(), dev2->Name());
+  EXPECT_EQ(dev->Description(), dev2->Description());
+  EXPECT_EQ(dev->ActiveApplication(), dev2->ActiveApplication());
+  EXPECT_EQ(dev->PcicTCPPort(), dev2->PcicTCPPort());
+  EXPECT_EQ(dev->PcicProtocolVersion(), dev2->PcicProtocolVersion());
+  EXPECT_EQ(dev->IOLogicType(), dev2->IOLogicType());
+  EXPECT_EQ(dev->IODebouncing(), dev2->IODebouncing());
+  EXPECT_EQ(dev->IOExternApplicationSwitch(),
+	    dev2->IOExternApplicationSwitch());
+  EXPECT_EQ(dev->SessionTimeout(), dev2->SessionTimeout());
+  EXPECT_EQ(dev->ExtrinsicCalibTransX(), dev2->ExtrinsicCalibTransX());
+  EXPECT_EQ(dev->ExtrinsicCalibTransY(), dev2->ExtrinsicCalibTransY());
+  EXPECT_EQ(dev->ExtrinsicCalibTransZ(), dev2->ExtrinsicCalibTransZ());
+  EXPECT_EQ(dev->ExtrinsicCalibRotX(), dev2->ExtrinsicCalibRotX());
+  EXPECT_EQ(dev->ExtrinsicCalibRotY(), dev2->ExtrinsicCalibRotY());
+  EXPECT_EQ(dev->ExtrinsicCalibRotZ(), dev2->ExtrinsicCalibRotZ());
+
+  // we do not want to compare the read-only properties
+}

@@ -66,34 +66,9 @@ namespace o3d3xx
   value_struct_to_map(const xmlrpc_c::value_struct& vs);
 
   /**
-   * Create a value of type T from sizeof(T) bytes of the passed in byte
-   * buffer. This assumes the passed in byte buffer is holding the data in
-   * network byte order.
-   *
-   * @param[in] buff A pointer to a buffer in memory intended to be interpreted
-   * as data of type T and assuming the buffer is in network byte order (big
-   * endian).
-   *
-   * @return An interpretation of `buff` as type T with bytes swapped as
-   * appropriate for the host's byte ordering semantics.
+   * Converts a string to a bool.
    */
-  template<typename T>
-  T ntohval(const unsigned char *buff)
-  {
-    union
-    {
-      T v;
-      unsigned char bytes[sizeof(T)];
-    } value;
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-    std::copy(buff, buff + sizeof(T), value.bytes);
-#else
-    std::reverse_copy(buff, buff + sizeof(T), value.bytes);
-#endif
-
-    return value.v;
-  }
+  bool stob(const std::string& s);
 
   /**
    * Create a value of type T from sizeof(T) bytes of the passed in byte

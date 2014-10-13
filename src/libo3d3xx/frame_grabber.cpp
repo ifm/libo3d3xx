@@ -61,7 +61,7 @@ o3d3xx::FrameGrabber::Stop()
 
 bool
 o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
-				   long timeout_millis)
+				   long timeout_millis, bool copy_buff)
 {
   // mutex will unlock in `unique_lock' dtor if not explicitly unlocked prior
   std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
@@ -90,7 +90,7 @@ o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
     }
 
   DLOG(INFO) << "Client fetching new image data";
-  img->SetBytes(this->front_buffer_);
+  img->SetBytes(this->front_buffer_, copy_buff);
   lock.unlock();
 
   img->Organize();

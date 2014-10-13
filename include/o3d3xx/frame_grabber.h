@@ -89,10 +89,17 @@ namespace o3d3xx
      * new image data from the FrameGrabber. If `timeout_millis' is set to 0,
      * this function will block indefinitely.
      *
+     * @param[in] copy_buff Flag indicating whether the frame grabber's
+     * internal `front_buffer_' should be copied (O(n)) or swapped (O(1)) with
+     * the raw `bytes_' of the passed in `img'. You should only flag this as
+     * `true' if you are planning to use multiple clients with a single
+     * FrameGrabber.
+     *
      * @return true if a new buffer was acquired within `timeout_millis', false
      * otherwise.
      */
-    bool WaitForFrame(o3d3xx::ImageBuffer::Ptr& img, long timeout_millis = 0);
+    bool WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
+		      long timeout_millis = 0, bool copy_buff = false);
 
   protected:
     /**

@@ -4,6 +4,7 @@
 
 int main(int argc, char **argv)
 {
+  FLAGS_logbuflevel = -1;
   o3d3xx::Logging::Init();
   // keeps the unit test output cleaner
   google::SetStderrLogging(google::FATAL);

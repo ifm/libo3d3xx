@@ -18,6 +18,7 @@
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <boost/algorithm/string.hpp>
 #include <glog/logging.h>
 #include <xmlrpc-c/base.hpp>
 #include "o3d3xx/version.h"
@@ -57,4 +58,21 @@ o3d3xx::value_struct_to_map(const xmlrpc_c::value_struct& vs)
     }
 
   return retval;
+}
+
+//--------------------------------------------------
+// Misc
+//--------------------------------------------------
+
+bool
+o3d3xx::stob(const std::string& s)
+{
+  if ((s == "1") ||
+      (boost::iequals(s, "true")) ||
+      (boost::iequals(s, "yes")))
+    {
+      return true;
+    }
+
+  return false;
 }

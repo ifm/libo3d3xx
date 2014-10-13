@@ -29,14 +29,15 @@
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/client_simple.hpp>
 #include <xmlrpc-c/girerr.hpp>
+#include "o3d3xx/device_config.h"
 #include "o3d3xx/err.h"
 
 namespace o3d3xx
 {
-
   extern const std::string DEFAULT_PASSWORD;
   extern const std::string DEFAULT_IP;
   extern const std::uint32_t DEFAULT_XMLRPC_PORT;
+  extern const int MAX_HEARTBEAT;
 
   extern const std::string XMLRPC_MAIN;
   extern const std::string XMLRPC_SESSION;
@@ -73,6 +74,23 @@ namespace o3d3xx
      * Camera operating modes
      */
     enum class operating_mode : int { RUN = 0, EDIT = 1 };
+
+    /**
+     * Allowed values for I/O logic of digital pins
+     */
+    enum class io_logic_type : int { NPN = 0, PNP = 1 };
+
+    /**
+     * Allowed values for I/O external application switch
+     */
+    enum class io_extern_app_switch : int
+    { OFF = 0, STATIC_IO = 1, PULSE_IO = 2, PULSE_TRIGGER = 3 };
+
+    /**
+     * Ways in which the camera can obtain an IP address
+     */
+    enum class ip_address_config : int
+    { STATIC = 0, DHCP = 1, LINK_LOCAL = 2, DISCOVERY = 3 };
 
     /**
      * Initializes the camera interface utilizing library defaults for
@@ -127,6 +145,13 @@ namespace o3d3xx
     void CancelSession();
     int Heartbeat(int hb);
     void SetOperatingMode(const operating_mode& mode);
+
+    // XMLRPC: DeviceConfig object
+    o3d3xx::DeviceConfig::Ptr GetDeviceConfig();
+    void ActivatePassword();
+    void DisablePassword();
+    void SetDeviceConfig(o3d3xx::DeviceConfig::Ptr config);
+    void SaveDevice();
 
   protected:
     /** Password for mutating camera parameters */
@@ -254,6 +279,30 @@ namespace o3d3xx
     _XCallSession(const std::string& sensor_method_name)
     {
       return this->_XCallSession(sensor_method_name, "");
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "DeviceConfig" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallDevice(const std::string& sensor_method_name,
+		 const std::string& format, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT +
+	o3d3xx::XMLRPC_DEVICE;
+
+      boost::algorithm::replace_all(url, "XXX", this->GetSessionID());
+      return this->_XCall(url, sensor_method_name, format, args...);
+    }
+
+    /** _XCallDevice overload for case of no arg call */
+    xmlrpc_c::value const
+    _XCallDevice(const std::string& sensor_method_name)
+    {
+      return this->_XCallDevice(sensor_method_name, "");
     }
 
   }; // end: class Camera
