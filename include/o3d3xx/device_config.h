@@ -50,7 +50,7 @@ namespace o3d3xx
      *
      * @param[in] json A string of JSON encoding device config parameters.
      */
-    static o3d3xx::DeviceConfig::Ptr FromJSON(const std::string json);
+    static o3d3xx::DeviceConfig::Ptr FromJSON(const std::string& json);
 
     /**
      * Initializes a device configuration utilizing default values (per the

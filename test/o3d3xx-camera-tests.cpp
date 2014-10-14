@@ -290,3 +290,48 @@ TEST(Camera_Tests, DeviceConfig_JSON)
 
   // we do not want to compare the read-only properties
 }
+
+TEST(Camera_Tests, GetNetParameters)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+  std::unordered_map<std::string, std::string> params =
+    cam->GetNetParameters();
+
+  EXPECT_NO_THROW(params.at("MACAddress"));
+  EXPECT_NO_THROW(params.at("NetworkSpeed"));
+  EXPECT_NO_THROW(params.at("StaticIPv4Address"));
+  EXPECT_NO_THROW(params.at("StaticIPv4Gateway"));
+  EXPECT_NO_THROW(params.at("StaticIPv4SubNetMask"));
+  EXPECT_NO_THROW(params.at("UseDHCP"));
+}
+
+// TEST(Camera_Tests, NetConfig)
+// {
+//   o3d3xx::Camera::Ptr cam =
+//     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+//   cam->RequestSession();
+//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+//   o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
+//   std::string orig_ip = net->StaticIPv4Address();
+//   net->SetStaticIPv4Address("192.168.0.70");
+
+//   cam->SetNetConfig(net);
+//   EXPECT_NO_THROW(cam->SaveNet());
+
+//   o3d3xx::NetConfig::Ptr net2 = cam->GetNetConfig();
+//   EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
+
+//   net2->SetStaticIPv4Address(orig_ip);
+//   cam->SetNetConfig(net2);
+//   EXPECT_NO_THROW(cam->SaveNet());
+
+//   o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
+//   EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
+// }

@@ -30,6 +30,7 @@
 #include <xmlrpc-c/client_simple.hpp>
 #include <xmlrpc-c/girerr.hpp>
 #include "o3d3xx/device_config.h"
+#include "o3d3xx/net_config.h"
 #include "o3d3xx/err.h"
 
 namespace o3d3xx
@@ -152,6 +153,12 @@ namespace o3d3xx
     void DisablePassword();
     void SetDeviceConfig(o3d3xx::DeviceConfig::Ptr config);
     void SaveDevice();
+
+    // XMLRPC: NetConfig object
+    std::unordered_map<std::string, std::string> GetNetParameters();
+    o3d3xx::NetConfig::Ptr GetNetConfig();
+    void SetNetConfig(o3d3xx::NetConfig::Ptr config);
+    void SaveNet();
 
   protected:
     /** Password for mutating camera parameters */
@@ -303,6 +310,31 @@ namespace o3d3xx
     _XCallDevice(const std::string& sensor_method_name)
     {
       return this->_XCallDevice(sensor_method_name, "");
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "NetworkConfig" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallNet(const std::string& sensor_method_name,
+	      const std::string& format, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT +
+	o3d3xx::XMLRPC_DEVICE +
+	o3d3xx::XMLRPC_NET;
+
+      boost::algorithm::replace_all(url, "XXX", this->GetSessionID());
+      return this->_XCall(url, sensor_method_name, format, args...);
+    }
+
+    /** _XCallNet overload for case of no arg call */
+    xmlrpc_c::value const
+    _XCallNet(const std::string& sensor_method_name)
+    {
+      return this->_XCallNet(sensor_method_name, "");
     }
 
   }; // end: class Camera

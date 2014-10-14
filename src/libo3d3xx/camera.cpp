@@ -396,3 +396,76 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig::Ptr config)
 			 config->ExtrinsicCalibRotZ());
     }
 }
+
+o3d3xx::NetConfig::Ptr
+o3d3xx::Camera::GetNetConfig()
+{
+  return o3d3xx::NetConfig::Ptr(
+	   new o3d3xx::NetConfig(this->GetNetParameters()));
+}
+
+std::unordered_map<std::string, std::string>
+o3d3xx::Camera::GetNetParameters()
+{
+  return o3d3xx::value_struct_to_map(this->_XCallNet("getAllParameters"));
+}
+
+void
+o3d3xx::Camera::SetNetConfig(o3d3xx::NetConfig::Ptr config)
+{
+  // only set mutable parameters and only if they are different than current
+  // settings.
+  o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
+
+  if (net->StaticIPv4Address() != config->StaticIPv4Address())
+    {
+      this->_XCallNet("setParameter", "ss",
+		      "StaticIPv4Address",
+		      config->StaticIPv4Address().c_str());
+    }
+
+  if (net->StaticIPv4Gateway() != config->StaticIPv4Gateway())
+    {
+      this->_XCallNet("setParameter", "ss",
+		      "StaticIPv4Gateway",
+		      config->StaticIPv4Gateway().c_str());
+    }
+
+  if (net->StaticIPv4SubNetMask() != config->StaticIPv4SubNetMask())
+    {
+      this->_XCallNet("setParameter", "ss",
+		      "StaticIPv4SubNetMask",
+		      config->StaticIPv4SubNetMask().c_str());
+    }
+
+  if (net->UseDHCP() != config->UseDHCP())
+    {
+      this->_XCallNet("setParameter", "ss",
+		      "UseDHCP", config->UseDHCP() ? "true" : "false");
+    }
+}
+
+void
+o3d3xx::Camera::SaveNet()
+{
+  // o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
+
+  // // When calling `saveAndActivateConfig' on the network object of the xmlrpc
+  // // interface, the sensor's network interface will have to be reset. As a
+  // // result, there will be no xmlrpc result returned. To get around this, we
+  // // use a SIGALRM on UNIX to effectively timeout the synchronous RPC call.
+  // std::signal(SIGALRM, [](int sig) { LOG(INFO) << "SaveNet: Caught SIGALRM!"; });
+
+  // try
+  //   {
+  //     alarm(o3d3xx::WAIT_NET);
+  //     this->_XCallNet("saveAndActivateConfig");
+  //     DLOG(INFO) << "Past `saveAndActivateConfig'";
+  //     this->SetSessionID("");
+  //     this->SetIP(net->StaticIPv4Address());
+  //   }
+  // catch (const o3d3xx::error_t& ex)
+  //   {
+  //     LOG(ERROR) << "SaveNet(): " << ex.what();
+  //   }
+}
