@@ -341,3 +341,24 @@ TEST(Camera_Tests, NetConfig)
   o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
   EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
 }
+
+TEST(Camera_Tests, NetConfig_JSON)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+  o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
+  std::string json = net->ToJSON();
+
+  o3d3xx::NetConfig::Ptr net2 =
+    o3d3xx::NetConfig::FromJSON(json);
+
+  EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
+  EXPECT_EQ(net->StaticIPv4Gateway(), net2->StaticIPv4Gateway());
+  EXPECT_EQ(net->StaticIPv4SubNetMask(), net2->StaticIPv4SubNetMask());
+  EXPECT_EQ(net->UseDHCP(), net2->UseDHCP());
+
+  // we do not want to compare the read-only properties
+}
