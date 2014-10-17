@@ -116,7 +116,7 @@ int main(int argc, const char **argv)
       int retval = 0;
       while (true)
 	{
-	  if (fg->WaitForFrame(buff, 1000))
+	  if (fg->WaitForFrame(buff.get(), 1000))
 	    {
 	      cv::minMaxIdx(buff->AmplitudeImage(), &min, &max);
 	      cv::convertScaleAbs(buff->AmplitudeImage(), colormap_img, 255.0 / max);

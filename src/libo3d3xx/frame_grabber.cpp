@@ -60,7 +60,7 @@ o3d3xx::FrameGrabber::Stop()
 }
 
 bool
-o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
+o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer* img,
 				   long timeout_millis, bool copy_buff)
 {
   // mutex will unlock in `unique_lock' dtor if not explicitly unlocked prior

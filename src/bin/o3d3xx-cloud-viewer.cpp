@@ -71,7 +71,7 @@ public:
 
     while (! viewer.wasStopped())
       {
-	if (! fg->WaitForFrame(buff, 1000))
+	if (! fg->WaitForFrame(buff.get(), 1000))
 	  {
 	    continue;
 	  }

@@ -22,7 +22,7 @@ TEST(ImageBuffers_Tests, Cloud)
   o3d3xx::ImageBuffer::Ptr img =
     o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-  EXPECT_TRUE(fg->WaitForFrame(img, 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
   pcl::PointCloud<o3d3xx::PointT>::Ptr cloud = img->Cloud();
   EXPECT_TRUE(cloud.use_count() == 2);
@@ -35,7 +35,7 @@ TEST(ImageBuffers_Tests, Cloud)
     o3d3xx::ImageBuffer::Ptr img2 =
       o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-    EXPECT_TRUE(fg->WaitForFrame(img2, 1000));
+    EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
 
     cloud = img2->Cloud();
 
@@ -59,7 +59,7 @@ TEST(ImageBuffers_Tests, DepthImage)
   o3d3xx::ImageBuffer::Ptr img =
     o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-  EXPECT_TRUE(fg->WaitForFrame(img, 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
   cv::Mat dimg = img->DepthImage();
   cv::Mat dimg2 = img->DepthImage();
@@ -69,7 +69,7 @@ TEST(ImageBuffers_Tests, DepthImage)
     o3d3xx::ImageBuffer::Ptr img2 =
       o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-    EXPECT_TRUE(fg->WaitForFrame(img2, 1000));
+    EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
 
     dimg2 = img2->DepthImage();
     EXPECT_FALSE(imgs_eq(dimg, dimg2));
@@ -94,7 +94,7 @@ TEST(ImageBuffers_Tests, AmplitudeImage)
   o3d3xx::ImageBuffer::Ptr img =
     o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-  EXPECT_TRUE(fg->WaitForFrame(img, 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
   cv::Mat aimg = img->AmplitudeImage();
   cv::Mat aimg2 = img->AmplitudeImage();
@@ -104,7 +104,7 @@ TEST(ImageBuffers_Tests, AmplitudeImage)
     o3d3xx::ImageBuffer::Ptr img2 =
       o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-    EXPECT_TRUE(fg->WaitForFrame(img2, 1000));
+    EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
 
     aimg2 = img2->AmplitudeImage();
     EXPECT_FALSE(imgs_eq(aimg, aimg2));
@@ -128,7 +128,7 @@ TEST(ImageBuffers_Tests, ConfidenceImage)
   o3d3xx::ImageBuffer::Ptr img =
     o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-  EXPECT_TRUE(fg->WaitForFrame(img, 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
   cv::Mat cimg = img->ConfidenceImage();
   cv::Mat cimg2 = img->ConfidenceImage();
@@ -138,7 +138,7 @@ TEST(ImageBuffers_Tests, ConfidenceImage)
     o3d3xx::ImageBuffer::Ptr img2 =
       o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-    EXPECT_TRUE(fg->WaitForFrame(img2, 1000));
+    EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
 
     cimg2 = img2->ConfidenceImage();
     EXPECT_FALSE(imgs_eq(cimg, cimg2));
@@ -162,7 +162,7 @@ TEST(ImageBuffers_Tests, Bytes)
   o3d3xx::ImageBuffer::Ptr img =
     o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-  EXPECT_TRUE(fg->WaitForFrame(img, 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
   std::vector<std::uint8_t> b1 = img->Bytes();
   std::vector<std::uint8_t> b2 = img->Bytes();
@@ -177,7 +177,7 @@ TEST(ImageBuffers_Tests, Bytes)
     o3d3xx::ImageBuffer::Ptr img2 =
       o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-    EXPECT_TRUE(fg->WaitForFrame(img2, 1000));
+    EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
 
     b3 = img2->Bytes();
   }

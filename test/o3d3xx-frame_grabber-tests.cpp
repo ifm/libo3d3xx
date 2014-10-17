@@ -26,13 +26,13 @@ TEST(FrameGrabber_Tests, WaitForFrame)
   int i = 0;
   while (i < 10)
     {
-      EXPECT_TRUE(fg->WaitForFrame(img, 1000));
+      EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
       i++;
     }
 
   EXPECT_EQ(i, 10);
   fg->Stop();
-  EXPECT_FALSE(fg->WaitForFrame(img, 500));
+  EXPECT_FALSE(fg->WaitForFrame(img.get(), 500));
 }
 
 //

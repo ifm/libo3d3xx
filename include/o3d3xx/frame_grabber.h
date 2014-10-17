@@ -82,7 +82,7 @@ namespace o3d3xx
      * be synchronized and ready for analysis provided this function returns
      * true.
      *
-     * @param[out] buff An o3d3xx::ImageBuffer object to update with the latest
+     * @param[out] img An o3d3xx::ImageBuffer object to update with the latest
      * data from the camera.
      *
      * @param[in] timeout_millis Amount of time, in milliseconds, to wait for
@@ -98,7 +98,7 @@ namespace o3d3xx
      * @return true if a new buffer was acquired within `timeout_millis', false
      * otherwise.
      */
-    bool WaitForFrame(o3d3xx::ImageBuffer::Ptr& img,
+    bool WaitForFrame(o3d3xx::ImageBuffer* img,
 		      long timeout_millis = 0, bool copy_buff = false);
 
   protected:
