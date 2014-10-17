@@ -23,14 +23,15 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
 #include <glog/logging.h>
+#include "o3d3xx/camera.hpp"
 #include "o3d3xx/util.hpp"
 
 o3d3xx::NetConfig::NetConfig()
   : mac_address_(""),
     network_speed_(0),
-    ip_("192.168.0.69"),
-    gw_("192.168.0.201"),
-    subnet_("255.255.255.0"),
+    ip_(o3d3xx::DEFAULT_IP),
+    gw_(o3d3xx::DEFAULT_GW),
+    subnet_(o3d3xx::DEFAULT_SUBNET),
     use_dhcp_(false)
 { }
 
@@ -47,9 +48,7 @@ o3d3xx::NetConfig::NetConfig(
 	}
       catch (const std::out_of_range& ex)
 	{
-	  DLOG(WARNING) << "In NetConfig ctor: "
-			<< kv.first << "=" << kv.second
-			<< ": " << ex.what();
+	  // we expect this for the read-only params
 	}
     }
 }

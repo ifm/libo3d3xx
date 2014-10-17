@@ -116,14 +116,14 @@ TEST(Camera_Tests, CancelSession)
 
   // we have no session, so, CancelSession should not make the XMLRPC call
   EXPECT_EQ("", cam->GetSessionID());
-  EXPECT_NO_THROW(cam->CancelSession());
+  EXPECT_TRUE(cam->CancelSession());
 
   // set a dummy session
   cam->SetSessionID("ABC");
 
   // session doesn't really exist, so, sensor should send back an error
   // and the session id should still be the dummy above
-  EXPECT_NO_THROW(cam->CancelSession());
+  EXPECT_FALSE(cam->CancelSession());
   EXPECT_EQ("ABC", cam->GetSessionID());
   cam->SetSessionID("");
 
@@ -155,7 +155,7 @@ TEST(Camera_Tests, SetOperatingMode)
     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
 
   cam->RequestSession();
-  EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
+  EXPECT_TRUE(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
   EXPECT_EQ(static_cast<int>(o3d3xx::Camera::operating_mode::EDIT),
 	    std::stoi(cam->GetParameter("OperatingMode")));
 
@@ -225,13 +225,13 @@ TEST(Camera_Tests, ActivateDisablePassword)
   EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
   cam->SetPassword(tmp_password);
   EXPECT_NO_THROW(cam->ActivatePassword());
-  //EXPECT_NO_THROW(cam->SaveDevice());
+  //EXPECT_TRUE(cam->SaveDevice());
 
   //o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
   //EXPECT_TRUE(dev->PasswordActivated());
 
   EXPECT_NO_THROW(cam->DisablePassword());
-  //EXPECT_NO_THROW(cam->SaveDevice());
+  //EXPECT_TRUE(cam->SaveDevice());
   //dev = cam->GetDeviceConfig();
   //EXPECT_FALSE(dev->PasswordActivated());
 }
@@ -248,13 +248,13 @@ TEST(Camera_Tests, SetDeviceConfig)
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
   dev->SetName(tmp_name);
-  EXPECT_NO_THROW(cam->SetDeviceConfig(dev));
+  EXPECT_NO_THROW(cam->SetDeviceConfig(dev.get()));
 
   dev = cam->GetDeviceConfig();
   EXPECT_EQ(tmp_name, dev->Name());
 
   dev->SetName(orig_name);
-  EXPECT_NO_THROW(cam->SetDeviceConfig(dev));
+  EXPECT_NO_THROW(cam->SetDeviceConfig(dev.get()));
 
   dev = cam->GetDeviceConfig();
   EXPECT_EQ(orig_name, dev->Name());
@@ -310,28 +310,34 @@ TEST(Camera_Tests, GetNetParameters)
   EXPECT_NO_THROW(params.at("UseDHCP"));
 }
 
-// TEST(Camera_Tests, NetConfig)
-// {
-//   o3d3xx::Camera::Ptr cam =
-//     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+TEST(Camera_Tests, NetConfig)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
 
-//   cam->RequestSession();
-//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
 
-//   o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
-//   std::string orig_ip = net->StaticIPv4Address();
-//   net->SetStaticIPv4Address("192.168.0.70");
+  o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
+  std::string orig_ip = net->StaticIPv4Address();
+  net->SetStaticIPv4Address("192.168.0.70");
 
-//   cam->SetNetConfig(net);
-//   EXPECT_NO_THROW(cam->SaveNet());
+  EXPECT_NO_THROW(cam->SetNetConfig(net.get()));
+  EXPECT_TRUE(cam->SaveNet());
 
-//   o3d3xx::NetConfig::Ptr net2 = cam->GetNetConfig();
-//   EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
+  usleep(2000);
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  o3d3xx::NetConfig::Ptr net2 = cam->GetNetConfig();
+  EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
 
-//   net2->SetStaticIPv4Address(orig_ip);
-//   cam->SetNetConfig(net2);
-//   EXPECT_NO_THROW(cam->SaveNet());
+  net2->SetStaticIPv4Address(orig_ip);
+  EXPECT_NO_THROW(cam->SetNetConfig(net2.get()));
+  EXPECT_TRUE(cam->SaveNet());
 
-//   o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
-//   EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
-// }
+  usleep(2000);
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
+  EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
+}

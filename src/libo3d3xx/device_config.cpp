@@ -59,9 +59,7 @@ o3d3xx::DeviceConfig::DeviceConfig(
 	}
       catch (const std::out_of_range& ex)
 	{
-	  DLOG(WARNING) << "In DeviceConfig ctor: "
-			<< kv.first << "=" << kv.second
-			<< ": "	<< ex.what();
+	  // we expect this for the read-only params
 	}
     }
 }
@@ -441,6 +439,7 @@ o3d3xx::DeviceConfig::FromJSON(const std::string& json)
 	}
       catch (const std::out_of_range& ex)
 	{
+	  // we expect this for read-only values
 	  DLOG(WARNING) << "In FromJSON: "
 			<< kv.first << "=" << kv.second.data()
 			<< ": "	<< ex.what();

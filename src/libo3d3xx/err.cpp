@@ -21,6 +21,10 @@ const int O3D3XX_NO_ERRORS = 0;
 const int O3D3XX_XMLRPC_FAILURE = -9000;
 const int O3D3XX_THREAD_INTERRUPTED = -9001;
 const int O3D3XX_IMG_CHUNK_NOT_FOUND = -9002;
+const int O3D3XX_XMLRPC_TIMEOUT = -9003;
+const int O3D3XX_XMLRPC_FINFAIL = -9004;
+const int O3D3XX_XMLRPC_OBJ_NOT_FOUND = -9005;
+const int O3D3XX_XMLRPC_INVALID_PARAM = -9006;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -28,11 +32,19 @@ const char *o3d3xx::strerror(int errnum)
   case O3D3XX_NO_ERRORS:
     return "OK";
   case O3D3XX_XMLRPC_FAILURE:
-    return "XMLRPC communications failure";
+    return "Unknown XMLRPC failure";
   case O3D3XX_THREAD_INTERRUPTED:
     return "Thread interrupted";
   case O3D3XX_IMG_CHUNK_NOT_FOUND:
     return "Image chunk not found";
+  case O3D3XX_XMLRPC_TIMEOUT:
+    return "XMLRPC call timed out";
+  case O3D3XX_XMLRPC_FINFAIL:
+    return "XMLRPC finished but the called failed";
+  case O3D3XX_XMLRPC_OBJ_NOT_FOUND:
+    return "XMLRPC server object not found";
+  case O3D3XX_XMLRPC_INVALID_PARAM:
+    return "XMLRPC requested parameter is invalid";
   default:
     return ::strerror(errnum);
   }

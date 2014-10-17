@@ -22,15 +22,18 @@
 #include <string>
 #include <unordered_map>
 #include <glog/logging.h>
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/client_simple.hpp>
+#include <xmlrpc-c/client.hpp>
 #include "o3d3xx/util.hpp"
 #include "o3d3xx/device_config.h"
+#include "o3d3xx/net_config.h"
 
 const std::string o3d3xx::DEFAULT_PASSWORD = "";
 const std::string o3d3xx::DEFAULT_IP = "192.168.0.69";
+const std::string o3d3xx::DEFAULT_SUBNET = "255.255.255.0";
+const std::string o3d3xx::DEFAULT_GW = "192.168.0.201";
 const std::uint32_t o3d3xx::DEFAULT_XMLRPC_PORT = 80;
-const int o3d3xx::MAX_HEARTBEAT = 300;
+const int o3d3xx::MAX_HEARTBEAT = 300; // seconds
+const int o3d3xx::NET_WAIT = 3000; // millis
 
 const std::string o3d3xx::XMLRPC_MAIN = "/api/rpc/v1/com.ifm.efector/";
 const std::string o3d3xx::XMLRPC_SESSION = "session_XXX/";
@@ -47,7 +50,11 @@ o3d3xx::Camera::Camera(const std::string& ip,
     ip_(ip),
     xmlrpc_port_(xmlrpc_port),
     xmlrpc_url_prefix_("http://" + ip + ":" + std::to_string(xmlrpc_port_)),
-    xmlrpc_client_(xmlrpc_c::clientSimple()),
+    xclient_(new xmlrpc_c::client_xml(
+               xmlrpc_c::clientXmlTransportPtr(
+		 new xmlrpc_c::clientXmlTransport_curl(
+	           xmlrpc_c::clientXmlTransport_curl::constrOpt().
+		   timeout(o3d3xx::NET_WAIT))))),
     session_("")
 {
   DLOG(INFO) << "Initializing Camera: ip="
@@ -131,7 +138,7 @@ std::string
 o3d3xx::Camera::GetParameter(const std::string& param)
 {
   xmlrpc_c::value_string result(this->_XCallMain("getParameter",
-						 "s", param.c_str()));
+						 param.c_str()));
   return std::string(result);
 }
 
@@ -182,7 +189,7 @@ o3d3xx::Camera::GetApplicationList()
 void
 o3d3xx::Camera::Reboot(const boot_mode& mode)
 {
-  this->_XCallMain("reboot", "i", mode);
+  this->_XCallMain("reboot", static_cast<int>(mode));
 }
 
 std::string
@@ -191,22 +198,25 @@ o3d3xx::Camera::RequestSession()
   try
     {
       xmlrpc_c::value_string val_str(
-        this->_XCallMain("requestSession", "s", this->GetPassword().c_str()));
+        this->_XCallMain("requestSession", this->GetPassword().c_str()));
 
       this->SetSessionID(static_cast<std::string>(val_str));
       this->Heartbeat(o3d3xx::MAX_HEARTBEAT);
     }
   catch (const o3d3xx::error_t& ex)
     {
-      // for now do nothing
+      LOG(ERROR) << "RequestSession(): "
+		 << ex.what();
     }
 
   return this->GetSessionID();
 }
 
-void
+bool
 o3d3xx::Camera::CancelSession()
 {
+  bool retval = true;
+
   if (this->GetSessionID() != "")
     {
       try
@@ -217,9 +227,14 @@ o3d3xx::Camera::CancelSession()
       catch (const o3d3xx::error_t& ex)
 	{
 	  LOG(ERROR) << "Failed to cancel session: "
-		     << this->GetSessionID();
+		     << this->GetSessionID() << " -> "
+		     << ex.what();
+
+	  retval = false;
 	}
     }
+
+  return retval;
 }
 
 int
@@ -229,29 +244,36 @@ o3d3xx::Camera::Heartbeat(int hb)
 
   try
     {
-      xmlrpc_c::value_int v_int(this->_XCallSession("heartbeat", "i", hb));
+      xmlrpc_c::value_int v_int(this->_XCallSession("heartbeat", hb));
       retval = v_int.cvalue();
     }
   catch (const o3d3xx::error_t& ex)
     {
-      LOG(ERROR) << "Failed to set heartbeat value";
+      LOG(ERROR) << "Failed to set heartbeat value: "
+		 << ex.what();
     }
 
   return retval;
 }
 
-void
+bool
 o3d3xx::Camera::SetOperatingMode(const o3d3xx::Camera::operating_mode& mode)
 {
+  bool retval = true;
+
   try
     {
-      this->_XCallSession("setOperatingMode", "i", mode);
+      this->_XCallSession("setOperatingMode", static_cast<int>(mode));
     }
   catch (const o3d3xx::error_t& ex)
     {
-      LOG(ERROR) << "Failed to set operating mode!";
-      throw(ex);
+      LOG(ERROR) << "Failed to set operating mode: "
+		 << ex.what();
+
+      retval = false;
     }
+
+  return retval;
 }
 
 o3d3xx::DeviceConfig::Ptr
@@ -261,51 +283,69 @@ o3d3xx::Camera::GetDeviceConfig()
 	   new o3d3xx::DeviceConfig(this->GetAllParameters()));
 }
 
-void
+bool
 o3d3xx::Camera::ActivatePassword()
 {
+  bool retval = true;
+
   try
     {
-      this->_XCallDevice("activatePassword", "s",
+      this->_XCallDevice("activatePassword",
 			 this->GetPassword().c_str());
     }
   catch (const o3d3xx::error_t& ex)
     {
-      LOG(ERROR) << "ActivatePassword: "
+      LOG(ERROR) << "ActivatePassword(): "
 		 << ex.what();
+
+      retval = false;
     }
+
+  return retval;
 }
 
-void
+bool
 o3d3xx::Camera::DisablePassword()
 {
+  bool retval = true;
+
   try
     {
       this->_XCallDevice("disablePassword");
     }
   catch (const o3d3xx::error_t& ex)
     {
-      LOG(ERROR) << "DisablePassword: "
+      LOG(ERROR) << "DisablePassword(): "
 		 << ex.what();
+
+      retval = false;
     }
+
+  return retval;
 }
 
-void
+bool
 o3d3xx::Camera::SaveDevice()
 {
+  bool retval = true;
+
   try
     {
       this->_XCallDevice("save");
     }
   catch (const o3d3xx::error_t& ex)
     {
-      LOG(ERROR) << "SaveDevice: "
+      LOG(ERROR) << "SaveDevice(): "
 		 << ex.what();
+
+      retval = false;
     }
+
+  return retval;
 }
 
 void
-o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig::Ptr config)
+o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
 {
   o3d3xx::DeviceConfig::Ptr dev = this->GetDeviceConfig();
 
@@ -313,86 +353,86 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig::Ptr config)
   // different
   if (dev->Name() != config->Name())
     {
-      this->_XCallDevice("setParameter", "ss", "Name",
+      this->_XCallDevice("setParameter", "Name",
 			 config->Name().c_str());
     }
 
   if (dev->Description() != config->Description())
     {
-      this->_XCallDevice("setParameter", "ss", "Description",
+      this->_XCallDevice("setParameter", "Description",
 			 config->Description().c_str());
     }
 
   if (dev->ActiveApplication() != config->ActiveApplication())
     {
-      this->_XCallDevice("setParameter", "si", "ActiveApplication",
+      this->_XCallDevice("setParameter", "ActiveApplication",
 			 config->ActiveApplication());
     }
 
   if (dev->PcicTCPPort() != config->PcicTCPPort())
     {
-      this->_XCallDevice("setParameter", "si", "PcicTcpPort",
+      this->_XCallDevice("setParameter", "PcicTcpPort",
 			 config->PcicTCPPort());
     }
 
   if (dev->PcicProtocolVersion() != config->PcicProtocolVersion())
     {
-      this->_XCallDevice("setParameter", "si", "PcicProtocolVersion",
+      this->_XCallDevice("setParameter", "PcicProtocolVersion",
 			 config->PcicProtocolVersion());
     }
 
   if (dev->IOLogicType() != config->IOLogicType())
     {
-      this->_XCallDevice("setParameter", "si", "IOLogicType",
+      this->_XCallDevice("setParameter", "IOLogicType",
 			 config->IOLogicType());
     }
 
   if (dev->IOExternApplicationSwitch() !=
       config->IOExternApplicationSwitch())
     {
-      this->_XCallDevice("setParameter", "si", "IOExternApplicationSwitch",
+      this->_XCallDevice("setParameter", "IOExternApplicationSwitch",
 			 config->IOExternApplicationSwitch());
     }
 
   if (dev->SessionTimeout() != config->SessionTimeout())
     {
-      this->_XCallDevice("setParameter", "si", "SessionTimeout",
+      this->_XCallDevice("setParameter", "SessionTimeout",
 			 config->SessionTimeout());
     }
 
   if (dev->ExtrinsicCalibTransX() != config->ExtrinsicCalibTransX())
     {
-      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibTransX",
+      this->_XCallDevice("setParameter", "ExtrinsicCalibTransX",
 			 config->ExtrinsicCalibTransX());
     }
 
   if (dev->ExtrinsicCalibTransY() != config->ExtrinsicCalibTransY())
     {
-      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibTransY",
+      this->_XCallDevice("setParameter", "ExtrinsicCalibTransY",
 			 config->ExtrinsicCalibTransY());
     }
 
   if (dev->ExtrinsicCalibTransZ() != config->ExtrinsicCalibTransZ())
     {
-      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibTransZ",
+      this->_XCallDevice("setParameter", "ExtrinsicCalibTransZ",
 			 config->ExtrinsicCalibTransZ());
     }
 
   if (dev->ExtrinsicCalibRotX() != config->ExtrinsicCalibRotX())
     {
-      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibRotX",
+      this->_XCallDevice("setParameter", "ExtrinsicCalibRotX",
 			 config->ExtrinsicCalibRotX());
     }
 
   if (dev->ExtrinsicCalibRotY() != config->ExtrinsicCalibRotY())
     {
-      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibRotY",
+      this->_XCallDevice("setParameter", "ExtrinsicCalibRotY",
 			 config->ExtrinsicCalibRotY());
     }
 
   if (dev->ExtrinsicCalibRotZ() != config->ExtrinsicCalibRotZ())
     {
-      this->_XCallDevice("setParameter", "sd", "ExtrinsicCalibRotZ",
+      this->_XCallDevice("setParameter", "ExtrinsicCalibRotZ",
 			 config->ExtrinsicCalibRotZ());
     }
 }
@@ -411,7 +451,7 @@ o3d3xx::Camera::GetNetParameters()
 }
 
 void
-o3d3xx::Camera::SetNetConfig(o3d3xx::NetConfig::Ptr config)
+o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config)
 {
   // only set mutable parameters and only if they are different than current
   // settings.
@@ -419,53 +459,56 @@ o3d3xx::Camera::SetNetConfig(o3d3xx::NetConfig::Ptr config)
 
   if (net->StaticIPv4Address() != config->StaticIPv4Address())
     {
-      this->_XCallNet("setParameter", "ss",
+      this->_XCallNet("setParameter",
 		      "StaticIPv4Address",
 		      config->StaticIPv4Address().c_str());
     }
 
   if (net->StaticIPv4Gateway() != config->StaticIPv4Gateway())
     {
-      this->_XCallNet("setParameter", "ss",
+      this->_XCallNet("setParameter",
 		      "StaticIPv4Gateway",
 		      config->StaticIPv4Gateway().c_str());
     }
 
   if (net->StaticIPv4SubNetMask() != config->StaticIPv4SubNetMask())
     {
-      this->_XCallNet("setParameter", "ss",
+      this->_XCallNet("setParameter",
 		      "StaticIPv4SubNetMask",
 		      config->StaticIPv4SubNetMask().c_str());
     }
 
   if (net->UseDHCP() != config->UseDHCP())
     {
-      this->_XCallNet("setParameter", "ss",
+      this->_XCallNet("setParameter",
 		      "UseDHCP", config->UseDHCP() ? "true" : "false");
     }
 }
 
-void
+bool
 o3d3xx::Camera::SaveNet()
 {
-  // o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
+  bool retval = true;
+  o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
 
-  // // When calling `saveAndActivateConfig' on the network object of the xmlrpc
-  // // interface, the sensor's network interface will have to be reset. As a
-  // // result, there will be no xmlrpc result returned. To get around this, we
-  // // use a SIGALRM on UNIX to effectively timeout the synchronous RPC call.
-  // std::signal(SIGALRM, [](int sig) { LOG(INFO) << "SaveNet: Caught SIGALRM!"; });
+  // When calling `saveAndActivateConfig' on the network object of the xmlrpc
+  // interface, the sensor's network interface will have to be reset. As a
+  // result, there will be no xmlrpc result returned -- we expect a timeout.
+  try
+    {
+      this->_XCallNet("saveAndActivateConfig");
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      if (ex.code() != O3D3XX_XMLRPC_TIMEOUT)
+	{
+	  LOG(ERROR) << "SaveNet(): " << ex.what();
+	  retval = false;
+	}
+    }
 
-  // try
-  //   {
-  //     alarm(o3d3xx::WAIT_NET);
-  //     this->_XCallNet("saveAndActivateConfig");
-  //     DLOG(INFO) << "Past `saveAndActivateConfig'";
-  //     this->SetSessionID("");
-  //     this->SetIP(net->StaticIPv4Address());
-  //   }
-  // catch (const o3d3xx::error_t& ex)
-  //   {
-  //     LOG(ERROR) << "SaveNet(): " << ex.what();
-  //   }
+  this->SetSessionID("");
+  this->SetIP(net->StaticIPv4Address());
+
+  return retval;
 }

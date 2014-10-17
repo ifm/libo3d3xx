@@ -26,9 +26,7 @@
 #include <vector>
 #include <boost/algorithm/string/replace.hpp>
 #include <glog/logging.h>
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/client_simple.hpp>
-#include <xmlrpc-c/girerr.hpp>
+#include <xmlrpc-c/client.hpp>
 #include "o3d3xx/device_config.h"
 #include "o3d3xx/net_config.h"
 #include "o3d3xx/err.h"
@@ -37,8 +35,11 @@ namespace o3d3xx
 {
   extern const std::string DEFAULT_PASSWORD;
   extern const std::string DEFAULT_IP;
+  extern const std::string DEFAULT_SUBNET;
+  extern const std::string DEFAULT_GW;
   extern const std::uint32_t DEFAULT_XMLRPC_PORT;
   extern const int MAX_HEARTBEAT;
+  extern const int NET_WAIT;
 
   extern const std::string XMLRPC_MAIN;
   extern const std::string XMLRPC_SESSION;
@@ -143,22 +144,22 @@ namespace o3d3xx
     std::vector<app_entry_t> GetApplicationList();
     void Reboot(const boot_mode& mode);
     std::string RequestSession();
-    void CancelSession();
+    bool CancelSession();
     int Heartbeat(int hb);
-    void SetOperatingMode(const operating_mode& mode);
+    bool SetOperatingMode(const operating_mode& mode);
 
     // XMLRPC: DeviceConfig object
     o3d3xx::DeviceConfig::Ptr GetDeviceConfig();
-    void ActivatePassword();
-    void DisablePassword();
-    void SetDeviceConfig(o3d3xx::DeviceConfig::Ptr config);
-    void SaveDevice();
+    bool ActivatePassword();
+    bool DisablePassword();
+    void SetDeviceConfig(const o3d3xx::DeviceConfig* config);
+    bool SaveDevice();
 
     // XMLRPC: NetConfig object
     std::unordered_map<std::string, std::string> GetNetParameters();
     o3d3xx::NetConfig::Ptr GetNetConfig();
-    void SetNetConfig(o3d3xx::NetConfig::Ptr config);
-    void SaveNet();
+    void SetNetConfig(const o3d3xx::NetConfig* config);
+    bool SaveNet();
 
   protected:
     /** Password for mutating camera parameters */
@@ -186,10 +187,10 @@ namespace o3d3xx
     std::mutex xmlrpc_url_prefix_mutex_;
 
     /** XMLRPC client */
-    xmlrpc_c::clientSimple xmlrpc_client_;
+    xmlrpc_c::clientPtr xclient_;
 
     /** Protects xmlrpc_client_ */
-    std::mutex xmlrpc_client_mutex_;
+    std::mutex xclient_mutex_;
 
     /** Session ID for mutating camera parameters */
     std::string session_;
@@ -198,6 +199,20 @@ namespace o3d3xx
     std::mutex session_mutex_;
 
   private:
+    /** Terminates iteration over the parameter pack in _XSetParams */
+    void _XSetParams(xmlrpc_c::paramList& params) { }
+
+    /**
+     * Recursively processes the parameter pack `args' as a list and sets those
+     * values into the `params' reference.
+     */
+    template <typename T, typename... Args>
+    void _XSetParams(xmlrpc_c::paramList& params, T value, Args... args)
+    {
+      params.addc(value);
+      this->_XSetParams(params, args...);
+    }
+
     /**
      * Encapsulates XMLRPC calls to the sensor and unifies the trapping of
      * communication errors with the sensor.
@@ -207,10 +222,8 @@ namespace o3d3xx
      * @param[in] sensor_method_name The name of the XMLRPC method as defined
      *                               by the sensor
      *
-     * @param[in] format The format string for the arguments to the XMLRPC call
-     *
-     * @param[in] args A variable list of args that should be correllated back
-     *                 (in number and type) to the format string in `format`.
+     * @param[in] args A variable list of arguments that should be passed to
+     *                 the XMLRPC call.
      *
      * @return The XMLRPC-encoded return value from the sensor.
      *
@@ -218,81 +231,88 @@ namespace o3d3xx
      */
     template <typename... Args>
     xmlrpc_c::value const
-    _XCall(const std::string& url, const std::string& sensor_method_name,
-	   const std::string& format, Args... args)
+    _XCall(std::string& url, const std::string& sensor_method_name,
+	   Args... args)
     {
-      std::lock_guard<std::mutex> lock(this->xmlrpc_client_mutex_);
-      xmlrpc_c::value result;
+      xmlrpc_c::paramList params;
+      this->_XSetParams(params, args...);
+      xmlrpc_c::rpcPtr rpc(sensor_method_name, params);
 
-      DLOG(INFO) << "_XCall: url=" << url << ", method=" << sensor_method_name;
+      boost::algorithm::replace_all(url, "XXX", this->GetSessionID());
+      xmlrpc_c::carriageParm_curl0 cparam(url);
 
+      std::lock_guard<std::mutex> lock(this->xclient_mutex_);
       try
 	{
-	  if (format.empty())
-	    {
-	      this->xmlrpc_client_.call(url, sensor_method_name, &result);
-	    }
-	  else
-	    {
-	      this->xmlrpc_client_.call(url, sensor_method_name, format,
-					&result, args...);
-	    }
+	  rpc->call(this->xclient_.get(), &cparam);
+	  return rpc->getResult();
 	}
       catch (const std::exception& ex)
 	{
 	  LOG(ERROR) << url << " -> "
-		     << sensor_method_name << " : "
-		     << ex.what();
-	  throw(o3d3xx::error_t(O3D3XX_XMLRPC_FAILURE));
-	}
+	  	     << sensor_method_name << " : "
+	  	     << ex.what();
 
-      return result;
+	  if (! rpc->isFinished())
+	    {
+	      throw(o3d3xx::error_t(O3D3XX_XMLRPC_TIMEOUT));
+	    }
+	  else if (! rpc->isSuccessful())
+	    {
+	      xmlrpc_c::fault f = rpc->getFault();
+	      int ifm_error = f.getCode();
+
+	      switch (ifm_error)
+		{
+		case 101000:
+		  throw(o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_PARAM));
+		  break;
+
+		case 100000:
+		  LOG(WARNING) << "Invalid session object? "
+			       << this->GetSessionID();
+		  throw(o3d3xx::error_t(O3D3XX_XMLRPC_OBJ_NOT_FOUND));
+		  break;
+
+		default:
+		  LOG(ERROR) << "IFM error code: " << ifm_error;
+		  throw(o3d3xx::error_t(O3D3XX_XMLRPC_FINFAIL));
+		  break;
+		}
+	    }
+	  else
+	    {
+	      throw(o3d3xx::error_t(O3D3XX_XMLRPC_FAILURE));
+	    }
+	}
     }
 
     /** _XCall wrapper for XMLRPC calls to the "Main" object */
     template <typename... Args>
     xmlrpc_c::value const
-    _XCallMain(const std::string& sensor_method_name,
-	       const std::string& format, Args... args)
+    _XCallMain(const std::string& sensor_method_name, Args... args)
     {
       std::string url = this->GetXMLRPCURLPrefix() + o3d3xx::XMLRPC_MAIN;
-      return this->_XCall(url, sensor_method_name, format, args...);
-    }
-
-    /** _XCallMain overload for case of no arg call */
-    xmlrpc_c::value const
-    _XCallMain(const std::string& sensor_method_name)
-    {
-      return this->_XCallMain(sensor_method_name, "");
+      return this->_XCall(url, sensor_method_name, args...);
     }
 
     /** _XCall wrapper for XMLRPC calls to the "Session" object */
     template <typename... Args>
     xmlrpc_c::value const
-    _XCallSession(const std::string& sensor_method_name,
-		  const std::string& format, Args... args)
+    _XCallSession(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
 	this->GetXMLRPCURLPrefix() +
 	o3d3xx::XMLRPC_MAIN +
 	o3d3xx::XMLRPC_SESSION;
 
-      boost::algorithm::replace_all(url, "XXX", this->GetSessionID());
-      return this->_XCall(url, sensor_method_name, format, args...);
-    }
-
-    /** _XCallSession overload for case of no arg call */
-    xmlrpc_c::value const
-    _XCallSession(const std::string& sensor_method_name)
-    {
-      return this->_XCallSession(sensor_method_name, "");
+      return this->_XCall(url, sensor_method_name, args...);
     }
 
     /** _XCall wrapper for XMLRPC calls to the "DeviceConfig" object */
     template <typename... Args>
     xmlrpc_c::value const
-    _XCallDevice(const std::string& sensor_method_name,
-		 const std::string& format, Args... args)
+    _XCallDevice(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
 	this->GetXMLRPCURLPrefix() +
@@ -301,22 +321,13 @@ namespace o3d3xx
 	o3d3xx::XMLRPC_EDIT +
 	o3d3xx::XMLRPC_DEVICE;
 
-      boost::algorithm::replace_all(url, "XXX", this->GetSessionID());
-      return this->_XCall(url, sensor_method_name, format, args...);
-    }
-
-    /** _XCallDevice overload for case of no arg call */
-    xmlrpc_c::value const
-    _XCallDevice(const std::string& sensor_method_name)
-    {
-      return this->_XCallDevice(sensor_method_name, "");
+      return this->_XCall(url, sensor_method_name, args...);
     }
 
     /** _XCall wrapper for XMLRPC calls to the "NetworkConfig" object */
     template <typename... Args>
     xmlrpc_c::value const
-    _XCallNet(const std::string& sensor_method_name,
-	      const std::string& format, Args... args)
+    _XCallNet(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
 	this->GetXMLRPCURLPrefix() +
@@ -326,15 +337,7 @@ namespace o3d3xx
 	o3d3xx::XMLRPC_DEVICE +
 	o3d3xx::XMLRPC_NET;
 
-      boost::algorithm::replace_all(url, "XXX", this->GetSessionID());
-      return this->_XCall(url, sensor_method_name, format, args...);
-    }
-
-    /** _XCallNet overload for case of no arg call */
-    xmlrpc_c::value const
-    _XCallNet(const std::string& sensor_method_name)
-    {
-      return this->_XCallNet(sensor_method_name, "");
+      return this->_XCall(url, sensor_method_name, args...);
     }
 
   }; // end: class Camera

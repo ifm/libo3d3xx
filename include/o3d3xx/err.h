@@ -24,6 +24,10 @@ extern const int O3D3XX_NO_ERRORS;
 extern const int O3D3XX_XMLRPC_FAILURE;
 extern const int O3D3XX_THREAD_INTERRUPTED;
 extern const int O3D3XX_IMG_CHUNK_NOT_FOUND;
+extern const int O3D3XX_XMLRPC_TIMEOUT;
+extern const int O3D3XX_XMLRPC_FINFAIL;
+extern const int O3D3XX_XMLRPC_OBJ_NOT_FOUND;
+extern const int O3D3XX_XMLRPC_INVALID_PARAM;
 
 namespace o3d3xx
 {
