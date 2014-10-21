@@ -1,9 +1,0 @@
-#include "o3d3xx.h"
-#include <string>
-#include <unordered_map>
-#include "gtest/gtest.h"
-
-TEST(DeviceConfig_Tests, Ctor)
-{
-
-}
