@@ -19,54 +19,59 @@
 //-------------------------------------------------------------
 
 #include <cstdint>
-#include <functional>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <thread>
 #include <boost/program_options.hpp>
 #include <glog/logging.h>
 #include <opencv2/opencv.hpp>
 #include <pcl/visualization/cloud_viewer.h>
 #include "o3d3xx.h"
 
-//-----------------------------------------------------------
-// Render point clouds on a separate thread
-//-----------------------------------------------------------
 class O3DCloudViewer
 {
 public:
   O3DCloudViewer(o3d3xx::FrameGrabber::Ptr fg, const std::string& descr)
     : fg_(fg),
-      description_(descr),
-      thread_(new std::thread(std::bind(&O3DCloudViewer::Run, this)))
-  {}
-
-  void Join()
-  {
-    return this->thread_->join();
-  }
+      description_(descr) {}
 
   void Run()
   {
-    pcl::visualization::CloudViewer viewer(this->description_);
     o3d3xx::ImageBuffer::Ptr buff(new o3d3xx::ImageBuffer());
 
-    while (! viewer.wasStopped())
+    std::shared_ptr<pcl::visualization::PCLVisualizer> viewer(
+      new pcl::visualization::PCLVisualizer(this->description_));
+    viewer->setBackgroundColor(0, 0, 0);
+
+    bool is_first = true;
+    while (! viewer->wasStopped())
       {
-	if (! this->fg_->WaitForFrame(buff.get(), 1000, true))
+	viewer->spinOnce(100);
+
+	if (! this->fg_->WaitForFrame(buff.get(), 1000))
 	  {
 	    continue;
 	  }
 
-	viewer.showCloud(buff->Cloud());
+	// color points based on x-distance
+	pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI>
+	  x_dist(buff->Cloud(), "x");
+
+	if (is_first)
+	  {
+	    is_first = false;
+	    viewer->addPointCloud(buff->Cloud(), x_dist, "o3d3xx cloud");
+	  }
+	else
+	  {
+	    viewer->updatePointCloud(buff->Cloud(), x_dist, "o3d3xx cloud");
+	  }
       }
   }
 
 private:
   o3d3xx::FrameGrabber::Ptr fg_;
   std::string description_;
-  std::unique_ptr<std::thread> thread_;
 
 }; // end: O3DCloudViewer
 
@@ -85,14 +90,7 @@ public:
 	       int image_type)
     : fg_(fg),
       description_(descr),
-      image_type_(image_type),
-      thread_(new std::thread(std::bind(&O3DMatViewer::Run, this)))
-  {}
-
-  void Join()
-  {
-    return this->thread_->join();
-  }
+      image_type_(image_type) {}
 
   void Run()
   {
@@ -158,7 +156,6 @@ private:
   o3d3xx::FrameGrabber::Ptr fg_;
   std::string description_;
   int image_type_;
-  std::unique_ptr<std::thread> thread_;
 
 }; // end: O3DMatViewer
 
@@ -225,24 +222,24 @@ int main(int argc, const char **argv)
 	{
 	  O3DMatViewer depth_viewer(fg, "o3d3xx Depth Viewer",
 				    O3DMatViewer::DEPTH);
-	  depth_viewer.Join();
+	  depth_viewer.Run();
 	}
       else if (opts.vm.count("amp"))
 	{
 	  O3DMatViewer amp_viewer(fg, "o3d3xx Amplitude Viewer",
 				  O3DMatViewer::AMP);
-	  amp_viewer.Join();
+	  amp_viewer.Run();
 	}
       else if (opts.vm.count("conf"))
 	{
 	  O3DMatViewer conf_viewer(fg, "o3d3xx Confidence Viewer",
 				  O3DMatViewer::CONF);
-	  conf_viewer.Join();
+	  conf_viewer.Run();
 	}
       else
 	{
 	  O3DCloudViewer cloud_viewer(fg, "o3d3xx Cloud Viewer");
-	  cloud_viewer.Join();
+	  cloud_viewer.Run();
 	}
     }
   catch (const std::exception& e)
