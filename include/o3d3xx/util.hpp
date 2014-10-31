@@ -23,6 +23,7 @@
 #include <string>
 #include <unordered_map>
 #include <endian.h>
+#include <opencv2/core/core.hpp>
 #include <xmlrpc-c/base.hpp>
 
 namespace o3d3xx
@@ -99,6 +100,21 @@ namespace o3d3xx
 
     return value.v;
   }
+
+  /**
+   * Creates a histogram with `histsize' bins from the intensity input image
+   * `img'. The returned image is suitable for display in a highgui window. The
+   * function is named `hist1' to denote it assumes a single channel image. The
+   * function will assert that this is true, so, don't pass it something
+   * else. The method here is extenable to multichannel images but does not
+   * have a place in this library.
+   *
+   * @param[in] img The input intensity image to analyze
+   * @param[in] histsize The number of bins in the histogram
+   *
+   * @return A histogram image.
+   */
+  cv::Mat hist1(const cv::Mat& img, int histsize = 256);
 
 } // end: namespace o3d3xx
 

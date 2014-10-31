@@ -53,18 +53,17 @@ public:
 	    continue;
 	  }
 
-	// color points based on x-distance
 	pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI>
-	  x_dist(buff->Cloud(), "x");
+	  color_handler(buff->Cloud(), "intensity");
 
 	if (is_first)
 	  {
 	    is_first = false;
-	    viewer->addPointCloud(buff->Cloud(), x_dist, "o3d3xx cloud");
+	    viewer->addPointCloud(buff->Cloud(), color_handler, "o3d3xx cloud");
 	  }
 	else
 	  {
-	    viewer->updatePointCloud(buff->Cloud(), x_dist, "o3d3xx cloud");
+	    viewer->updatePointCloud(buff->Cloud(), color_handler, "o3d3xx cloud");
 	  }
       }
   }
@@ -94,7 +93,14 @@ public:
 
   void Run()
   {
+    cv::Mat scaled_img;
     cv::Mat colormap_img;
+    cv::Mat equalized_colormap_img;
+    cv::Mat hist_img;
+    cv::Mat equalized_hist_img;
+    cv::Mat disp_img;
+    cv::Rect roi;
+
     cv::namedWindow(this->description_, cv::WINDOW_NORMAL);
     double min, max;
 
@@ -110,19 +116,68 @@ public:
 	      case O3DMatViewer::DEPTH:
 		cv::minMaxIdx(buff->DepthImage(), &min, &max);
 		cv::convertScaleAbs(buff->DepthImage(),
-				    colormap_img, 255.0 / max);
+				    colormap_img, 255 / max);
 		cv::applyColorMap(colormap_img, colormap_img,
 				  cv::COLORMAP_JET);
 		cv::imshow(this->description_, colormap_img);
 		break;
 
 	      case O3DMatViewer::AMP:
+		//------------------------------
+		// non-equalized
+		//------------------------------
 		cv::minMaxIdx(buff->AmplitudeImage(), &min, &max);
 		cv::convertScaleAbs(buff->AmplitudeImage(),
-				    colormap_img, 255.0 / max);
-		cv::applyColorMap(colormap_img, colormap_img,
-				  cv::COLORMAP_JET);
-		cv::imshow(this->description_, colormap_img);
+				    scaled_img, 255 / max);
+		cv::applyColorMap(scaled_img, colormap_img,
+				  cv::COLORMAP_BONE);
+
+		hist_img = o3d3xx::hist1(buff->AmplitudeImage());
+		cv::minMaxIdx(hist_img, &min, &max);
+		cv::convertScaleAbs(hist_img, hist_img, 255 / max);
+
+		//------------------------------
+		// equalized
+		//------------------------------
+		//cv::equalizeHist(scaled_img, scaled_img);
+
+		buff->EqualizedAmplitudeImage(scaled_img);
+		equalized_hist_img = o3d3xx::hist1(scaled_img);
+		cv::applyColorMap(scaled_img, equalized_colormap_img,
+				  cv::COLORMAP_BONE);
+
+		//------------------------------
+		// stitch and display
+		//------------------------------
+		disp_img.create(colormap_img.rows*2,
+				colormap_img.cols*2,
+				colormap_img.type());
+
+		roi = cv::Rect(0, 0,
+			       colormap_img.cols,
+			       colormap_img.rows);
+		colormap_img.copyTo(disp_img(roi));
+
+		roi = cv::Rect(colormap_img.cols,
+			       0,
+			       hist_img.cols,
+			       hist_img.rows);
+		hist_img.copyTo(disp_img(roi));
+
+		roi = cv::Rect(0,
+			       colormap_img.rows,
+			       equalized_colormap_img.cols,
+			       equalized_colormap_img.rows);
+		equalized_colormap_img.copyTo(disp_img(roi));
+
+		roi = cv::Rect(colormap_img.cols,
+			       colormap_img.rows,
+			       equalized_hist_img.cols,
+			       equalized_hist_img.rows);
+		equalized_hist_img.copyTo(disp_img(roi));
+
+		cv::imshow(this->description_, disp_img);
+
 		break;
 
 	      case O3DMatViewer::CONF:
@@ -137,7 +192,7 @@ public:
 		cv::convertScaleAbs(colormap_img,
 		 		    colormap_img, 255);
 		cv::applyColorMap(colormap_img, colormap_img,
-				  cv::COLORMAP_JET);
+				  cv::COLORMAP_SUMMER);
 		cv::imshow(this->description_, colormap_img);
 		break;
 	      }
@@ -153,6 +208,8 @@ public:
   }
 
 private:
+
+
   o3d3xx::FrameGrabber::Ptr fg_;
   std::string description_;
   int image_type_;

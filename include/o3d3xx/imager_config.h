@@ -14,20 +14,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+#ifndef __O3D3XX_IMAGER_CONFIG_H__
+#define __O3D3XX_IMAGER_CONFIG_H__
 
-#ifndef __O3D3XX_H__
-#define __O3D3XX_H__
 
-#include "o3d3xx/version.h"
-#include "o3d3xx/err.h"
-#include "o3d3xx/util.hpp"
-#include "o3d3xx/cmdline_opts.h"
-#include "o3d3xx/device_config.h"
-#include "o3d3xx/net_config.h"
-#include "o3d3xx/app_config.h"
-#include "o3d3xx/imager_config.h"
-#include "o3d3xx/image.h"
-#include "o3d3xx/camera.hpp"
-#include "o3d3xx/frame_grabber.h"
-
-#endif // __O3D3XX_H__
+#endif // __O3D3XX_IMAGER_CONFIG_H__

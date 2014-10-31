@@ -22,7 +22,7 @@
 #include <string>
 #include <vector>
 #include <glog/logging.h>
-#include <opencv2/core/core.hpp>
+#include <opencv2/opencv.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 #include "o3d3xx/util.hpp"
@@ -322,4 +322,64 @@ o3d3xx::ImageBuffer::Organize()
   this->cloud_->sensor_orientation_.z() = 0.0f;
 
   this->_SetDirty(false);
+}
+
+void
+o3d3xx::ImageBuffer::EqualizedAmplitudeImage(cv::Mat& img)
+{
+  double min, max;
+
+  cv::Mat amp_img = this->AmplitudeImage();
+  cv::Ptr<cv::CLAHE> clahe = cv::createCLAHE();
+
+  cv::minMaxIdx(amp_img, &min, &max);
+  cv::convertScaleAbs(amp_img, img, 255 / max);
+
+  // may want these parameters to be configurable.
+  clahe->setClipLimit(4);
+  clahe->setTilesGridSize(cv::Size(8, 8));
+  clahe->apply(img, img);
+}
+
+void
+o3d3xx::ImageBuffer::EqualizedPointCloud(
+  cv::Mat& img, pcl::PointCloud<o3d3xx::ColoredPointT>::Ptr dst_cloud)
+{
+  pcl::PointCloud<o3d3xx::PointT>::Ptr src_cloud = this->Cloud();
+  dst_cloud->points.resize(src_cloud->size());
+
+  this->EqualizedAmplitudeImage(img);
+  cv::applyColorMap(img, img, cv::COLORMAP_BONE);
+
+  std::vector<cv::Mat> channels;
+  cv::split(img, channels);
+
+  float bad_point = std::numeric_limits<float>::quiet_NaN();
+
+  int pt_idx = 0;
+  for (int i = 0; i < img.rows; i++)
+    {
+      for (int j = 0; j < img.cols; j++)
+	{
+	  o3d3xx::PointT& src_pt = src_cloud->points[pt_idx];
+	  o3d3xx::ColoredPointT& dst_pt = dst_cloud->points[pt_idx];
+
+	  if (src_pt.x == bad_point)
+	    {
+	      dst_pt.x = dst_pt.y = dst_pt.z = bad_point;
+	      dst_pt.r = dst_pt.g = dst_pt.b = 0;
+	    }
+	  else
+	    {
+	      dst_pt.x = src_pt.x;
+	      dst_pt.y = src_pt.y;
+	      dst_pt.z = src_pt.z;
+	      dst_pt.r = channels[0].at<std::uint8_t>(i, j);
+	      dst_pt.g = channels[1].at<std::uint8_t>(i, j);
+	      dst_pt.b = channels[2].at<std::uint8_t>(i, j);
+	    }
+
+	  pt_idx++;
+	}
+    }
 }

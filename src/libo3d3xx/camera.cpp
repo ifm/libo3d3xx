@@ -16,6 +16,7 @@
 
 #include "o3d3xx/camera.hpp"
 #include <map>
+#include <memory>
 #include <mutex>
 #include <cstdint>
 #include <map>
@@ -41,7 +42,7 @@ const std::string o3d3xx::XMLRPC_EDIT = "edit/";
 const std::string o3d3xx::XMLRPC_DEVICE = "device/";
 const std::string o3d3xx::XMLRPC_NET = "network/";
 const std::string o3d3xx::XMLRPC_APP = "application/";
-const std::string o3d3xx::XMLRPC_IMAGER = "imager_001";
+const std::string o3d3xx::XMLRPC_IMAGER = "imager_001/";
 
 o3d3xx::Camera::Camera(const std::string& ip,
 		       const std::uint32_t xmlrpc_port,
@@ -195,20 +196,11 @@ o3d3xx::Camera::Reboot(const boot_mode& mode)
 std::string
 o3d3xx::Camera::RequestSession()
 {
-  try
-    {
-      xmlrpc_c::value_string val_str(
-        this->_XCallMain("requestSession", this->GetPassword().c_str()));
+  xmlrpc_c::value_string val_str(
+    this->_XCallMain("requestSession", this->GetPassword().c_str()));
 
-      this->SetSessionID(static_cast<std::string>(val_str));
-      this->Heartbeat(o3d3xx::MAX_HEARTBEAT);
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "RequestSession(): "
-		 << ex.what();
-    }
-
+  this->SetSessionID(static_cast<std::string>(val_str));
+  this->Heartbeat(o3d3xx::MAX_HEARTBEAT);
   return this->GetSessionID();
 }
 
@@ -240,108 +232,39 @@ o3d3xx::Camera::CancelSession()
 int
 o3d3xx::Camera::Heartbeat(int hb)
 {
-  int retval = -1;
-
-  try
-    {
-      xmlrpc_c::value_int v_int(this->_XCallSession("heartbeat", hb));
-      retval = v_int.cvalue();
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "Failed to set heartbeat value: "
-		 << ex.what();
-    }
-
-  return retval;
+  xmlrpc_c::value_int v_int(this->_XCallSession("heartbeat", hb));
+  return v_int.cvalue();
 }
 
-bool
+void
 o3d3xx::Camera::SetOperatingMode(const o3d3xx::Camera::operating_mode& mode)
 {
-  bool retval = true;
-
-  try
-    {
-      this->_XCallSession("setOperatingMode", static_cast<int>(mode));
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "Failed to set operating mode: "
-		 << ex.what();
-
-      retval = false;
-    }
-
-  return retval;
+  this->_XCallSession("setOperatingMode", static_cast<int>(mode));
 }
 
 o3d3xx::DeviceConfig::Ptr
 o3d3xx::Camera::GetDeviceConfig()
 {
-  return o3d3xx::DeviceConfig::Ptr(
-	   new o3d3xx::DeviceConfig(this->GetAllParameters()));
+  return std::make_shared<o3d3xx::DeviceConfig>(this->GetAllParameters());
 }
 
-bool
+void
 o3d3xx::Camera::ActivatePassword()
 {
-  bool retval = true;
-
-  try
-    {
-      this->_XCallDevice("activatePassword",
-			 this->GetPassword().c_str());
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "ActivatePassword(): "
-		 << ex.what();
-
-      retval = false;
-    }
-
-  return retval;
+  this->_XCallDevice("activatePassword",
+		     this->GetPassword().c_str());
 }
 
-bool
+void
 o3d3xx::Camera::DisablePassword()
 {
-  bool retval = true;
-
-  try
-    {
-      this->_XCallDevice("disablePassword");
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "DisablePassword(): "
-		 << ex.what();
-
-      retval = false;
-    }
-
-  return retval;
+  this->_XCallDevice("disablePassword");
 }
 
-bool
+void
 o3d3xx::Camera::SaveDevice()
 {
-  bool retval = true;
-
-  try
-    {
-      this->_XCallDevice("save");
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "SaveDevice(): "
-		 << ex.what();
-
-      retval = false;
-    }
-
-  return retval;
+  this->_XCallDevice("save");
 }
 
 void
@@ -440,8 +363,7 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
 o3d3xx::NetConfig::Ptr
 o3d3xx::Camera::GetNetConfig()
 {
-  return o3d3xx::NetConfig::Ptr(
-	   new o3d3xx::NetConfig(this->GetNetParameters()));
+  return std::make_shared<o3d3xx::NetConfig>(this->GetNetParameters());
 }
 
 std::unordered_map<std::string, std::string>
@@ -485,10 +407,9 @@ o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config)
     }
 }
 
-bool
+void
 o3d3xx::Camera::SaveNet()
 {
-  bool retval = true;
   o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
 
   // When calling `saveAndActivateConfig' on the network object of the xmlrpc
@@ -502,13 +423,163 @@ o3d3xx::Camera::SaveNet()
     {
       if (ex.code() != O3D3XX_XMLRPC_TIMEOUT)
 	{
-	  LOG(ERROR) << "SaveNet(): " << ex.what();
-	  retval = false;
+	  throw ex;
 	}
     }
 
   this->SetSessionID("");
   this->SetIP(net->StaticIPv4Address());
+}
+
+int
+o3d3xx::Camera::CopyApplication(int idx)
+{
+  try
+    {
+      xmlrpc_c::value_int v_int(this->_XCallEdit("copyApplication", idx));
+      return v_int.cvalue();
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "Failed to copy application with index="
+		 << idx << ": "
+		 << ex.what();
+
+      throw ex;
+    }
+}
+
+void
+o3d3xx::Camera::DeleteApplication(int idx)
+{
+  this->_XCallEdit("deleteApplication", idx);
+}
+
+int
+o3d3xx::Camera::CreateApplication()
+{
+  try
+    {
+      xmlrpc_c::value_int v_int(this->_XCallEdit("createApplication"));
+      return v_int.cvalue();
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "Failed to create application: "
+		 << ex.what();
+
+      throw ex;
+    }
+}
+
+void
+o3d3xx::Camera::ChangeAppNameAndDescription(int idx,
+					    const std::string& name,
+					    const std::string& descr)
+{
+  this->_XCallEdit("changeNameAndDescription",
+		   idx, name.c_str(), descr.c_str());
+}
+
+void
+o3d3xx::Camera::EditApplication(int idx)
+{
+  this->_XCallEdit("editApplication", idx);
+}
+
+void
+o3d3xx::Camera::StopEditingApplication()
+{
+  this->_XCallEdit("stopEditingApplication");
+}
+
+void
+o3d3xx::Camera::FactoryReset()
+{
+  this->_XCallEdit("factoryReset");
+}
+
+std::unordered_map<std::string, std::string>
+o3d3xx::Camera::GetAppParameters()
+{
+  return o3d3xx::value_struct_to_map(this->_XCallApp("getAllParameters"));
+}
+
+void
+o3d3xx::Camera::SaveApp()
+{
+  this->_XCallApp("save");
+}
+
+o3d3xx::AppConfig::Ptr
+o3d3xx::Camera::GetAppConfig()
+{
+  return o3d3xx::AppConfig::Ptr(
+	   new o3d3xx::AppConfig(this->GetAppParameters()));
+}
+
+void
+o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
+{
+  o3d3xx::AppConfig::Ptr app = this->GetAppConfig();
+
+  if (app->Name() != config->Name())
+    {
+      this->_XCallApp("setParameter",
+		      "Name", config->Name().c_str());
+    }
+
+  if (app->Description() != config->Description())
+    {
+      this->_XCallApp("setParameter",
+		      "Description", config->Description().c_str());
+    }
+
+  if (app->TriggerMode() != config->TriggerMode())
+    {
+      this->_XCallApp("setParameter",
+		      "TriggerMode", config->TriggerMode());
+    }
+
+  if (app->PcicTcpResultOutputEnabled() !=
+      config->PcicTcpResultOutputEnabled())
+    {
+      this->_XCallApp("setParameter",
+		      "PcicTcpResultOutputEnabled",
+		      config->PcicTcpResultOutputEnabled());
+    }
+
+  if (app->PcicTcpResultSchema() != config->PcicTcpResultSchema())
+    {
+      this->_XCallApp("setParameter",
+		      "PcicTcpResultSchema",
+		      config->PcicTcpResultSchema());
+    }
+}
+
+std::vector<std::string>
+o3d3xx::Camera::GetAvailableImagerTypes()
+{
+  xmlrpc_c::value_array a = this->_XCallImager("availableTypes");
+
+  std::vector<xmlrpc_c::value> v = a.vectorValueValue();
+  std::vector<std::string> retval;
+  for (auto& vs : v)
+    {
+      retval.push_back(static_cast<std::string>(xmlrpc_c::value_string(vs)));
+    }
 
   return retval;
+}
+
+void
+o3d3xx::Camera::ChangeImagerType(const std::string& type)
+{
+  this->_XCallImager("changeType", type.c_str());
+}
+
+std::unordered_map<std::string, std::string>
+o3d3xx::Camera::GetImagerParameters()
+{
+  return o3d3xx::value_struct_to_map(this->_XCallImager("getAllParameters"));
 }

@@ -29,6 +29,7 @@
 #include <xmlrpc-c/client.hpp>
 #include "o3d3xx/device_config.h"
 #include "o3d3xx/net_config.h"
+#include "o3d3xx/app_config.h"
 #include "o3d3xx/err.h"
 
 namespace o3d3xx
@@ -95,6 +96,12 @@ namespace o3d3xx
     { STATIC = 0, DHCP = 1, LINK_LOCAL = 2, DISCOVERY = 3 };
 
     /**
+     * Image acquisition trigger modes
+     */
+    enum class trigger_mode : int
+    { FREE_RUN = 1, PROCESS_INTERFACE = 2 };
+
+    /**
      * Initializes the camera interface utilizing library defaults for
      * password, ip address, and xmlrpc port unless explictly passed in.
      *
@@ -136,30 +143,345 @@ namespace o3d3xx
     std::string GetSessionID();
     void SetSessionID(const std::string& id);
 
-    // XMLRPC Calls to the hardware -- these go over the network
+    //---------------------------------------------
+    // XMLRPC: Main object
+    //---------------------------------------------
+
+    /**
+     * Accessor for device global parameters
+     *
+     * @param[in] param Name of device parameter
+     * @return Value of the requested parameter
+     *
+     * @throw o3d3xx::error_t upon error
+     */
     std::string GetParameter(const std::string& param);
+
+    /**
+     * Accessor for all device global parameters. This allows for reading
+     * device parameters outside of an edit session.
+     *
+     * @return A hash table mapping parameter key to parameter value.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
     std::unordered_map<std::string, std::string> GetAllParameters();
+
+    /**
+     * Returns version information for all software components
+     *
+     * @return A hash table mapping software component to version string.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
     std::unordered_map<std::string, std::string> GetSWVersion();
+
+    /**
+     * Return hardware information for all components
+     *
+     * @return A hash table mapping hardware component to version string.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
     std::unordered_map<std::string, std::string> GetHWInfo();
+
+    /**
+     * Delivers basic information of all applications stored on the device.
+     * A session is not required to call this function.
+     *
+     * @return A `vector' of `app_entry_t' structures describing basic
+     * information about the applications stored on the camera.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
     std::vector<app_entry_t> GetApplicationList();
-    void Reboot(const boot_mode& mode);
+
+    /**
+     * Reboot the sensor
+     *
+     * @param[in] mode The system mode that should be booted into after
+     * shutdown.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void Reboot(const boot_mode& mode = o3d3xx::Camera::boot_mode::PRODUCTIVE);
+
+    /**
+     * Request a session-object for access to the configuration and changing of
+     * device operating parameters.
+     *
+     * @return The session id as constructed by the sensor
+     *
+     * @throw o3d3xx::error_t upon error (e.g., unable to create a session)
+     */
     std::string RequestSession();
+
+    /**
+     * Explicitly stops the current session with the sensor. If an application
+     * is still in edit-mode, it implicitly has the same as effect as calling
+     * `stopEditingApplication'
+     *
+     * NOTE: This function returns a boolean indicating the success/failure of
+     * cancelling the session. The reason we return a bool and explicitly
+     * supress exceptions is because camera dtors will cancel any open
+     * sessions with the camera and we do not want the dtor to throw.
+     *
+     * @return true if the session was cancelled properly, false if an
+     * exception was caught while trying to cancel the session.
+     */
     bool CancelSession();
+
+    /**
+     * Heartbeat messages are used to keep a session with the sensor
+     * alive. This function sends a heartbeat message to the sensor and sets when
+     * the next heartbeat message is required.
+     *
+     * @param[in] hb The time (seconds) of when the next heartbeat message will
+     * be required.
+     *
+     * @return The current timeout-interval in seconds for heartbeat messages.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
     int Heartbeat(int hb);
-    bool SetOperatingMode(const operating_mode& mode);
 
+    /**
+     * Changes the operating mode of the device. This is essentially a way to
+     * toggle between editing parameters on the device and streaming data from
+     * the device.
+     *
+     * @param[in] mode The mode to set the camera into.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void SetOperatingMode(const operating_mode& mode);
+
+    //---------------------------------------------
+    // XMLRPC: EditMode object
+    //---------------------------------------------
+
+    /**
+     * Copies the application currently stored at `idx' to a new application
+     * whose index is the return value of this function.
+     *
+     * @param[in] idx The application index to copy
+     * @return The index of the new application.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    int CopyApplication(int idx);
+
+    /**
+     * Deletes the application currently stored at `idx'.
+     *
+     * @param[in] idx The application index to delete
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void DeleteApplication(int idx);
+
+    /**
+     * Creates a new (empty) application on the camera.
+     *
+     * @return The integer index of the new application
+     *
+     * @throw o3d3xx::error_t
+     */
+    int CreateApplication();
+
+    /**
+     * Changes the name and description of the application stored at index
+     * `idx'.
+     *
+     * @param[in] idx The index of the application to edit
+     * @param[in] name The new name for the application
+     * @param[in] descr The new description for the application
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void ChangeAppNameAndDescription(int idx,
+				     const std::string& name,
+				     const std::string& descr);
+
+    /**
+     * Puts the specified application into edit-status. This will attach an
+     * application-object to the RPC interface. The name of the object will be
+     * application independent. This does not change the active application.
+     *
+     * @param[in] idx The index of the application to set into edit-mode.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void EditApplication(int idx);
+
+    /**
+     * Detaches the application-object from RPC and discards all unsaved
+     * changes on the current application being edited.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void StopEditingApplication();
+
+    /**
+     * Sets all configuration back to factory defaults. I.e., all applications
+     * that are persistently stored on the camera will be deleted.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void FactoryReset();
+
+    //---------------------------------------------
+    // XMLRPC: ApplicationConfig object
+    //---------------------------------------------
+
+    /**
+     * Returns a mapping of key/value pairs for the application object
+     * currently attached to the XMLRPC server -- this is not necessary the
+     * "active application" but rather the application specified by index to
+     * `EditApplication(index)'.
+     */
+    std::unordered_map<std::string, std::string> GetAppParameters();
+
+    /**
+     * Saves the application that is currently attached to the XMLRPC server.
+     */
+    void SaveApp();
+
+    /**
+     * Returns an `AppConfig' instance for the application currently attached
+     * to the XMLRPC server.
+     */
+    o3d3xx::AppConfig::Ptr GetAppConfig();
+
+    /**
+     * Sets parameters on the XMLRPC-attached application based on the passed
+     * in `AppConfig' pointer.
+     */
+    void SetAppConfig(const o3d3xx::AppConfig* config);
+
+    //---------------------------------------------
+    // XMLRPC: ImagerConfig object
+    //---------------------------------------------
+
+    /**
+     * Lists the available imager types that can be attached to an
+     * application.
+     */
+    std::vector<std::string> GetAvailableImagerTypes();
+
+    /**
+     * Changes the imager type for the currently attached application.
+     *
+     * @param[in] type The identifying string for the new imager type. This
+     * string should be one of the strings returned from
+     * `GetAvailableImagerTypes()'.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void ChangeImagerType(const std::string& type);
+
+    /**
+     * Returns a mapping of key/value pairs for the imager of the application
+     * object currently attached to the XMLRPC server -- this is not
+     * necessarily the "active application" but rather the application
+     * specified by index to `EditApplication(index)'.
+     */
+    std::unordered_map<std::string, std::string> GetImagerParameters();
+
+    //---------------------------------------------
     // XMLRPC: DeviceConfig object
-    o3d3xx::DeviceConfig::Ptr GetDeviceConfig();
-    bool ActivatePassword();
-    bool DisablePassword();
-    void SetDeviceConfig(const o3d3xx::DeviceConfig* config);
-    bool SaveDevice();
+    //---------------------------------------------
 
+    /**
+     * Returns a device config object populated with the current device
+     * configuration. This device config object can be used to mutate
+     * parameters on the device by calling its mutator functions and then
+     * `SetDeviceConfig' and `SaveDevice'. on the camera.
+     *
+     * @return A shared pointer to a DeviceConfig.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    o3d3xx::DeviceConfig::Ptr GetDeviceConfig();
+
+    /**
+     * Set a password and activate it for the next edit session. This takes the
+     * password that is currently set on the camera instnace either by setting
+     * it in the ctor or via `SetPassword'.
+     *
+     * @throw o3d3xx::error_t
+     */
+    void ActivatePassword();
+
+    /**
+     * Disables password protection on the sensor. In order to make this
+     * persistent, `SaveDevice' needs to be called.
+     *
+     * @throw o3d3xx::error_t
+     */
+    void DisablePassword();
+
+    /**
+     * For each mutable parameter in the device configuration, this funtion
+     * will set that parameter on the camera. In order to make the changes
+     * persistent `SaveDevice' needs to be called.
+     *
+     * @param[in] config a Pointer to an `o3d3xx::DeviceConfig'
+     *
+     * @throw o3d3xx::error_t
+     */
+    void SetDeviceConfig(const o3d3xx::DeviceConfig* config);
+
+    /**
+     * Persists any device changes set on the camera during the current edit
+     * session.
+     *
+     * @throw o3d3xx::error_t
+     */
+    void SaveDevice();
+
+    //---------------------------------------------
     // XMLRPC: NetConfig object
+    //---------------------------------------------
+
+    /**
+     * Return a key/value hash table of the sensor's current network settings.
+     *
+     * @return Hash table of network settings
+     *
+     * @throw o3d3xx::error_t
+     */
     std::unordered_map<std::string, std::string> GetNetParameters();
+
+    /**
+     * Returns the current network configuration parameters of the sensor
+     * wrapped in an `o3d3xx::NetConfig' object. This object can be mutated and
+     * then passed to `SetNetConfig' to enabled changes to the hardware.
+     *
+     * @return A new `NetConfig' object populated with the sensor's current
+     * network configuration information.
+     *
+     * @throw o3d3xx::error_t
+     */
     o3d3xx::NetConfig::Ptr GetNetConfig();
+
+    /**
+     * Mutates the sensor's network settings based on the passed in `NetConfig'
+     * instance.
+     *
+     * @param[in] config A `NetConfig' pointer whose settings should be
+     * sent to the hardware.
+     *
+     * @throw o3d3xx::error_t
+     */
     void SetNetConfig(const o3d3xx::NetConfig* config);
-    bool SaveNet();
+
+    /**
+     * Persists any network settings that were set on the hardware.
+     *
+     * @throw o3d3xx::error_t
+     */
+    void SaveNet();
 
   protected:
     /** Password for mutating camera parameters */
@@ -265,24 +587,41 @@ namespace o3d3xx
 	      switch (ifm_error)
 		{
 		case 101000:
-		  throw(o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_PARAM));
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_PARAM);
 		  break;
 
 		case 100000:
 		  LOG(WARNING) << "Invalid session object? "
 			       << this->GetSessionID();
-		  throw(o3d3xx::error_t(O3D3XX_XMLRPC_OBJ_NOT_FOUND));
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_OBJ_NOT_FOUND);
 		  break;
+
+		case 101004:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE);
+		  break;
+
+		case 101013:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_APPLICATION);
+		  break;
+
+		case 101014:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE);
+
+		case 101015:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS);
+
+		case 101016:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_NOT_EDITING_APPLICATION);
 
 		default:
 		  LOG(ERROR) << "IFM error code: " << ifm_error;
-		  throw(o3d3xx::error_t(O3D3XX_XMLRPC_FINFAIL));
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_FINFAIL);
 		  break;
 		}
 	    }
 	  else
 	    {
-	      throw(o3d3xx::error_t(O3D3XX_XMLRPC_FAILURE));
+	      throw o3d3xx::error_t(O3D3XX_XMLRPC_FAILURE);
 	    }
 	}
     }
@@ -305,6 +644,20 @@ namespace o3d3xx
 	this->GetXMLRPCURLPrefix() +
 	o3d3xx::XMLRPC_MAIN +
 	o3d3xx::XMLRPC_SESSION;
+
+      return this->_XCall(url, sensor_method_name, args...);
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "EditMode" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallEdit(const std::string& sensor_method_name, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -336,6 +689,37 @@ namespace o3d3xx
 	o3d3xx::XMLRPC_EDIT +
 	o3d3xx::XMLRPC_DEVICE +
 	o3d3xx::XMLRPC_NET;
+
+      return this->_XCall(url, sensor_method_name, args...);
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "Application" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallApp(const std::string& sensor_method_name, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT +
+	o3d3xx::XMLRPC_APP;
+
+      return this->_XCall(url, sensor_method_name, args...);
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "ImagerConfig" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallImager(const std::string& sensor_method_name, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT +
+	o3d3xx::XMLRPC_APP +
+	o3d3xx::XMLRPC_IMAGER;
 
       return this->_XCall(url, sensor_method_name, args...);
     }

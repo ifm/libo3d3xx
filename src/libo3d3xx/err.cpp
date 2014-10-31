@@ -25,6 +25,11 @@ const int O3D3XX_XMLRPC_TIMEOUT = -9003;
 const int O3D3XX_XMLRPC_FINFAIL = -9004;
 const int O3D3XX_XMLRPC_OBJ_NOT_FOUND = -9005;
 const int O3D3XX_XMLRPC_INVALID_PARAM = -9006;
+const int O3D3XX_XMLRPC_INVALID_APPLICATION = -9007;
+const int O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE = -9008;
+const int O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS = -9009;
+const int O3D3XX_XMLRPC_NOT_EDITING_APPLICATION = -9010;
+const int O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE = -9011;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -45,6 +50,16 @@ const char *o3d3xx::strerror(int errnum)
     return "XMLRPC server object not found";
   case O3D3XX_XMLRPC_INVALID_PARAM:
     return "XMLRPC requested parameter is invalid";
+  case O3D3XX_XMLRPC_INVALID_APPLICATION:
+    return "XMLRPC invalid application index";
+  case O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE:
+    return "XMLRPC application is in edit-mode";
+  case O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS:
+    return "XMLRPC maximum number of applications exceeded";
+  case O3D3XX_XMLRPC_NOT_EDITING_APPLICATION:
+    return "XMLRPC no application in edit status";
+  case O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE:
+    return "XMLRPC device already has an edit session active";
   default:
     return ::strerror(errnum);
   }

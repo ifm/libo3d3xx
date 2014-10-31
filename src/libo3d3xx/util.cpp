@@ -15,11 +15,16 @@
  */
 
 #include "o3d3xx/util.hpp"
+#include <cassert>
+#include <cmath>
 #include <mutex>
 #include <string>
 #include <unordered_map>
+#include <vector>
 #include <boost/algorithm/string.hpp>
 #include <glog/logging.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <xmlrpc-c/base.hpp>
 #include "o3d3xx/version.h"
 
@@ -58,6 +63,53 @@ o3d3xx::value_struct_to_map(const xmlrpc_c::value_struct& vs)
     }
 
   return retval;
+}
+
+//--------------------------------------------------
+// Image processing utilities
+//--------------------------------------------------
+
+cv::Mat
+o3d3xx::hist1(const cv::Mat& img, int histsize)
+{
+  assert(img.channels() == 1);
+
+  float range[] = {0, (float) histsize};
+  const float* histrange = {range};
+
+  cv::Mat hist;
+  cv::calcHist(&img,        // source image
+	       1,           // number of source images
+	       0,           // channels used to compute hist
+	       cv::Mat(),   // mask
+	       hist,        // output histogram
+	       1,           // dimensionality of histogram
+	       &histsize,   // histogram size in each dimension
+	       &histrange,  // bin boundaries in each dimension
+	       true,        // uniform flag
+	       true);       // accumulate flag
+
+  int hist_width = img.cols;
+  int hist_height = img.rows;
+  int bin_width = static_cast<int>(std::round((double) hist_width / histsize));
+
+  cv::Mat histimg = cv::Mat::zeros(hist_height, hist_width, CV_16UC3);
+  cv::normalize(hist, hist, 0, histimg.rows, cv::NORM_MINMAX, -1, cv::Mat());
+
+  for (int i = 1; i < histsize; i++)
+    {
+      cv::line(histimg,
+	       cv::Point(bin_width*(i-1),
+			 hist_height - static_cast<int>(std::round(hist.at<float>(i-1)))),
+	       cv::Point(bin_width*(i),
+			 hist_height - static_cast<int>(std::round(hist.at<float>(i)))),
+	       CV_RGB(65535, 65535, 65535),  // line color
+	       1,                   // line thickness
+	       8,                   // line type (8 = connected)
+	       0);                  // fractional bits in the point coords
+    }
+
+  return histimg;
 }
 
 //--------------------------------------------------

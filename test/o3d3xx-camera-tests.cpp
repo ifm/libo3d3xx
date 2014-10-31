@@ -1,4 +1,5 @@
 #include "o3d3xx.h"
+#include <memory>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -137,8 +138,8 @@ TEST(Camera_Tests, Heartbeat)
   o3d3xx::Camera::Ptr cam =
     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
 
-  // Heartbeat w/o a session should yield a negative return
-  EXPECT_LT(cam->Heartbeat(10), 0);
+  // Heartbeat w/o a session should throw
+  EXPECT_THROW(cam->Heartbeat(10), o3d3xx::error_t);
 
   int timeout = std::stoi(cam->GetParameter("SessionTimeout"));
   cam->RequestSession();
@@ -155,7 +156,7 @@ TEST(Camera_Tests, SetOperatingMode)
     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
 
   cam->RequestSession();
-  EXPECT_TRUE(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
+  EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
   EXPECT_EQ(static_cast<int>(o3d3xx::Camera::operating_mode::EDIT),
 	    std::stoi(cam->GetParameter("OperatingMode")));
 
@@ -293,9 +294,7 @@ TEST(Camera_Tests, DeviceConfig_JSON)
 
 TEST(Camera_Tests, GetNetParameters)
 {
-  o3d3xx::Camera::Ptr cam =
-    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
-
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
 
@@ -312,9 +311,7 @@ TEST(Camera_Tests, GetNetParameters)
 
 TEST(Camera_Tests, NetConfig)
 {
-  o3d3xx::Camera::Ptr cam =
-    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
-
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
 
@@ -323,7 +320,7 @@ TEST(Camera_Tests, NetConfig)
   net->SetStaticIPv4Address("192.168.0.70");
 
   EXPECT_NO_THROW(cam->SetNetConfig(net.get()));
-  EXPECT_TRUE(cam->SaveNet());
+  EXPECT_NO_THROW(cam->SaveNet());
 
   usleep(2000);
   cam->RequestSession();
@@ -333,7 +330,7 @@ TEST(Camera_Tests, NetConfig)
 
   net2->SetStaticIPv4Address(orig_ip);
   EXPECT_NO_THROW(cam->SetNetConfig(net2.get()));
-  EXPECT_TRUE(cam->SaveNet());
+  EXPECT_NO_THROW(cam->SaveNet());
 
   usleep(2000);
   cam->RequestSession();
@@ -344,8 +341,7 @@ TEST(Camera_Tests, NetConfig)
 
 TEST(Camera_Tests, NetConfig_JSON)
 {
-  o3d3xx::Camera::Ptr cam =
-    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
 
