@@ -35,7 +35,7 @@ configure_file(
   )
 
 # bring in PCL
-find_package(PCL 1.7 REQUIRED COMPONENTS common visualization)
+find_package(PCL 1.7 REQUIRED COMPONENTS common visualization filters)
 find_package(OpenCV REQUIRED)
 
 # Manage compiler/linker flags
