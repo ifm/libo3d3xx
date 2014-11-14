@@ -27,6 +27,8 @@
 #include "o3d3xx/util.hpp"
 #include "o3d3xx/device_config.h"
 #include "o3d3xx/net_config.h"
+#include "o3d3xx/app_config.h"
+#include "o3d3xx/imager_config.h"
 
 const std::string o3d3xx::DEFAULT_PASSWORD = "";
 const std::string o3d3xx::DEFAULT_IP = "192.168.0.69";
@@ -582,4 +584,125 @@ std::unordered_map<std::string, std::string>
 o3d3xx::Camera::GetImagerParameters()
 {
   return o3d3xx::value_struct_to_map(this->_XCallImager("getAllParameters"));
+}
+
+o3d3xx::ImagerConfig::Ptr
+o3d3xx::Camera::GetImagerConfig()
+{
+  return std::make_shared<o3d3xx::ImagerConfig>(this->GetImagerParameters());
+}
+
+void
+o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
+{
+  o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
+
+  DLOG(INFO) << "Setting Imager Config for Type="
+	     << im->Type();
+
+  try
+    {
+      if (im->ExposureTime() != config->ExposureTime())
+	{
+	  DLOG(INFO) << "Setting ExposureTime="
+		     << config->ExposureTime();
+
+	  this->_XCallImager("setParameter",
+			     "ExposureTime", config->ExposureTime());
+	}
+
+      if (im->Channel() != config->Channel())
+	{
+	  DLOG(INFO) << "Setting Channel="
+		     << config->Channel();
+
+	  this->_XCallImager("setParameter",
+			     "Channel", config->Channel());
+	}
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      if (ex.code() != O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE)
+	{
+	  throw;
+	}
+
+      DLOG(WARNING) << "In `SetImagerConfig': " << ex.what()
+		    << " ... " << "high dynamic range imager?";
+    }
+
+  if (im->FrameRate() != config->FrameRate())
+    {
+      DLOG(INFO) << "Setting FrameRate="
+		 << config->FrameRate();
+
+      this->_XCallImager("setParameter",
+			 "FrameRate", config->FrameRate());
+    }
+
+  if (im->ClippingLeft() != config->ClippingLeft())
+    {
+      DLOG(INFO) << "Setting ClippingLeft="
+		 << config->ClippingLeft();
+
+      this->_XCallImager("setParameter",
+			 "ClippingLeft", config->ClippingLeft());
+    }
+
+  if (im->ClippingTop() != config->ClippingTop())
+    {
+      DLOG(INFO) << "Setting ClippingTop="
+		 << config->ClippingTop();
+
+      this->_XCallImager("setParameter",
+			 "ClippingTop", config->ClippingTop());
+    }
+
+  if (im->ClippingRight() != config->ClippingRight())
+    {
+      DLOG(INFO) << "Setting ClippingRight="
+		 << config->ClippingRight();
+
+      this->_XCallImager("setParameter",
+			 "ClippingRight", config->ClippingRight());
+    }
+
+  if (im->ClippingBottom() != config->ClippingBottom())
+    {
+      DLOG(INFO) << "Setting ClippingBottom="
+		 << config->ClippingBottom();
+
+      this->_XCallImager("setParameter",
+			 "ClippingBottom", config->ClippingBottom());
+    }
+
+  if (im->ReduceMotionArtifacts() != config->ReduceMotionArtifacts())
+    {
+      DLOG(INFO) << "Setting ReduceMotionArtifacts="
+		 << config->ReduceMotionArtifacts();
+
+      this->_XCallImager("setParameter",
+			 "ReduceMotionArtifacts",
+			 config->ReduceMotionArtifacts());
+    }
+
+  if (im->SpatialFilterType() != config->SpatialFilterType())
+    {
+      DLOG(INFO) << "Setting SpatialFilterType="
+		 << config->SpatialFilterType();
+
+      this->_XCallImager("setParameter",
+			 "SpatialFilterType",
+			 config->SpatialFilterType());
+    }
+
+  if (im->AverageFilterNumPictures() != config->AverageFilterNumPictures())
+    {
+      DLOG(INFO) << "Setting AverageFilterNumPictures="
+		 << config->AverageFilterNumPictures();
+
+      this->_XCallImager("setParameter",
+			 "AverageFilterNumPictures",
+			 config->AverageFilterNumPictures());
+    }
 }

@@ -30,6 +30,7 @@
 #include "o3d3xx/device_config.h"
 #include "o3d3xx/net_config.h"
 #include "o3d3xx/app_config.h"
+#include "o3d3xx/imager_config.h"
 #include "o3d3xx/err.h"
 
 namespace o3d3xx
@@ -100,6 +101,12 @@ namespace o3d3xx
      */
     enum class trigger_mode : int
     { FREE_RUN = 1, PROCESS_INTERFACE = 2 };
+
+    /**
+     * Spatial filter types
+     */
+    enum class spatial_filter : int
+    { OFF = 0, MEDIAN_FILTER = 1 };
 
     /**
      * Initializes the camera interface utilizing library defaults for
@@ -388,6 +395,18 @@ namespace o3d3xx
      */
     std::unordered_map<std::string, std::string> GetImagerParameters();
 
+    /**
+     * Returns an `ImagerConfig' instance for the imager configuration of the
+     * application currently attached to the XMLRPC server.
+     */
+    o3d3xx::ImagerConfig::Ptr GetImagerConfig();
+
+    /**
+     * Sets parameters on the XMLRPC-attached application's imager based on the
+     * passed in `ImagerConfig' pointer.
+     */
+    void SetImagerConfig(const o3d3xx::ImagerConfig* config);
+
     //---------------------------------------------
     // XMLRPC: DeviceConfig object
     //---------------------------------------------
@@ -596,6 +615,14 @@ namespace o3d3xx
 		  throw o3d3xx::error_t(O3D3XX_XMLRPC_OBJ_NOT_FOUND);
 		  break;
 
+		case 100001:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_METHOD_NOT_FOUND);
+		  break;
+
+		case 101002:
+		  throw o3d3xx::error_t(O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
+		  break;
+
 		case 101004:
 		  throw o3d3xx::error_t(O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE);
 		  break;
@@ -606,12 +633,15 @@ namespace o3d3xx
 
 		case 101014:
 		  throw o3d3xx::error_t(O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE);
+		  break;
 
 		case 101015:
 		  throw o3d3xx::error_t(O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS);
+		  break;
 
 		case 101016:
 		  throw o3d3xx::error_t(O3D3XX_XMLRPC_NOT_EDITING_APPLICATION);
+		  break;
 
 		default:
 		  LOG(ERROR) << "IFM error code: " << ifm_error;

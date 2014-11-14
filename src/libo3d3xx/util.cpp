@@ -43,7 +43,9 @@ o3d3xx::Logging::Init()
 void
 o3d3xx::Logging::_Init()
 {
+  FLAGS_logbuflevel = -1;
   google::InitGoogleLogging(O3D3XX_LIBRARY_NAME);
+  google::SetStderrLogging(google::FATAL);
 }
 
 //--------------------------------------------------

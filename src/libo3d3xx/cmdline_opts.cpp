@@ -16,9 +16,12 @@
 
 #include "o3d3xx/cmdline_opts.h"
 #include <cstdint>
+#include <functional>
+#include <iostream>
 #include <string>
 #include <boost/program_options.hpp>
 #include "o3d3xx/camera.hpp"
+#include "o3d3xx/version.h"
 
 namespace po = boost::program_options;
 
@@ -45,11 +48,48 @@ o3d3xx::CmdLineOpts::CmdLineOpts(const std::string& description)
   this->visible.add(general).add(connection_opts);
 }
 
-void
-o3d3xx::CmdLineOpts::Parse(int argc, const char **argv)
+int
+o3d3xx::CmdLineOpts::Parse(int argc, const char **argv,
+			   std::string *ip,
+			   std::uint32_t *xmlrpc_port,
+			   std::function<void()> fn,
+			   std::ostream& out)
 {
+  int retval = 1;
+  int major, minor, patch;
+
   po::store(po::command_line_parser(argc, argv).
 	    options(this->visible).run(), this->vm);
 
   po::notify(this->vm);
+
+  if (this->vm.count("help"))
+    {
+      out << this->visible << std::endl;
+      retval = 0;
+    }
+  else if (this->vm.count("version"))
+    {
+      o3d3xx::version(&major, &minor, &patch);
+      out << "Version=" << major << "."
+	  << minor << "." << patch << std::endl;
+      retval = 0;
+    }
+
+  if (retval != 0)
+    {
+      if (ip != nullptr)
+	{
+	  ip->assign(this->vm["ip"].as<std::string>());
+	}
+
+      if (xmlrpc_port != nullptr)
+	{
+	  *xmlrpc_port = this->vm["xmlrpc-port"].as<std::uint32_t>();
+	}
+
+      fn();
+    }
+
+  return retval;
 }

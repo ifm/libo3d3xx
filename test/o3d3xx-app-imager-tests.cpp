@@ -9,7 +9,7 @@
 // camera into a testable state.
 //
 
-class DISABLED_AppImagerTest : public ::testing::Test
+class AppImagerTest : public ::testing::Test
 {
 protected:
   virtual void SetUp()
@@ -40,7 +40,7 @@ protected:
   o3d3xx::Camera::Ptr cam_;
 };
 
-TEST_F(DISABLED_AppImagerTest, CopyDeleteApplication)
+TEST_F(AppImagerTest, CopyDeleteApplication)
 {
   std::vector<o3d3xx::Camera::app_entry_t> apps = cam_->GetApplicationList();
   int napps = apps.size();
@@ -66,7 +66,7 @@ TEST_F(DISABLED_AppImagerTest, CopyDeleteApplication)
     }
 }
 
-TEST_F(DISABLED_AppImagerTest, CreateApplication)
+TEST_F(AppImagerTest, CreateApplication)
 {
   std::vector<o3d3xx::Camera::app_entry_t> apps = cam_->GetApplicationList();
   int napps = apps.size();
@@ -81,7 +81,7 @@ TEST_F(DISABLED_AppImagerTest, CreateApplication)
   ASSERT_EQ(napps, apps.size());
 }
 
-TEST_F(DISABLED_AppImagerTest, ChangeAppNameAndDescription)
+TEST_F(AppImagerTest, ChangeAppNameAndDescription)
 {
   int new_idx = cam_->CreateApplication();
   std::string name("Foo");
@@ -101,7 +101,7 @@ TEST_F(DISABLED_AppImagerTest, ChangeAppNameAndDescription)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, EditApplication)
+TEST_F(AppImagerTest, EditApplication)
 {
   int new_idx = cam_->CreateApplication();
   ASSERT_NO_THROW(cam_->EditApplication(new_idx));
@@ -110,7 +110,7 @@ TEST_F(DISABLED_AppImagerTest, EditApplication)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, GetAppParameters)
+TEST_F(AppImagerTest, GetAppParameters)
 {
   int new_idx = cam_->CopyApplication(1);
   cam_->EditApplication(new_idx);
@@ -128,7 +128,7 @@ TEST_F(DISABLED_AppImagerTest, GetAppParameters)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, AppConfig)
+TEST_F(AppImagerTest, AppConfig)
 {
   int new_idx = cam_->CopyApplication(1);
   cam_->EditApplication(new_idx);
@@ -153,7 +153,7 @@ TEST_F(DISABLED_AppImagerTest, AppConfig)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, AppConfig_JSON)
+TEST_F(AppImagerTest, AppConfig_JSON)
 {
   int new_idx = cam_->CopyApplication(1);
   cam_->EditApplication(new_idx);
@@ -175,7 +175,7 @@ TEST_F(DISABLED_AppImagerTest, AppConfig_JSON)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, GetAvailableImagerTypes)
+TEST_F(AppImagerTest, GetAvailableImagerTypes)
 {
   int new_idx = cam_->CopyApplication(1);
   cam_->EditApplication(new_idx);
@@ -188,7 +188,7 @@ TEST_F(DISABLED_AppImagerTest, GetAvailableImagerTypes)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, ChangeImagerType)
+TEST_F(AppImagerTest, ChangeImagerType)
 {
   int new_idx = cam_->CopyApplication(1);
   cam_->EditApplication(new_idx);
@@ -210,7 +210,7 @@ TEST_F(DISABLED_AppImagerTest, ChangeImagerType)
   cam_->DeleteApplication(new_idx);
 }
 
-TEST_F(DISABLED_AppImagerTest, GetImagerParameters)
+TEST_F(AppImagerTest, GetImagerParameters)
 {
   int new_idx = cam_->CopyApplication(1);
   cam_->EditApplication(new_idx);
@@ -246,6 +246,105 @@ TEST_F(DISABLED_AppImagerTest, GetImagerParameters)
 	  ASSERT_NO_THROW(params.at("ExposureTime"));
 	}
     }
+
+  cam_->StopEditingApplication();
+  cam_->DeleteApplication(new_idx);
+}
+
+TEST_F(AppImagerTest, ImagerConfig)
+{
+  int new_idx = cam_->CopyApplication(1);
+  cam_->EditApplication(new_idx);
+
+  std::vector<std::string> imager_types =
+    cam_->GetAvailableImagerTypes();
+
+  for (auto& type : imager_types)
+    {
+      ASSERT_NO_THROW(cam_->ChangeImagerType(type));
+
+      o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
+      ASSERT_EQ(im->Type(), type);
+
+      // mutate the config
+      ASSERT_NO_THROW(im->SetFrameRate(10));
+      ASSERT_NO_THROW(im->SetReduceMotionArtifacts(true));
+      ASSERT_NO_THROW(im->SetSpatialFilterType(1));
+
+      // XXX: For prototype camera, max here is 1
+      //ASSERT_NO_THROW(im->SetAverageFilterNumPictures(2));
+
+      // send new config parameters to the sensor
+      ASSERT_NO_THROW(cam_->SetImagerConfig(im.get()));
+
+      // check if they are correct when queried again
+      o3d3xx::ImagerConfig::Ptr im2 = cam_->GetImagerConfig();
+      ASSERT_EQ(im2->Type(), type);
+      ASSERT_EQ(im2->FrameRate() , 10);
+      ASSERT_EQ(im2->ReduceMotionArtifacts(), true);
+      ASSERT_EQ(im2->SpatialFilterType(), 1);
+      //ASSERT_EQ(im2->AverageFilterNumPictures(), 2);
+    }
+
+  cam_->StopEditingApplication();
+  cam_->DeleteApplication(new_idx);
+}
+
+TEST_F(AppImagerTest, ImagerConfigValueOutOfRange)
+{
+  int new_idx = cam_->CopyApplication(1);
+  cam_->EditApplication(new_idx);
+
+  std::vector<std::string> imager_types =
+    cam_->GetAvailableImagerTypes();
+
+  for (auto& type : imager_types)
+    {
+      ASSERT_NO_THROW(cam_->ChangeImagerType(type));
+
+      o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
+      ASSERT_EQ(im->Type(), type);
+
+      // mutate the config
+      ASSERT_NO_THROW(im->SetAverageFilterNumPictures(2));
+
+      // send new config parameters to the sensor
+      bool ex_thrown = false;
+      try
+	{
+	  cam_->SetImagerConfig(im.get());
+	}
+      catch (const o3d3xx::error_t& ex)
+	{
+	  ASSERT_EQ(ex.code(), O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
+	  ex_thrown = true;
+	}
+
+      ASSERT_TRUE(ex_thrown);
+    }
+
+  cam_->StopEditingApplication();
+  cam_->DeleteApplication(new_idx);
+}
+
+TEST_F(AppImagerTest, ImagerConfig_JSON)
+{
+  int new_idx = cam_->CopyApplication(1);
+  cam_->EditApplication(new_idx);
+
+  o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
+  std::string json = im->ToJSON();
+
+  o3d3xx::ImagerConfig::Ptr im2 = o3d3xx::ImagerConfig::FromJSON(json);
+
+  ASSERT_EQ(im->FrameRate(), im2->FrameRate());
+  ASSERT_EQ(im->ClippingLeft(), im2->ClippingLeft());
+  ASSERT_EQ(im->ClippingTop(), im2->ClippingTop());
+  ASSERT_EQ(im->ClippingRight(), im2->ClippingRight());
+  ASSERT_EQ(im->ClippingBottom(), im2->ClippingBottom());
+  ASSERT_EQ(im->ReduceMotionArtifacts(), im2->ReduceMotionArtifacts());
+  ASSERT_EQ(im->SpatialFilterType(), im2->SpatialFilterType());
+  ASSERT_EQ(im->AverageFilterNumPictures(), im2->AverageFilterNumPictures());
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);

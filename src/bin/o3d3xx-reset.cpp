@@ -1,14 +1,17 @@
+#include <cstdint>
+#include <exception>
 #include <iostream>
 #include <memory>
-#include <glog/logging.h>
+#include <string>
+#include <boost/program_options.hpp>
 #include "o3d3xx.h"
+
+namespace po = boost::program_options;
 
 int main(int argc, const char** argv)
 {
-  int major, minor, patch;
-
-  std::string camera_ip(o3d3xx::DEFAULT_IP);
-  uint32_t xmlrpc_port = o3d3xx::DEFAULT_XMLRPC_PORT;
+  std::string camera_ip;
+  uint32_t xmlrpc_port;
 
   try
     {
@@ -16,35 +19,31 @@ int main(int argc, const char** argv)
       // Handle command-line arguments
       //---------------------------------------------------
       o3d3xx::CmdLineOpts opts("o3d3xx Factory Reset");
-      opts.Parse(argc, argv);
 
-      if (opts.vm.count("help"))
+      po::options_description reset_opts("Reset Information");
+      reset_opts.add_options()
+	("reboot", "Reboot the sensor after reset");
+      opts.visible.add(reset_opts);
+
+      if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port))
 	{
-	  std::cout << opts.visible
-		    << std::endl;
 	  return 0;
 	}
 
-      if (opts.vm.count("version"))
-	{
-	  o3d3xx::version(&major, &minor, &patch);
-	  std::cout << "Version=" << major << "."
-		    << minor << "." << patch << std::endl;
-	  return 0;
-	}
-
-      FLAGS_logbuflevel = -1;
-      o3d3xx::Logging::Init();
-      google::SetStderrLogging(google::FATAL);
-
-      camera_ip.assign(opts.vm["ip"].as<std::string>());
-      xmlrpc_port = opts.vm["xmlrpc-port"].as<std::uint32_t>();
-
+      //---------------------------------------------------
+      // Reset the camera
+      //---------------------------------------------------
       o3d3xx::Camera::Ptr cam =
 	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port);
+
       cam->RequestSession();
       cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
       cam->FactoryReset();
+
+      if (opts.vm.count("reboot"))
+	{
+	  cam->Reboot();
+	}
     }
   catch (const std::exception& e)
     {

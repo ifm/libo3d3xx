@@ -30,6 +30,9 @@ const int O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE = -9008;
 const int O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS = -9009;
 const int O3D3XX_XMLRPC_NOT_EDITING_APPLICATION = -9010;
 const int O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE = -9011;
+const int O3D3XX_XMLRPC_METHOD_NOT_FOUND = -9012;
+const int O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE = -9013;
+const int O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE = -9014;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -60,6 +63,12 @@ const char *o3d3xx::strerror(int errnum)
     return "XMLRPC no application in edit status";
   case O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE:
     return "XMLRPC device already has an edit session active";
+  case O3D3XX_XMLRPC_METHOD_NOT_FOUND:
+    return "XMLRPC method not found";
+  case O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE:
+    return "Exposure time not accessible for imager type";
+  case O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE:
+    return "XMLRPC value out of range";
   default:
     return ::strerror(errnum);
   }
