@@ -1,6 +1,6 @@
 project(O3D3XX)
-cmake_minimum_required(VERSION 2.8)
-set(GIT_PROJECT_NAME "o3d3xx-toolbox")
+cmake_minimum_required(VERSION 2.8.11)
+set(GIT_PROJECT_NAME "libo3d3xx")
 set(CMAKE_INSTALL_PREFIX /opt/${GIT_PROJECT_NAME})
 set(GTEST_CMAKE_DIR "/usr/src/gtest")
 
@@ -23,7 +23,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11") # turn on C++11 for g++
 
 # This is the single place to manage API version numbers
 set(O3D3XX_VERSION_MAJOR 0)
-set(O3D3XX_VERSION_MINOR 0)
+set(O3D3XX_VERSION_MINOR 1)
 set(O3D3XX_VERSION_PATCH 0)
 file(COPY ${O3D3XX_SOURCE_DIR}/include
   DESTINATION ${O3D3XX_BINARY_DIR}
@@ -34,8 +34,8 @@ configure_file(
   @ONLY
   )
 
-# bring in PCL
-find_package(PCL 1.7 REQUIRED COMPONENTS common visualization filters)
+# bring dependent projects
+find_package(PCL 1.7.1 REQUIRED COMPONENTS common visualization filters)
 find_package(OpenCV REQUIRED)
 
 # Manage compiler/linker flags

@@ -19,9 +19,16 @@
 #include <memory>
 #include <mutex>
 #include <cstdint>
+#include <ctime>
 #include <map>
+#include <set>
 #include <string>
+#include <sstream>
 #include <unordered_map>
+#include <utility>
+#include <boost/property_tree/exceptions.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <glog/logging.h>
 #include <xmlrpc-c/client.hpp>
 #include "o3d3xx/util.hpp"
@@ -29,6 +36,7 @@
 #include "o3d3xx/net_config.h"
 #include "o3d3xx/app_config.h"
 #include "o3d3xx/imager_config.h"
+#include "o3d3xx/version.h"
 
 const std::string o3d3xx::DEFAULT_PASSWORD = "";
 const std::string o3d3xx::DEFAULT_IP = "192.168.0.69";
@@ -704,5 +712,283 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
       this->_XCallImager("setParameter",
 			 "AverageFilterNumPictures",
 			 config->AverageFilterNumPictures());
+    }
+}
+
+std::string
+o3d3xx::Camera::ToJSON()
+{
+  bool do_cancel = false;
+  std::string root = "o3d3xx";
+  boost::property_tree::ptree pt;
+  pt.put(root + "." + std::string(O3D3XX_LIBRARY_NAME),
+	 O3D3XX_VERSION);
+
+  std::ostringstream time_buf;
+  std::time_t t = std::time(nullptr);
+  time_buf << std::asctime(std::localtime(&t));
+  std::string time_str = time_buf.str();
+  time_str.erase(std::remove(time_str.begin(), time_str.end(), '\n'),
+		 time_str.end());
+  pt.put(root + ".Date", time_str);
+
+  try
+    {
+      if (this->GetSessionID() == "")
+	{
+	  this->RequestSession();
+	  do_cancel = true;
+	}
+
+      // serialize the hardware info
+      boost::property_tree::ptree hw_pt;
+      std::unordered_map<std::string, std::string> hwinfo =
+	this->GetHWInfo();
+
+      for (auto& kv : hwinfo)
+	{
+	  hw_pt.put(kv.first, kv.second);
+	}
+
+      pt.put_child(root + ".HWInfo", hw_pt);
+
+      // serialize the software info
+      boost::property_tree::ptree sw_pt;
+      std::unordered_map<std::string, std::string> swinfo =
+	this->GetSWVersion();
+
+      for (auto& kv : swinfo)
+	{
+	  sw_pt.put(kv.first, kv.second);
+	}
+
+      pt.put_child(root + ".SWVersion", sw_pt);
+
+      // enter "edit mode" to get access to device, net, app, and imager
+      // configurations
+      this->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+      // device configuration
+      o3d3xx::DeviceConfig::Ptr dev = this->GetDeviceConfig();
+      std::istringstream dev_in(dev->ToJSON());
+      boost::property_tree::ptree dev_pt;
+      boost::property_tree::read_json(dev_in, dev_pt);
+      pt.put_child(root + ".Device", dev_pt);
+
+      // network configuration
+      o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
+      std::istringstream net_in(net->ToJSON());
+      boost::property_tree::ptree net_pt;
+      boost::property_tree::read_json(net_in, net_pt);
+      pt.put_child(root + ".Net", net_pt);
+
+      // applications
+      boost::property_tree::ptree apps_pt;
+
+      for (auto& app : this->GetApplicationList())
+	{
+	  this->EditApplication(app.index);
+	  o3d3xx::AppConfig::Ptr app_ptr = this->GetAppConfig();
+	  std::istringstream app_in(app_ptr->ToJSON());
+	  boost::property_tree::ptree app_pt;
+	  boost::property_tree::read_json(app_in, app_pt);
+	  app_pt.put("Index", app.index);
+	  app_pt.put("Id", app.id);
+
+	  o3d3xx::ImagerConfig::Ptr im_ptr = this->GetImagerConfig();
+	  std::istringstream im_in(im_ptr->ToJSON());
+	  boost::property_tree::ptree im_pt;
+	  boost::property_tree::read_json(im_in, im_pt);
+
+	  app_pt.put_child("Imager", im_pt);
+	  apps_pt.push_back(std::make_pair("", app_pt));
+
+	  this->StopEditingApplication();
+	}
+
+      pt.put_child(root + ".Apps", apps_pt);
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << ex.what();
+      this->CancelSession();
+      throw ex;
+    }
+
+
+  if (do_cancel)
+    {
+      this->CancelSession();
+    }
+
+  std::ostringstream buf;
+  boost::property_tree::write_json(buf, pt);
+  return buf.str();
+}
+
+void
+o3d3xx::Camera::FromJSON(const std::string& json)
+{
+  bool do_cancel = false;
+
+  boost::property_tree::ptree pt;
+  std::istringstream is(json);
+  boost::property_tree::read_json(is, pt);
+
+  int desired_active_application = -1;
+
+  try
+    {
+      if (this->GetSessionID() == "")
+	{
+	  this->RequestSession();
+	  do_cancel = true;
+	}
+
+      this->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+      //
+      // device config
+      //
+      try
+	{
+	  boost::property_tree::ptree dev_pt = pt.get_child("o3d3xx.Device");
+	  std::ostringstream dev_buf;
+	  boost::property_tree::write_json(dev_buf, dev_pt);
+	  o3d3xx::DeviceConfig::Ptr dev =
+	    o3d3xx::DeviceConfig::FromJSON(dev_buf.str());
+	  this->SetDeviceConfig(dev.get());
+	  this->SaveDevice();
+
+	  try
+	    {
+	      desired_active_application =
+		dev_pt.get<int>("ActiveApplication");
+	    }
+	  catch (const std::exception& ex)
+	    {
+	      // no "ActiveApplication" specified
+	    }
+	}
+      catch (const boost::property_tree::ptree_bad_path& ex)
+	{
+	  LOG(WARNING) << "In `FromJSON(...)', skipping `Device' section";
+	  LOG(WARNING) << "ptree_bad_path: " << ex.what();
+	}
+
+      //
+      // app config
+      //
+      std::set<int> app_indices;
+      for (auto& app : this->GetApplicationList())
+	{
+	  app_indices.insert(app.index);
+	}
+
+      try
+	{
+	  boost::property_tree::ptree apps_pt = pt.get_child("o3d3xx.Apps");
+	  for (auto& kv : apps_pt)
+	    {
+	      boost::property_tree::ptree app_pt = kv.second;
+	      std::ostringstream app_buff;
+	      boost::property_tree::write_json(app_buff, app_pt);
+	      o3d3xx::AppConfig::Ptr app =
+		o3d3xx::AppConfig::FromJSON(app_buff.str());
+
+	      int index = -1;
+
+	      try
+		{
+		  index = app_pt.get<int>("Index");
+		}
+	      catch (const std::exception& ex)
+		{
+		  // no index, so, we will have to create the application
+		}
+
+	      if (app_indices.find(index) == app_indices.end())
+		{
+		  index = this->CreateApplication();
+		}
+
+	      this->EditApplication(index);
+	      this->SetAppConfig(app.get());
+	      this->SaveApp();
+
+	      try
+		{
+		  boost::property_tree::ptree im_pt =
+		    app_pt.get_child("Imager");
+		  std::ostringstream im_buff;
+		  boost::property_tree::write_json(im_buff, im_pt);
+		  o3d3xx::ImagerConfig::Ptr im =
+		    o3d3xx::ImagerConfig::FromJSON(im_buff.str());
+
+		  o3d3xx::ImagerConfig::Ptr current_im =
+		    this->GetImagerConfig();
+
+		  if (current_im->Type() != im->Type())
+		    {
+		      this->ChangeImagerType(im->Type());
+		    }
+
+		  this->SetImagerConfig(im.get());
+		  this->SaveApp();
+		}
+	      catch (const boost::property_tree::ptree_bad_path& path_ex)
+		{
+		  LOG(WARNING) << "In `FromJSON(...)', "
+			       << "skipping `Imager' section for app";
+		  LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
+		}
+
+	      this->StopEditingApplication();
+	    }
+	}
+      catch (const boost::property_tree::ptree_bad_path& ex)
+	{
+	  LOG(WARNING) << "In `FromJSON(...)', skipping `Apps' section";
+	  LOG(WARNING) << "ptree_bad_path: " << ex.what();
+	}
+
+      // set the active application
+      if (desired_active_application > 0)
+	{
+	  o3d3xx::DeviceConfig::Ptr newdev = this->GetDeviceConfig();
+	  newdev->SetActiveApplication(desired_active_application);
+	  this->SetDeviceConfig(newdev.get());
+	  this->SaveDevice();
+	}
+
+      //
+      // net config
+      //
+      try
+	{
+	  boost::property_tree::ptree net_pt = pt.get_child("o3d3xx.Net");
+	  std::ostringstream net_buf;
+	  boost::property_tree::write_json(net_buf, net_pt);
+	  o3d3xx::NetConfig::Ptr net =
+	    o3d3xx::NetConfig::FromJSON(net_buf.str());
+	  this->SetNetConfig(net.get());
+	  this->SaveNet();
+	}
+      catch (const boost::property_tree::ptree_bad_path& ex)
+	{
+	  LOG(WARNING) << "In `FromJSON(...)', skipping `Net' section";
+	  LOG(WARNING) << "ptree_bad_path: " << ex.what();
+	}
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << ex.what();
+      this->CancelSession();
+      throw ex;
+    }
+
+  if (do_cancel)
+    {
+      this->CancelSession();
     }
 }

@@ -55,6 +55,7 @@ namespace o3d3xx
      * @param[out] ip Pointer to a string to fill with the `--ip' arg
      * @param[out] xmlrpc_port Pointer to a uint32_t to fill with the
      *             `--xmlrpc-port' arg
+     * @param[out] password Point to a string to fill with the password
      * @param[in] fn A function that should be run after parsing the common
      *               arguments but prior to returning. It should be noted that
      *               this function will only run if the return value of this
@@ -69,6 +70,7 @@ namespace o3d3xx
     int Parse(int argc, const char **argv,
 	      std::string *ip = nullptr,
 	      std::uint32_t *xmlrpc_port = nullptr,
+	      std::string *password = nullptr,
 	      std::function<void()> fn = [](){ o3d3xx::Logging::Init(); },
 	      std::ostream& out = std::cout);
 

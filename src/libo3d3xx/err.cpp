@@ -33,6 +33,7 @@ const int O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE = -9011;
 const int O3D3XX_XMLRPC_METHOD_NOT_FOUND = -9012;
 const int O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE = -9013;
 const int O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE = -9014;
+const int O3D3XX_IO_ERROR = -9015;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -69,6 +70,8 @@ const char *o3d3xx::strerror(int errnum)
     return "Exposure time not accessible for imager type";
   case O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE:
     return "XMLRPC value out of range";
+  case O3D3XX_IO_ERROR:
+    return "I/O error";
   default:
     return ::strerror(errnum);
   }

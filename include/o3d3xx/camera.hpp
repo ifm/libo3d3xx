@@ -150,6 +150,60 @@ namespace o3d3xx
     std::string GetSessionID();
     void SetSessionID(const std::string& id);
 
+    /**
+     * Stringifies the state of the camera to JSON
+     *
+     * This function can produce a string that can effectively function as a
+     * backup of the camera configuration. The generated JSON shall be
+     * importable by the `FromJSON' method.
+     *
+     * NOTE: This method will automatically open an "edit session" with the
+     * camera if necessary so a call to `RequestSession()' is not necessary
+     * prior to calling this method.
+     *
+     * @return A JSON string representing the current state of the hardware.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    std::string ToJSON();
+
+    /**
+     * Configures the camera (the physical hardware, not just this software
+     * object) from the parameters outlined in the passed in `json' file.
+     *
+     * We assume the input `json' file conforms to the structure produced by
+     *`ToJSON'. However, not all keys in each substructure are required -- only
+     * those that are present will be processed.
+     *
+     * Here are the basic rules for how this function works:
+     *
+     * 1. The "Device" section is processed and saved on the camera.
+     * 2. The "Apps" section is processed. For each app:
+     *    2.a. If the "Index" key is present, a current app at that `index' is
+     *         looked up. If present, it is edited to reflect the data in the
+     *         JSON file. If an app at that `index' is not present, a new app
+     *         is created with the parameters from the JSON file. It is not
+     *         guaranteed that the new app will have the specified `index'.
+     *    2.b. If the "Index" key is not present, a new app is created with the
+     *         parameters as specified in the JSON file.
+     *    2.c. The active application is set by consulting the desired index
+     *         of the `ActiveApplication" from the "Device" section of the
+     *         JSON. If the specified `index' does not exist, the active
+     *         application is not set.
+     * 3. The "Net" section is processed. A reboot of the camera may be
+     *    necessary after changing the camera's network parameters.
+     *
+     * NOTE: This method will automatically open an "edit session" with the
+     * camera if necessary so a call to `RequestSession()' is not necessary
+     * prior to calling this method.
+     *
+     * @param[in] json A json string describing the desired camera
+     *                 configuration.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void FromJSON(const std::string& json);
+
     //---------------------------------------------
     // XMLRPC: Main object
     //---------------------------------------------

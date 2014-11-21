@@ -43,7 +43,11 @@ o3d3xx::CmdLineOpts::CmdLineOpts(const std::string& description)
 
     ("xmlrpc-port",
      po::value<std::uint32_t>()->default_value(o3d3xx::DEFAULT_XMLRPC_PORT),
-     "XMLRPC port of the camera");
+     "XMLRPC port of the camera")
+
+    ("password",
+     po::value<std::string>()->default_value(o3d3xx::DEFAULT_PASSWORD),
+     "Password for configuring the camera");
 
   this->visible.add(general).add(connection_opts);
 }
@@ -52,6 +56,7 @@ int
 o3d3xx::CmdLineOpts::Parse(int argc, const char **argv,
 			   std::string *ip,
 			   std::uint32_t *xmlrpc_port,
+			   std::string *password,
 			   std::function<void()> fn,
 			   std::ostream& out)
 {
@@ -71,7 +76,8 @@ o3d3xx::CmdLineOpts::Parse(int argc, const char **argv,
   else if (this->vm.count("version"))
     {
       o3d3xx::version(&major, &minor, &patch);
-      out << "Version=" << major << "."
+      out << O3D3XX_LIBRARY_NAME
+	  << ": version=" << major << "."
 	  << minor << "." << patch << std::endl;
       retval = 0;
     }
@@ -86,6 +92,11 @@ o3d3xx::CmdLineOpts::Parse(int argc, const char **argv,
       if (xmlrpc_port != nullptr)
 	{
 	  *xmlrpc_port = this->vm["xmlrpc-port"].as<std::uint32_t>();
+	}
+
+      if (password != nullptr)
+	{
+	  password->assign(this->vm["password"].as<std::string>());
 	}
 
       fn();

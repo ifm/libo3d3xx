@@ -21,6 +21,10 @@
 #include <string>
 #include "o3d3xx.h"
 
+//
+// Dumps the current camera configuration to JSON.
+//
+
 int main(int argc, const char** argv)
 {
   std::string camera_ip;
@@ -29,7 +33,7 @@ int main(int argc, const char** argv)
 
   try
     {
-      o3d3xx::CmdLineOpts opts("o3d3xx Application Listing");
+      o3d3xx::CmdLineOpts opts("o3d3xx Dump");
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
 	{
 	  return 0;
@@ -38,33 +42,12 @@ int main(int argc, const char** argv)
       o3d3xx::Camera::Ptr cam =
       	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
-      std::unordered_map<std::string, std::string> params =
-	cam->GetAllParameters();
-
-      int active_app = std::stoi(params["ActiveApplication"]);
-
-      std::vector<o3d3xx::Camera::app_entry_t> apps = cam->GetApplicationList();
-      for (auto& app : apps)
-	{
-	  if (app.index == active_app)
-	    {
-	      std::cout << "* ";
-	    }
-	  else
-	    {
-	      std::cout << "  ";
-	    }
-
-	  std::cout << "[" << app.index
-		    << "] id=" << app.id << ", name="
-		    << app.name << ", description=" << app.description
-		    << std::endl;
-	}
-
+      std::cout << cam->ToJSON() << std::endl;
     }
   catch (const std::exception& e)
     {
-      std::cerr << "Failed to list applications: " << e.what() << std::endl;
+      std::cerr << "Failed to dump camera configuration: "
+		<< std::endl << e.what() << std::endl;
       return 1;
     }
 

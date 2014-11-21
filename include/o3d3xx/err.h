@@ -36,6 +36,7 @@ extern const int O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE;
 extern const int O3D3XX_XMLRPC_METHOD_NOT_FOUND;
 extern const int O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE;
 extern const int O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE;
+extern const int O3D3XX_IO_ERROR;
 
 namespace o3d3xx
 {

@@ -28,7 +28,6 @@
 namespace o3d3xx
 {
   using PointT = pcl::PointXYZI;
-  using ColoredPointT = pcl::PointXYZRGB;
   extern const std::size_t IMG_TICKET_SZ; // bytes
 
   enum class pixel_format : std::uint8_t
@@ -121,18 +120,6 @@ namespace o3d3xx
      * Returns the shared pointer to the wrapped point cloud
      */
     pcl::PointCloud<o3d3xx::PointT>::Ptr Cloud();
-
-    /**
-     * Computes a histogram-equalized version of the Amplitude image in an
-     * attempt to improve its contrast.
-     *
-     * NOTE: This is not returning an image that is stored in the ImageBuffer
-     * instance but rather performs the computation every time it is called.
-     */
-    void EqualizedAmplitudeImage(cv::Mat& img);
-
-    void EqualizedPointCloud(
-      cv::Mat& img, pcl::PointCloud<o3d3xx::ColoredPointT>::Ptr dst_cloud);
 
     /**
      * Returns (a copy of) the underlying byte buffer read from the camera.

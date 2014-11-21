@@ -14,189 +14,175 @@
  * limitations under the License.
  */
 
-//-------------------------------------------------------------
-// Quick and dirty viewer application to visualize the various libo3d3xx images
-//-------------------------------------------------------------
-
 #include <cstdint>
 #include <iostream>
 #include <memory>
 #include <string>
-#include <boost/program_options.hpp>
-#include <glog/logging.h>
 #include <opencv2/opencv.hpp>
 #include <pcl/visualization/cloud_viewer.h>
 #include "o3d3xx.h"
 
-class O3DCloudViewer
+//-------------------------------------------------------------
+// Quick and dirty viewer application to visualize the various libo3d3xx images
+// -- leverages the built-in PCL and OpenCV visualization infrastructure.
+//-------------------------------------------------------------
+
+class O3DViewer
 {
 public:
-  O3DCloudViewer(o3d3xx::FrameGrabber::Ptr fg, const std::string& descr)
-    : fg_(fg),
-      description_(descr) {}
+  O3DViewer(o3d3xx::Camera::Ptr cam, const std::string& descr)
+    : cam_(cam),
+      description_(descr)
+  {}
 
   void Run()
   {
-    o3d3xx::ImageBuffer::Ptr buff(new o3d3xx::ImageBuffer());
+    int win_w = 800;
+    int win_h = 600;
 
-    std::shared_ptr<pcl::visualization::PCLVisualizer> viewer(
-      new pcl::visualization::PCLVisualizer(this->description_));
-    viewer->setBackgroundColor(0, 0, 0);
+    o3d3xx::FrameGrabber::Ptr fg =
+      std::make_shared<o3d3xx::FrameGrabber>(this->cam_);
+
+    o3d3xx::ImageBuffer::Ptr buff =
+      std::make_shared<o3d3xx::ImageBuffer>();
+
+    //
+    // Setup for point cloud
+    //
+    std::shared_ptr<pcl::visualization::PCLVisualizer> pclvis_ =
+      std::make_shared<pcl::visualization::PCLVisualizer>(this->description_);
+    pclvis_->setBackgroundColor(0, 0, 0);
+    pclvis_->setSize(win_w, win_h);
+    pclvis_->setCameraPosition(-3.0, // x-position
+			       0,    // y-position
+			       0,    // z-position
+			       0,    // x-axis "up" (0 = false)
+			       0,    // y-axis "up" (0 = false)
+			       1);   // z-axis "up" (1 = true)
+
+    // use "A" and "a" to toggle axes indicators
+    pclvis_->registerKeyboardCallback(
+     [&](const pcl::visualization::KeyboardEvent& ev)
+      {
+	if (ev.getKeySym() == "A" && ev.keyDown())
+	  {
+	    pclvis_->addCoordinateSystem();
+	  }
+	else if (ev.getKeySym() == "a" && ev.keyDown())
+	  {
+	    pclvis_->removeCoordinateSystem();
+	  }
+      });
+
+
+    //
+    // Setup for amplitude, depth, and confidence images
+    //
+
+    // used for all 2d images
+    cv::namedWindow(this->description_, cv::WINDOW_NORMAL|cv::WINDOW_OPENGL);
+    cv::resizeWindow(this->description_, win_w, win_h);
+    int retval;
+    double min, max;
+    cv::Rect roi;
+
+    // depth
+    cv::Mat display_img;
+    cv::Mat depth_colormap_img;
+
+    // confidence
+    cv::Mat conf_img;
+    cv::Mat conf_colormap_img;
+
+    // amplitude
+    cv::Mat amp_colormap_img;
+    cv::Mat hist_img;
 
     bool is_first = true;
-    while (! viewer->wasStopped())
+    while (! pclvis_->wasStopped())
       {
-	viewer->spinOnce(100);
-
-	if (! this->fg_->WaitForFrame(buff.get(), 1000))
+	pclvis_->spinOnce(100);
+	if (! fg->WaitForFrame(buff.get(), 500))
 	  {
 	    continue;
 	  }
 
-	pcl::visualization::PointCloudColorHandlerGenericField<pcl::PointXYZI>
+	//------------
+	// Point cloud
+	//------------
+	pcl::visualization::PointCloudColorHandlerGenericField<o3d3xx::PointT>
 	  color_handler(buff->Cloud(), "intensity");
 
 	if (is_first)
 	  {
 	    is_first = false;
-	    viewer->addPointCloud(buff->Cloud(), color_handler, "o3d3xx cloud");
+	    pclvis_->addPointCloud(buff->Cloud(), color_handler, "cloud");
 	  }
 	else
 	  {
-	    viewer->updatePointCloud(buff->Cloud(), color_handler, "o3d3xx cloud");
+	    pclvis_->updatePointCloud(buff->Cloud(), color_handler, "cloud");
 	  }
-      }
-  }
 
-private:
-  o3d3xx::FrameGrabber::Ptr fg_;
-  std::string description_;
+	//------------
+	// 2D images
+	//------------
 
-}; // end: O3DCloudViewer
+	// depth image
+	cv::minMaxIdx(buff->DepthImage(), &min, &max);
+	cv::convertScaleAbs(buff->DepthImage(),
+			    depth_colormap_img, 255 / max);
+	cv::applyColorMap(depth_colormap_img, depth_colormap_img,
+			  cv::COLORMAP_JET);
 
-//-----------------------------------------------------------
-// Render opencv images on a separate thread
-//-----------------------------------------------------------
-class O3DMatViewer
-{
-public:
-  static const int DEPTH = 1;
-  static const int AMP = 2;
-  static const int CONF = 3;
+	// confidence image: show as binary image of good pixel vs. bad pixel.
+	conf_img = buff->ConfidenceImage();
+	conf_colormap_img = cv::Mat::ones(conf_img.rows,
+					  conf_img.cols,
+					  CV_8UC1);
+	cv::bitwise_and(conf_img, conf_colormap_img,
+			conf_colormap_img);
+	cv::convertScaleAbs(conf_colormap_img,
+			    conf_colormap_img, 255);
+	cv::applyColorMap(conf_colormap_img, conf_colormap_img,
+			  cv::COLORMAP_SUMMER);
 
-  O3DMatViewer(o3d3xx::FrameGrabber::Ptr fg,
-	       const std::string& descr,
-	       int image_type)
-    : fg_(fg),
-      description_(descr),
-      image_type_(image_type) {}
+	// amplitude and amplitude histogram images
+	cv::minMaxIdx(buff->AmplitudeImage(), &min, &max);
+	cv::convertScaleAbs(buff->AmplitudeImage(),
+			    amp_colormap_img, 255 / max);
+	cv::applyColorMap(amp_colormap_img, amp_colormap_img,
+			  cv::COLORMAP_BONE);
 
-  void Run()
-  {
-    cv::Mat scaled_img;
-    cv::Mat colormap_img;
-    cv::Mat equalized_colormap_img;
-    cv::Mat hist_img;
-    cv::Mat equalized_hist_img;
-    cv::Mat disp_img;
-    cv::Rect roi;
+	hist_img = o3d3xx::hist1(buff->AmplitudeImage());
+	cv::minMaxIdx(hist_img, &min, &max);
+	cv::convertScaleAbs(hist_img, hist_img, 255 / max);
 
-    cv::namedWindow(this->description_, cv::WINDOW_NORMAL);
-    double min, max;
+	// stich 2d images together and display
+	display_img.create(depth_colormap_img.rows*2,
+			   depth_colormap_img.cols*2,
+			   depth_colormap_img.type());
 
-    int retval = 0;
-    while (true)
-      {
-	o3d3xx::ImageBuffer::Ptr buff(new o3d3xx::ImageBuffer());
+	roi = cv::Rect(0, 0,
+		       depth_colormap_img.cols,
+		       depth_colormap_img.rows);
+	depth_colormap_img.copyTo(display_img(roi));
 
-	if (this->fg_->WaitForFrame(buff.get(), 1000, true))
-	  {
-	    switch (this->image_type_)
-	      {
-	      case O3DMatViewer::DEPTH:
-		cv::minMaxIdx(buff->DepthImage(), &min, &max);
-		cv::convertScaleAbs(buff->DepthImage(),
-				    colormap_img, 255 / max);
-		cv::applyColorMap(colormap_img, colormap_img,
-				  cv::COLORMAP_JET);
-		cv::imshow(this->description_, colormap_img);
-		break;
+	roi = cv::Rect(depth_colormap_img.cols, 0,
+		       conf_colormap_img.cols,
+		       conf_colormap_img.rows);
+	conf_colormap_img.copyTo(display_img(roi));
 
-	      case O3DMatViewer::AMP:
-		//------------------------------
-		// non-equalized
-		//------------------------------
-		cv::minMaxIdx(buff->AmplitudeImage(), &min, &max);
-		cv::convertScaleAbs(buff->AmplitudeImage(),
-				    scaled_img, 255 / max);
-		cv::applyColorMap(scaled_img, colormap_img,
-				  cv::COLORMAP_BONE);
+	roi = cv::Rect(0, depth_colormap_img.rows,
+		       amp_colormap_img.cols,
+		       amp_colormap_img.rows);
+	amp_colormap_img.copyTo(display_img(roi));
 
-		hist_img = o3d3xx::hist1(buff->AmplitudeImage());
-		cv::minMaxIdx(hist_img, &min, &max);
-		cv::convertScaleAbs(hist_img, hist_img, 255 / max);
+	roi = cv::Rect(depth_colormap_img.cols,
+		       depth_colormap_img.rows,
+		       hist_img.cols, hist_img.rows);
+	hist_img.copyTo(display_img(roi));
 
-		//------------------------------
-		// equalized
-		//------------------------------
-		//cv::equalizeHist(scaled_img, scaled_img);
-
-		buff->EqualizedAmplitudeImage(scaled_img);
-		equalized_hist_img = o3d3xx::hist1(scaled_img);
-		cv::applyColorMap(scaled_img, equalized_colormap_img,
-				  cv::COLORMAP_BONE);
-
-		//------------------------------
-		// stitch and display
-		//------------------------------
-		disp_img.create(colormap_img.rows*2,
-				colormap_img.cols*2,
-				colormap_img.type());
-
-		roi = cv::Rect(0, 0,
-			       colormap_img.cols,
-			       colormap_img.rows);
-		colormap_img.copyTo(disp_img(roi));
-
-		roi = cv::Rect(colormap_img.cols,
-			       0,
-			       hist_img.cols,
-			       hist_img.rows);
-		hist_img.copyTo(disp_img(roi));
-
-		roi = cv::Rect(0,
-			       colormap_img.rows,
-			       equalized_colormap_img.cols,
-			       equalized_colormap_img.rows);
-		equalized_colormap_img.copyTo(disp_img(roi));
-
-		roi = cv::Rect(colormap_img.cols,
-			       colormap_img.rows,
-			       equalized_hist_img.cols,
-			       equalized_hist_img.rows);
-		equalized_hist_img.copyTo(disp_img(roi));
-
-		cv::imshow(this->description_, disp_img);
-
-		break;
-
-	      case O3DMatViewer::CONF:
-		// view confidence image as a binary
-		// image showing good pixel vs. bad pixel
-		cv::Mat conf_img = buff->ConfidenceImage();
-		colormap_img = cv::Mat::ones(conf_img.rows,
-					     conf_img.cols,
-					     CV_8UC1);
-		cv::bitwise_and(conf_img, colormap_img,
-				colormap_img);
-		cv::convertScaleAbs(colormap_img,
-		 		    colormap_img, 255);
-		cv::applyColorMap(colormap_img, colormap_img,
-				  cv::COLORMAP_SUMMER);
-		cv::imshow(this->description_, colormap_img);
-		break;
-	      }
-	  }
+	cv::imshow(this->description_, display_img);
 
 	// `ESC', `q', or `Q' to exit
 	retval = cv::waitKey(33);
@@ -204,100 +190,50 @@ public:
 	  {
 	    break;
 	  }
-      }
+      } // end: while (...)
   }
 
 private:
-
-
-  o3d3xx::FrameGrabber::Ptr fg_;
+  o3d3xx::Camera::Ptr cam_;
   std::string description_;
-  int image_type_;
 
-}; // end: O3DMatViewer
+}; // end: class O3DViewer
 
-namespace po = boost::program_options;
+//-------------------------------------------------------------
+// Go...
+//-------------------------------------------------------------
 
 int main(int argc, const char **argv)
 {
-  int major, minor, patch;
+  int retval = 0;
 
-  std::string camera_ip(o3d3xx::DEFAULT_IP);
-  uint32_t xmlrpc_port = o3d3xx::DEFAULT_XMLRPC_PORT;
+  std::string camera_ip;
+  uint32_t xmlrpc_port;
+  std::string password;
+  std::string descr("o3d3xx Viewer");
 
   try
     {
       //---------------------------------------------------
       // Handle command-line arguments
       //---------------------------------------------------
-      o3d3xx::CmdLineOpts opts("o3d3xx Viewer");
-
-      po::options_description viewer_opts("Viewer Information");
-      viewer_opts.add_options()
-	("cloud", "Visualize Point Cloud")
-	("depth", "Visualize Depth Image")
-	("amp", "Visualize Amplitude Image")
-	("conf", "Visualize Confidence Image");
-
-      opts.visible.add(viewer_opts);
-      opts.Parse(argc, argv);
-
-      if (opts.vm.count("help"))
+      o3d3xx::CmdLineOpts opts(descr);
+      if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
 	{
-	  std::cout << opts.visible
-		    << std::endl;
-	  return 0;
-	}
-
-      if (opts.vm.count("version"))
-	{
-	  o3d3xx::version(&major, &minor, &patch);
-	  std::cout << "Version=" << major << "."
-		    << minor << "." << patch << std::endl;
 	  return 0;
 	}
 
       //---------------------------------------------------
-      // Initialize o3d3xx logging facilities
+      // Initialize the camera
       //---------------------------------------------------
-      FLAGS_logbuflevel = -1;
-      o3d3xx::Logging::Init();
-      google::SetStderrLogging(google::FATAL);
+      o3d3xx::Camera::Ptr cam =
+	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       //---------------------------------------------------
-      // Initialize the camera and frame grabber
+      // Run the viewer
       //---------------------------------------------------
-      camera_ip.assign(opts.vm["ip"].as<std::string>());
-      xmlrpc_port = opts.vm["xmlrpc-port"].as<std::uint32_t>();
-      o3d3xx::Camera::Ptr cam(new o3d3xx::Camera(camera_ip, xmlrpc_port));
-      o3d3xx::FrameGrabber::Ptr fg(new o3d3xx::FrameGrabber(cam));
-
-      //---------------------------------------------------
-      // Run the requested image renderer
-      //---------------------------------------------------
-      if (opts.vm.count("depth"))
-	{
-	  O3DMatViewer depth_viewer(fg, "o3d3xx Depth Viewer",
-				    O3DMatViewer::DEPTH);
-	  depth_viewer.Run();
-	}
-      else if (opts.vm.count("amp"))
-	{
-	  O3DMatViewer amp_viewer(fg, "o3d3xx Amplitude Viewer",
-				  O3DMatViewer::AMP);
-	  amp_viewer.Run();
-	}
-      else if (opts.vm.count("conf"))
-	{
-	  O3DMatViewer conf_viewer(fg, "o3d3xx Confidence Viewer",
-				  O3DMatViewer::CONF);
-	  conf_viewer.Run();
-	}
-      else
-	{
-	  O3DCloudViewer cloud_viewer(fg, "o3d3xx Cloud Viewer");
-	  cloud_viewer.Run();
-	}
+      O3DViewer viewer(cam, descr);
+      viewer.Run();
     }
   catch (const std::exception& e)
     {
@@ -305,5 +241,5 @@ int main(int argc, const char **argv)
       return 1;
     }
 
-  return 0;
+  return retval;
 }

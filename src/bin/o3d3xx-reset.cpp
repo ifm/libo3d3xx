@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2014 Love Park Robotics, LLC
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distribted on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 #include <cstdint>
 #include <exception>
 #include <iostream>
@@ -12,6 +28,7 @@ int main(int argc, const char** argv)
 {
   std::string camera_ip;
   uint32_t xmlrpc_port;
+  std::string password;
 
   try
     {
@@ -25,7 +42,7 @@ int main(int argc, const char** argv)
 	("reboot", "Reboot the sensor after reset");
       opts.visible.add(reset_opts);
 
-      if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port))
+      if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
 	{
 	  return 0;
 	}
@@ -34,7 +51,7 @@ int main(int argc, const char** argv)
       // Reset the camera
       //---------------------------------------------------
       o3d3xx::Camera::Ptr cam =
-	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port);
+	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       cam->RequestSession();
       cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
