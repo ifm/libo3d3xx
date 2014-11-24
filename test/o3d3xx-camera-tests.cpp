@@ -358,11 +358,3 @@ TEST(Camera_Tests, NetConfig_JSON)
 
   // we do not want to compare the read-only properties
 }
-
-TEST(Camera_Tests, JSON)
-{
-  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
-  std::cout << cam->ToJSON() << std::endl;
-
-  EXPECT_EQ(1, 1);
-}

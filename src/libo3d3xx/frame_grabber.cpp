@@ -61,7 +61,9 @@ o3d3xx::FrameGrabber::Stop()
 
 bool
 o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer* img,
-				   long timeout_millis, bool copy_buff)
+				   long timeout_millis,
+				   bool copy_buff,
+				   bool organize)
 {
   // mutex will unlock in `unique_lock' dtor if not explicitly unlocked prior
   std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
@@ -93,7 +95,10 @@ o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer* img,
   img->SetBytes(this->front_buffer_, copy_buff);
   lock.unlock();
 
-  img->Organize();
+  if (organize)
+    {
+      img->Organize();
+    }
 
   return true;
 }

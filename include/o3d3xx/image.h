@@ -81,11 +81,13 @@ namespace o3d3xx
      */
     virtual ~ImageBuffer();
 
-    //! @todo sort out how we want copy and move semantics to work
+    // disable move semantics (for now)
     ImageBuffer(ImageBuffer&&) = delete;
     ImageBuffer& operator=(ImageBuffer&&) = delete;
-    ImageBuffer(ImageBuffer&) = delete;
-    ImageBuffer& operator=(const ImageBuffer&) = delete;
+
+    // copy ctor/assignment operator
+    ImageBuffer(const ImageBuffer& src_buff);
+    ImageBuffer& operator=(const ImageBuffer& src_buff);
 
     /**
      * Returns the wrapped depth image. This does NOT make a copy of the data.

@@ -118,8 +118,26 @@ o3d3xx::get_num_bytes_in_pixel_format(o3d3xx::pixel_format f)
 o3d3xx::ImageBuffer::ImageBuffer()
   : dirty_(false),
     cloud_(new pcl::PointCloud<o3d3xx::PointT>())
-{
+{ }
 
+o3d3xx::ImageBuffer::ImageBuffer(const o3d3xx::ImageBuffer& src_buff)
+  : o3d3xx::ImageBuffer()
+{
+  this->SetBytes(const_cast<std::vector<std::uint8_t>&>(src_buff.bytes_),
+		 true);
+}
+
+o3d3xx::ImageBuffer&
+o3d3xx::ImageBuffer::operator= (const o3d3xx::ImageBuffer& src_buff)
+{
+  if (this == &src_buff)
+    {
+      return *this;
+    }
+
+  this->SetBytes(const_cast<std::vector<std::uint8_t>&>(src_buff.bytes_),
+		 true);
+  return *this;
 }
 
 o3d3xx::ImageBuffer::~ImageBuffer()

@@ -78,12 +78,15 @@ namespace o3d3xx
     /**
      * This function is used to grab and parse out time synchronized image data
      * from the camera. It will call `SetBytes' on the passed in `ImageBuffer'
-     * as well as call `Organize', so the `img' output parameter is assumed to
-     * be synchronized and ready for analysis provided this function returns
-     * true.
+     * as well as (optionally, but by default) call `Organize'. Calling
+     * `Organize' is the default behavior so the `img' output parameter is
+     * assumed to be synchronized and ready for analysis provided this function
+     * returns true. In certain applications, it may be a performance
+     * enhancement to not call `Organize' but rather handle that outside of the
+     * `FrameGrabber'.
      *
-     * @param[out] img An o3d3xx::ImageBuffer object to update with the latest
-     * data from the camera.
+     * @param[out] img A pointer to an o3d3xx::ImageBuffer object to update
+     * with the latest data from the camera.
      *
      * @param[in] timeout_millis Amount of time, in milliseconds, to wait for
      * new image data from the FrameGrabber. If `timeout_millis' is set to 0,
@@ -95,11 +98,16 @@ namespace o3d3xx
      * `true' if you are planning to use multiple clients with a single
      * FrameGrabber.
      *
+     * @parma[in] organize Flag indicating whether or not `Organize' should be
+     * called on the image buffer before returning.
+     *
      * @return true if a new buffer was acquired within `timeout_millis', false
      * otherwise.
      */
     bool WaitForFrame(o3d3xx::ImageBuffer* img,
-		      long timeout_millis = 0, bool copy_buff = false);
+		      long timeout_millis = 0,
+		      bool copy_buff = false,
+		      bool organize = true);
 
   protected:
     /**

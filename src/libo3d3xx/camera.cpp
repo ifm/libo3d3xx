@@ -19,6 +19,7 @@
 #include <memory>
 #include <mutex>
 #include <cstdint>
+#include <cstdlib>
 #include <ctime>
 #include <map>
 #include <set>
@@ -39,7 +40,10 @@
 #include "o3d3xx/version.h"
 
 const std::string o3d3xx::DEFAULT_PASSWORD = "";
-const std::string o3d3xx::DEFAULT_IP = "192.168.0.69";
+const std::string o3d3xx::DEFAULT_IP =
+  std::getenv("O3D3XX_IP") == nullptr ?
+  "192.168.0.69" : std::string(std::getenv("O3D3XX_IP"));
+
 const std::string o3d3xx::DEFAULT_SUBNET = "255.255.255.0";
 const std::string o3d3xx::DEFAULT_GW = "192.168.0.201";
 const std::uint32_t o3d3xx::DEFAULT_XMLRPC_PORT = 80;

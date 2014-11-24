@@ -193,3 +193,55 @@ TEST(ImageBuffers_Tests, Bytes)
   b1 = img->Bytes();
   EXPECT_EQ(b1, b3);
 }
+
+TEST(ImageBuffers_Tests, CopyConstructor)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  o3d3xx::FrameGrabber::Ptr fg =
+    o3d3xx::FrameGrabber::Ptr(new o3d3xx::FrameGrabber(cam));
+
+  o3d3xx::ImageBuffer::Ptr img =
+    o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+
+  int i = 0;
+  while (i < 5)
+    {
+      EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+
+      o3d3xx::ImageBuffer::Ptr img2 =
+	o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer(*(img.get())));
+
+      EXPECT_TRUE(img2->Bytes() == img->Bytes());
+
+      i++;
+    }
+}
+
+TEST(ImageBuffers_Tests, CopyAssignmentOperator)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  o3d3xx::FrameGrabber::Ptr fg =
+    o3d3xx::FrameGrabber::Ptr(new o3d3xx::FrameGrabber(cam));
+
+  o3d3xx::ImageBuffer::Ptr img =
+    o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+
+  o3d3xx::ImageBuffer::Ptr img2 =
+    o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+
+  int i = 0;
+  while (i < 5)
+    {
+      EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+
+      *(img2.get()) = *(img.get());
+
+      EXPECT_TRUE(img2->Bytes() == img->Bytes());
+
+      i++;
+    }
+}
