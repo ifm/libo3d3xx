@@ -1,23 +1,70 @@
 
-o3d3xx-toolbox
-==============
+libo3d3xx
+=========
 
-Driver for IFM Efector O3D3xx Cameras
+Library and utilities for working with IFM Efector O3D3xx Cameras.
 
-Driver and utilities for usage with O3D3xx cameras built and sold
-by IFM Efector. The O3D3xx cameras are 3D cameras based on the PMD
-Tech Photonic Mixer Device time-of-flight imager. This toolbox has been built
-with mobile robotics applications in mind. To that end, the toolbox supplies
-a library for high-speed streaming of images from the camera written in modern
-C++, point cloud constructions, plugability with other frameworks commonly
-used by roboticists (e.g., ROS, PCL, Matlab, Python), and simple
-parameterization of the camera operating characteristics.
+libo3d3xx provides facilities for interfacing with O3D3xx cameras built and
+sold by IFM Efector. The O3D3xx cameras are 3D cameras based on the PMD
+Tech Photonic Mixer Device time-of-flight imager. This toolbox bridges the IFM
+hardware to the state-of-the-art open source computer vision packages:
+[OpenCV](http://opencv.org) and [PCL](http://pointclouds.org).
 
+At its core, libo3d3xx provides a way to stream images from an O3D3xx camera in
+real-time and access the data as OpenCV images (applies to the Amplitude,
+Depth, and Confidence images) or PCL point clouds (applies to the point cloud
+coming off the camera). We note that the PCL point cloud constructed by this
+library has point type `pcl::PointXYZI` (referred to as `o3d3xx::PointT`). For
+the intensity channel, we use the Amplitude image data registered to each
+point. We do this because, unlike in earlier PMD-based IFM cameras, the
+Intensity image is not currently available. We expect the Amplitude image can
+act as a proxy for the Intensity image as it relates to PCL algorithms that may
+rely on that data.
+
+The code has been developed on 64-bit Ubuntu Linux 14.04 LTS. This is currently
+the only platform that the software has been tested on. It is expected that
+some tweaks will need to be made to use the software on other platforms. You
+can contact [Love Park Robotics](http://loveparkrobotics.com) for assistance in
+porting or file an [issue request](https://github.com/lovepark/libo3d3xx/issues)
+
+Features
+--------
+
+High-level features of this library include:
+
+* The code is written in modern C++11.
+* The library employs PCL and OpenCV native image formats.
+* Easily scriptable command line utilities are provided for performaing common
+  tasks associated with configuring, backing up, restoring, and introspecting,
+  the camera settings. This scriptability lends itself to managing fleets of
+  cameras for large-scale installations.
+* A simple viewer application is provided for concurrently inspecting the point
+  cloud, depth, amplitude, and confidence image.
+* A business-friendly (Apache 2.0) License is employed.
+* The code is being actively developed and maintained at
+  [Love Park Robotics](http://loveparkrobotics.com). Pull requests are welcome
+  from those who wish to contribute code!
+
+Prerequisites
+-------------
+
+* [Boost](http://www.boost.org) (>= 1.54)
+* [Gtest](https://code.google.com/p/googletest/) (unit testing)
+* [Glog](https://code.google.com/p/google-glog/) (logging infrastructure)
+* [libxmlrpc](http://xmlrpc-c.sourceforge.net/)
+* [OpenCV](http://opencv.org) (>= 2.4)
+* [PCL](http://pointclouds.org) (>= 1.7.1)
+* [CMake](http://www.cmake.org) (>= 2.8.11)
+
+Additionally, your compiler must support C++11. We are using g++ 4.8.2 on
+Ubuntu Linux 14.04 LTS.
 
 Installation
 ------------
 
-To build and install o3d3xx you can issue the following commands
+(Assumes Linux)
+
+To build and install `libo3d3xx` you can issue the following commands
 from the top-level directory of this source distribution:
 
 	$ mkdir build
@@ -27,36 +74,37 @@ from the top-level directory of this source distribution:
 	$ make check
 	$ sudo make install
 
-There is also a `make package` target that will build the binary deb. After
-installation, you may find it useful to add the following to your
+NOTE: Running `make check` will run unit tests. It assumes that the hardware is
+available and running with factory default settings. If your camera is using an
+IP address different from the factory default of 192.168.0.69, you can set the
+`O3D3XX_IP` environment variable to point to the proper IP. Please note, the unit
+tests will wipe out your current camera settings and applications. You should
+back up your camera prior to running the unit tests.
+
+There is also a `make package` target that will build the binary debian
+package. You can then install this with the usual Debian/Ubuntu `dpkg`
+tool.
+
+After installation, you may find it useful to add the following to your
 `~/.bash_profile`:
 
-	if [ -f /opt/o3d3xx-toolbox/etc/setup.bash ]; then
-		source /opt/o3d3xx-toolbox/etc/setup.bash
+	if [ -f /opt/libo3d3xx/etc/setup.bash ]; then
+		source /opt/libo3d3xx/etc/setup.bash
 	fi
 
+This will modify your `LD_LIBRARY_PATH` and `PATH` to ensure the library is
+available to your environment.
 
-Prerequisites
--------------
+Running
+-------
 
-To build the software, you will need the following third-party software
-(expressed as Ubuntu software packages):
-
-* build-essential
-* cmake
-* libgtest-dev
-* libgoogle-glog-dev
-* libboost-system-dev (>= 1.46)
-* libboost-thread-dev (>= 1.46)
-* libboost-program-options-dev (>= 1.46)
-
-Runtime dependencies are encoded into the deb built as a result of
-`make package`. Typically, those are a subset of the build dependencies.
+* [Using the library](docs/using.md)
+* [Command-line utilities](docs/utils.md)
 
 TODO
 ----
 
-Please see the [Github Issues](https://github.com/lovepark/o3d3xx-toolbox/issues).
+Please see the [Github Issues](https://github.com/lovepark/libo3d3xx/issues).
 
 LICENSE
 -------
@@ -67,4 +115,3 @@ AUTHORS
 -------
 
 Tom Panzarella <tom@loveparkrobotics.com>
-

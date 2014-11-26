@@ -105,14 +105,11 @@ set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME ${GIT_PROJECT_NAME})
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Driver for IFM Efector O3D3xx Cameras")
 set(CPACK_PACKAGE_DESCRIPTION
-  "Driver and utilities for usage with O3D3xx cameras built and sold
-by IFM Efector. The O3D3xx cameras are 3D cameras based on the PMD
-Tech Photonic Mixer Device time-of-flight imager. This toolbox has been built
-with mobile robotics applications in mind. To that end, the toolbox supplies
-a library for high-speed streaming of images from the camera written in modern
-C++, point cloud constructions, plugability with other frameworks commonly
-used by roboticists (e.g., ROS, PCL, Matlab, Python), and simple
-parameterization of the camera operating characteristics.")
+  "Driver and utilities for usage with o3d3xx cameras built and sold
+by IFM Efector. The o3d3xx cameras are 3D cameras based on the PMD
+Tech Photonic Mixer Device time-of-flight imager. This toolbox bridges the IFM
+hardware to the state-of-the-art open source computer vision packages: OpenCV
+and PCL.")
 set(CPACK_PACKAGE_VENDOR "Love Park Robotics, LLC")
 set(CPACK_PACKAGE_CONTACT "Tom Panzarella <tom@loveparkrobotics.com>")
 set(CPACK_PACKAGE_VERSION_MAJOR
@@ -140,12 +137,12 @@ set(CPACK_PACKAGE_FILE_NAME
   "${GIT_PROJECT_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libboost-dev,
-   libboost-system-dev,
-   libboost-program-options-dev,
+  "libboost-dev (>= 1.54),
    libgoogle-glog-dev,
-   libxmlrpc-c++,
-   libxmlrpc-c++-dev,
+   libxmlrpc-c++8,
+   libxmlrpc-c++8-dev,
+   libopencv-core2.4,
+   libopencv-core-dev,
    libpcl-1.7-all,
    libpcl-1.7-all-dev")
 include(CPack)
