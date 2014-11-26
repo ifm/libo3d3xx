@@ -1,0 +1,93 @@
+{
+    "o3d3xx":
+    {
+        "libo3d3xx": "100",
+        "Date": "Wed Nov 26 10:07:19 2014",
+        "HWInfo":
+        {
+            "Mainboard": "#!01_M381_001_12345678_008001295",
+            "Illumination": "#!01_I300_001_12345678_008000723",
+            "MACAddress": "00:02:01:21:BA:00",
+            "Frontend": "#!01_F340_001_12345678_008000775",
+            "Diagnose": "#!01_D320_001_12345678_008001270",
+            "Connector": "#!01_A300_001_12345678_008000723"
+        },
+        "SWVersion":
+        {
+            "IFM_Software": "0.03.18",
+            "Linux": "Linux version 3.11.0-00002-ge320d22 (eswadmin@dettlx79) (gcc version 4.7.2 (GCC) ) #1 SMP Thu Sep 4 13:53:46 CEST 2014",
+            "Diagnostic_Controller": "0.2.613+svn110502",
+            "ELDK": "GOLDENEYE_ELDK-2014-09-15_13-21-20-9b520a83bd6ba0a146423b1ff3a1cf1da9581d58",
+            "Calibration_Version": "0.3.1",
+            "Calibration_Device": "00:02:01:21:ba:00",
+            "Main_Application": "0.2.686+svn110502",
+            "Algorithm_Version": "0.3.4"
+        },
+        "Device":
+        {
+            "Name": "New sensor",
+            "Description": "",
+            "ActiveApplication": "1",
+            "PcicTcpPort": "50010",
+            "PcicProtocolVersion": "3",
+            "IOLogicType": "1",
+            "IODebouncing": "true",
+            "IOExternApplicationSwitch": "0",
+            "SessionTimeout": "30",
+            "ExtrinsicCalibTransX": "0",
+            "ExtrinsicCalibTransY": "0",
+            "ExtrinsicCalibTransZ": "0",
+            "ExtrinsicCalibRotX": "0",
+            "ExtrinsicCalibRotY": "0",
+            "ExtrinsicCalibRotZ": "0",
+            "IPAddressConfig": "0",
+            "PasswordActivated": "false",
+            "OperatingMode": "0",
+            "DeviceType": "",
+            "ArticleNumber": "",
+            "ArticleStatus": "",
+            "UpTime": "1.12901826074555e-316",
+            "ImageTimestampReference": "1605965731",
+            "TemperatureFront1": "1.129028537310983e-316",
+            "TemperatureFront2": "1.129040394886483e-316",
+            "TemperatureIMX6": "6.953189366787785e-310",
+            "TemperatureIllu": "1.129052252461983e-316"
+        },
+        "Net":
+        {
+            "MACAddress": "",
+            "NetworkSpeed": "0",
+            "StaticIPv4Address": "192.168.10.69",
+            "StaticIPv4SubNetMask": "255.255.255.0",
+            "StaticIPv4Gateway": "192.168.10.201",
+            "UseDHCP": "false"
+        },
+        "Apps":
+        [
+            {
+                "Name": "Factory Default Test Application",
+                "Description": "",
+                "TriggerMode": "1",
+                "PcicTcpResultOutputEnabled": "true",
+                "PcicTcpResultSchema": "",
+                "Index": "1",
+                "Id": "964899043",
+                "Imager":
+                {
+                    "Type": "under5m_moderate",
+                    "TypeHash": "b2e85e3900684a5e23dacf89035cc184",
+                    "ExposureTime": "1905",
+                    "Channel": "0",
+                    "FrameRate": "5",
+                    "ClippingLeft": "0",
+                    "ClippingTop": "0",
+                    "ClippingRight": "175",
+                    "ClippingBottom": "131",
+                    "ReduceMotionArtifacts": "false",
+                    "SpatialFilterType": "0",
+                    "AverageFilterNumPictures": "1"
+                }
+            }
+        ]
+    }
+}
