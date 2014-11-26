@@ -100,8 +100,8 @@ available to your environment.
 Running
 -------
 
-* [Using the library](docs/using.md)
-* [Command-line utilities](docs/utils.md)
+* [Using the library](doc/using.md)
+* [Command-line utilities](doc/utils.md)
 
 TODO
 ----
