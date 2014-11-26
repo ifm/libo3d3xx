@@ -309,35 +309,35 @@ TEST(Camera_Tests, GetNetParameters)
   EXPECT_NO_THROW(params.at("UseDHCP"));
 }
 
-TEST(Camera_Tests, NetConfig)
-{
-  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
-  cam->RequestSession();
-  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+// TEST(Camera_Tests, NetConfig)
+// {
+//   o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+//   cam->RequestSession();
+//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
 
-  o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
-  std::string orig_ip = net->StaticIPv4Address();
-  net->SetStaticIPv4Address("192.168.0.70");
+//   o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
+//   std::string orig_ip = net->StaticIPv4Address();
+//   net->SetStaticIPv4Address("192.168.0.70");
 
-  EXPECT_NO_THROW(cam->SetNetConfig(net.get()));
-  EXPECT_NO_THROW(cam->SaveNet());
+//   EXPECT_NO_THROW(cam->SetNetConfig(net.get()));
+//   EXPECT_NO_THROW(cam->SaveNet());
 
-  usleep(2000);
-  cam->RequestSession();
-  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-  o3d3xx::NetConfig::Ptr net2 = cam->GetNetConfig();
-  EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
+//   usleep(2000);
+//   cam->RequestSession();
+//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+//   o3d3xx::NetConfig::Ptr net2 = cam->GetNetConfig();
+//   EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
 
-  net2->SetStaticIPv4Address(orig_ip);
-  EXPECT_NO_THROW(cam->SetNetConfig(net2.get()));
-  EXPECT_NO_THROW(cam->SaveNet());
+//   net2->SetStaticIPv4Address(orig_ip);
+//   EXPECT_NO_THROW(cam->SetNetConfig(net2.get()));
+//   EXPECT_NO_THROW(cam->SaveNet());
 
-  usleep(2000);
-  cam->RequestSession();
-  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-  o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
-  EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
-}
+//   usleep(2000);
+//   cam->RequestSession();
+//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+//   o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
+//   EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
+// }
 
 TEST(Camera_Tests, NetConfig_JSON)
 {
