@@ -3,6 +3,7 @@ libo3d3xx Command Line Utilities
 
 The following command-line utilities are provided with `libo3d3xx`:
 
+0. o3d3xx-viewer
 1. o3d3xx-config
 2. o3d3xx-dump
 3. o3d3xx-ls
@@ -10,13 +11,42 @@ The following command-line utilities are provided with `libo3d3xx`:
 5. o3d3xx-reset
 6. o3d3xx-rm
 7. o3d3xx-version
-8. o3d3xx-viewer
 
 All of the command-line utilities accept the `--help` and the `--version`
 flags. `--help` will list the arguments accepted by the program and `--version`
 will display the version of `libo3d3xx` that the program is linked to.
 
 A brief description of each program now follows:
+
+o3d3xx-viewer
+-------------
+
+This program streams real-time image data from the camera and displays it on
+the screen. To run the program:
+
+	$ o3d3xx-viewer
+
+This will open up two windows. The first window will display the point cloud:
+
+![3dimg](figures/3d.png)
+
+Each point in the point cloud is colored by the associated pixel's amplitude
+image value. The viewer window itself is a modified version of PCL's viewer
+application, so, all the normal key commands will work, `q' will exit the
+program. Additionally, 'A' will display a coordinate axes indicator on the
+screen and 'a' will remove it.
+
+The second window displays four images:
+
+![2dimgs](figures/2d.png)
+
+The top-left image is a rendering of the radial depth map. The top-right image
+is an interpretation of the confidence image. In this binary image
+rendering, "good" pixels are shown in green and "bad" pixels are shown in
+yellow. The bottom-left image shows the amplitude image and the bottom-right is
+a histogram showing the gray value distribution of the amplitude image -- a
+nice check to quickly visualize the current configuration's dynamic range.
+
 
 o3d3xx-config
 -------------
@@ -90,32 +120,3 @@ o3d3xx-version
 --------------
 
 This program displays the version of the library.
-
-o3d3xx-viewer
--------------
-
-This program streams real-time image data from the camera and displays it on
-the screen. To run the program:
-
-	$ o3d3xx-viewer
-
-This will open up two windows. The first window will display the point cloud:
-
-![3dimg](figures/3d.png)
-
-Each point in the point cloud is colored by the associated pixel's amplitude
-image value. The viewer window itself is a modified version of PCL's viewer
-application, so, all the normal key commands will work, `q' will exit the
-program. Additionally, 'A' will display a coordinate axes indicator on the
-screen and 'a' will remove it.
-
-The second window displays four images:
-
-![2dimgs](figures/2d.png)
-
-The top-left image is a rendering of the radial depth map. The top-right image
-is an interpretation of the confidence image. In this binary image
-rendering, "good" pixels are shown in green and "bad" pixels are shown in
-yellow. The bottom-left image shows the amplitude image and the bottom-right is
-a histogram showing the gray value distribution of the amplitude image -- a
-nice check to quickly visualize the current configuration's dynamic range.

@@ -36,7 +36,7 @@ library basically boils down to:
 	  // buff->ConfidenceImage()
 	  // buff->AmplitudeImage()
 	  //
-	  // Use the power of these open-source library to build your application
+	  // Use these open-source libraries to build your application
 	  //
     }
 
