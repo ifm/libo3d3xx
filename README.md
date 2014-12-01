@@ -4,6 +4,8 @@ libo3d3xx
 
 Library and utilities for working with IFM Efector O3D3xx Cameras.
 
+![3dimg](doc/figures/3d.png)
+
 libo3d3xx provides facilities for interfacing with O3D3xx cameras built and
 sold by IFM Efector. The O3D3xx cameras are 3D cameras based on the PMD
 Tech Photonic Mixer Device time-of-flight imager. This toolbox bridges the IFM
@@ -11,21 +13,26 @@ hardware to the state-of-the-art open source computer vision packages:
 [OpenCV](http://opencv.org) and [PCL](http://pointclouds.org).
 
 At its core, libo3d3xx provides a way to stream images from an O3D3xx camera in
-real-time and access the data as OpenCV images (applies to the Amplitude,
-Depth, and Confidence images) or PCL point clouds (applies to the point cloud
-coming off the camera). We note that the PCL point cloud constructed by this
-library has point type `pcl::PointXYZI` (referred to as `o3d3xx::PointT`). For
-the intensity channel, we use the Amplitude image data registered to each
-point. We do this because, unlike in earlier PMD-based IFM cameras, the
-Intensity image is not currently available. We expect the Amplitude image can
-act as a proxy for the Intensity image as it relates to PCL algorithms that may
-rely on that data.
+real-time and access the 2D data as OpenCV images (applies to the Amplitude,
+Depth, and Confidence images) and the 3D data as PCL point clouds (i.e., the
+`CARTESIAN_X`, `CARTESIAN_Y`, and `CARTESIAN_Z` are fused to create a point
+cloud). We note that the PCL point cloud constructed by this library has point
+type `pcl::PointXYZI` (referred to as `o3d3xx::PointT`). For the intensity
+channel, we use the Amplitude image data registered to each point. We do this
+because, unlike in earlier PMD-based IFM cameras, the Intensity image is not
+currently available. We expect the Amplitude image can act as a proxy for the
+Intensity image as it relates to PCL algorithms that may rely on that data.
 
 The code has been developed on 64-bit Ubuntu Linux 14.04 LTS. This is currently
 the only platform that the software has been tested on. It is expected that
 some tweaks will need to be made to use the software on other platforms. You
 can contact [Love Park Robotics](http://loveparkrobotics.com) for assistance in
 porting or file an [issue request](https://github.com/lovepark/libo3d3xx/issues)
+
+**NOTE:** As of this writing, the O3D3xx camera(s) are still in beta. To that
+  end, this software will also remain in beta with no guarantees of API
+  stability. Once an initial O3D3xx camera is released as production, the
+  `libo3d3xx` API will stabilize.
 
 Features
 --------
@@ -34,7 +41,7 @@ High-level features of this library include:
 
 * The code is written in modern C++11.
 * The library employs PCL and OpenCV native image formats.
-* Easily scriptable command line utilities are provided for performaing common
+* Easily scriptable command line utilities are provided for performing common
   tasks associated with configuring, backing up, restoring, and introspecting,
   the camera settings. This scriptability lends itself to managing fleets of
   cameras for large-scale installations.

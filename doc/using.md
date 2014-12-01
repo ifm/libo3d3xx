@@ -39,3 +39,5 @@ library basically boils down to:
 	  // Use the power of these open-source library to build your application
 	  //
     }
+
+Other useful examples exist in the unit tests.

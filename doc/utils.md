@@ -12,7 +12,7 @@ The following command-line utilities are provided with `libo3d3xx`:
 7. o3d3xx-version
 8. o3d3xx-viewer
 
-All of the command-line utilites accept the `--help` and the `--version`
+All of the command-line utilities accept the `--help` and the `--version`
 flags. `--help` will list the arguments accepted by the program and `--version`
 will display the version of `libo3d3xx` that the program is linked to.
 
@@ -72,7 +72,7 @@ as active. The number in square brackets indicates the application index.
 o3d3xx-reboot
 -------------
 
-This program peforms a soft boot of the camera.
+This program performs a soft boot of the camera.
 
 o3d3xx-reset
 ------------
