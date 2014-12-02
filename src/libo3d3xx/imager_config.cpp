@@ -84,22 +84,12 @@ o3d3xx::ImagerConfig::SetTypeHash(const std::string& hash) noexcept
 int
 o3d3xx::ImagerConfig::ExposureTime() const
 {
-  if (this->Type() == "under5m_high")
-    {
-      throw o3d3xx::error_t(O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE);
-    }
-
   return this->exposure_time_;
 }
 
 void
 o3d3xx::ImagerConfig::SetExposureTime(int usecs)
 {
-  if (this->Type() == "under5m_high")
-    {
-      throw o3d3xx::error_t(O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE);
-    }
-
   this->exposure_time_ = usecs;
 }
 
@@ -273,8 +263,13 @@ o3d3xx::ImagerConfig::ToJSON() const
 
   pt.put("Type", this->Type());
   pt.put("TypeHash", this->TypeHash());
-  pt.put("ExposureTime", this->ExposureTime());
-  pt.put("Channel", this->Channel());
+
+  if (this->Type() != "under5m_high")
+    {
+      pt.put("ExposureTime", this->ExposureTime());
+      pt.put("Channel", this->Channel());
+    }
+
   pt.put("FrameRate", this->FrameRate());
   pt.put("ClippingLeft", this->ClippingLeft());
   pt.put("ClippingTop", this->ClippingTop());

@@ -112,7 +112,8 @@ TEST_F(AppImagerTest, EditApplication)
 
 TEST_F(AppImagerTest, GetAppParameters)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::unordered_map<std::string, std::string> params =
@@ -130,7 +131,8 @@ TEST_F(AppImagerTest, GetAppParameters)
 
 TEST_F(AppImagerTest, AppConfig)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::string new_name("Foo");
@@ -155,7 +157,8 @@ TEST_F(AppImagerTest, AppConfig)
 
 TEST_F(AppImagerTest, AppConfig_JSON)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   o3d3xx::AppConfig::Ptr app = cam_->GetAppConfig();
@@ -177,7 +180,8 @@ TEST_F(AppImagerTest, AppConfig_JSON)
 
 TEST_F(AppImagerTest, GetAvailableImagerTypes)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::vector<std::string> imager_types;
@@ -190,7 +194,8 @@ TEST_F(AppImagerTest, GetAvailableImagerTypes)
 
 TEST_F(AppImagerTest, ChangeImagerType)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::vector<std::string> imager_types =
@@ -212,7 +217,8 @@ TEST_F(AppImagerTest, ChangeImagerType)
 
 TEST_F(AppImagerTest, GetImagerParameters)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::vector<std::string> imager_types =
@@ -253,7 +259,8 @@ TEST_F(AppImagerTest, GetImagerParameters)
 
 TEST_F(AppImagerTest, ImagerConfig)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::vector<std::string> imager_types =
@@ -292,7 +299,8 @@ TEST_F(AppImagerTest, ImagerConfig)
 
 TEST_F(AppImagerTest, ImagerConfigValueOutOfRange)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   std::vector<std::string> imager_types =
@@ -329,7 +337,8 @@ TEST_F(AppImagerTest, ImagerConfigValueOutOfRange)
 
 TEST_F(AppImagerTest, ImagerConfig_JSON)
 {
-  int new_idx = cam_->CopyApplication(1);
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
   cam_->EditApplication(new_idx);
 
   o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();

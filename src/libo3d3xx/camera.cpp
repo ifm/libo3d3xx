@@ -612,7 +612,7 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
   DLOG(INFO) << "Setting Imager Config for Type="
 	     << im->Type();
 
-  try
+  if (im->Type() != "under5m_high")
     {
       if (im->ExposureTime() != config->ExposureTime())
 	{
@@ -631,16 +631,6 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 	  this->_XCallImager("setParameter",
 			     "Channel", config->Channel());
 	}
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      if (ex.code() != O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE)
-	{
-	  throw;
-	}
-
-      DLOG(WARNING) << "In `SetImagerConfig': " << ex.what()
-		    << " ... " << "high dynamic range imager?";
     }
 
   if (im->FrameRate() != config->FrameRate())

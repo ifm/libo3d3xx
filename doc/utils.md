@@ -11,6 +11,7 @@ The following command-line utilities are provided with `libo3d3xx`:
 5. o3d3xx-reset
 6. o3d3xx-rm
 7. o3d3xx-version
+8. o3d3xx-hz
 
 All of the command-line utilities accept the `--help` and the `--version`
 flags. `--help` will list the arguments accepted by the program and `--version`
@@ -120,3 +121,11 @@ o3d3xx-version
 --------------
 
 This program displays the version of the library.
+
+o3d3xx-hz
+---------
+
+This program can be used to measure the effective frame rate achieved by the
+FrameGrabber based upon the imager config of the active application. The
+program allows for configuring a number of frames to capture and a number of
+runs to perform before computing the FPS statistics. See `--help` for details.
