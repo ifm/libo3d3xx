@@ -827,6 +827,7 @@ o3d3xx::Camera::FromJSON(const std::string& json)
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);
+  is.seekg(0, is.beg);
   boost::property_tree::read_json(is, pt);
 
   int desired_active_application = -1;
