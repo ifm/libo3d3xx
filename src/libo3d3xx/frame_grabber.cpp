@@ -131,8 +131,8 @@ o3d3xx::FrameGrabber::Run()
   try
     {
       this->cam_->RequestSession();
-      //! @todo: XXX: Set trigger mode to 'free run'
       this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
+      this->cam_->CancelSession();
     }
   catch (const o3d3xx::error_t& ex)
     {

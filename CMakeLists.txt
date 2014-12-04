@@ -24,7 +24,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11") # turn on C++11 for g++
 # This is the single place to manage API version numbers
 set(O3D3XX_VERSION_MAJOR 0)
 set(O3D3XX_VERSION_MINOR 1)
-set(O3D3XX_VERSION_PATCH 1)
+set(O3D3XX_VERSION_PATCH 2)
 file(COPY ${O3D3XX_SOURCE_DIR}/include
   DESTINATION ${O3D3XX_BINARY_DIR}
   )
