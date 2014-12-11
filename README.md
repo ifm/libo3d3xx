@@ -52,7 +52,7 @@ High-level features of this library include:
   [Love Park Robotics](http://loveparkrobotics.com). Pull requests are welcome
   from those who wish to contribute code!
 
-[ROS](http://ros.org) bindings are coming soon (as a separate GitHub project).
+[ROS](http://ros.org) bindings are available [here](https://github.com/lovepark/o3d3xx-ros)
 
 Prerequisites
 -------------
