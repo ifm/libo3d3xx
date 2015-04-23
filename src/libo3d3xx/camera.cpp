@@ -211,7 +211,9 @@ std::string
 o3d3xx::Camera::RequestSession()
 {
   xmlrpc_c::value_string val_str(
-    this->_XCallMain("requestSession", this->GetPassword().c_str()));
+    this->_XCallMain("requestSession",
+		     this->GetPassword().c_str(),
+		     std::string("")));
 
   this->SetSessionID(static_cast<std::string>(val_str));
   this->Heartbeat(o3d3xx::MAX_HEARTBEAT);
