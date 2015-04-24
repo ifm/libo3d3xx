@@ -567,6 +567,10 @@ o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
 
   if (app->PcicTcpResultSchema() != config->PcicTcpResultSchema())
     {
+      LOG(WARNING) << "Setting the PCIC Result Schema "
+		   << "may break the framegrabber!";
+      LOG(WARNING) << config->PcicTcpResultSchema();
+
       this->_XCallApp("setParameter",
 		      "PcicTcpResultSchema",
 		      config->PcicTcpResultSchema());

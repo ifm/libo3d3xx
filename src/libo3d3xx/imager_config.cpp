@@ -264,7 +264,8 @@ o3d3xx::ImagerConfig::ToJSON() const
   pt.put("Type", this->Type());
   pt.put("TypeHash", this->TypeHash());
 
-  if (this->Type() != "under5m_high")
+  if ((this->Type() != "under5m_high") &&
+      (this->Type() != "upto30m_high"))
     {
       pt.put("ExposureTime", this->ExposureTime());
       pt.put("Channel", this->Channel());
