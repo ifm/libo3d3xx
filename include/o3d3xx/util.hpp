@@ -60,11 +60,26 @@ namespace o3d3xx
    * std::unordered_map. The assumption is that all keys and values are
    * strings.
    *
-   * @param[in] xmlrcp_c::value_struct Structure of strings mapped to strings
+   * @param[in] xmlrpc_c::value_struct Structure of strings mapped to strings
    * @return std::unordered_map<std::string, std::string>
    */
   std::unordered_map<std::string, std::string> const
   value_struct_to_map(const xmlrpc_c::value_struct& vs);
+
+  /**
+   * This function converts an xmlrpc_c::value_struct into a std::unordered_map
+   * of std::unordered_map. The assumption is that the keys of both the inner
+   * and outter maps are strings. The values of the inner map are also
+   * strings.
+   *
+   * @param[in] xmlrpc_c::value_struct Structure of strings mapped to other
+   *            value_struct objects which map strings to stings.
+   * @return std::unordered_map<std::string,
+   *		     std::unordered_map<std::string, std::string> >
+   */
+  std::unordered_map<std::string,
+		     std::unordered_map<std::string, std::string> > const
+  value_struct_to_map_of_maps(const xmlrpc_c::value_struct& vs);
 
   /**
    * Converts a string to a bool.

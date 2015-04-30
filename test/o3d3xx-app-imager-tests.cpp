@@ -258,6 +258,63 @@ TEST_F(AppImagerTest, GetImagerParameters)
   cam_->DeleteApplication(new_idx);
 }
 
+TEST_F(AppImagerTest, GetImagerParameterLimits)
+{
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
+  cam_->EditApplication(new_idx);
+
+  std::vector<std::string> imager_types =
+    cam_->GetAvailableImagerTypes();
+
+  for (auto& type : imager_types)
+    {
+      cam_->ChangeImagerType(type);
+
+      std::unordered_map<std::string, std::string> params =
+	cam_->GetImagerParameters();
+
+      //
+      // tests that the call to fetch the parameter limits does not throw an
+      // exception.
+      //
+      std::unordered_map<std::string,
+			 std::unordered_map<std::string,
+					    std::string> > limits =
+	cam_->GetImagerParameterLimits();
+
+      for (auto& param : params)
+	{
+	  try
+	    {
+	      //
+	      // Now we simply want to make sure that
+	      // the only limits, if the parameter has
+	      // limits, are "min" and "max" ... and
+	      // that the values make some sort of sense.
+	      // Otherwise, we need to investigate further.
+	      //
+
+	      std::unordered_map<std::string, std::string>
+		param_limits = limits.at(param.first);
+
+	      ASSERT_EQ(param_limits.size(), 2);
+	      ASSERT_LE(std::stod(param_limits.at("min")),
+			std::stod(param_limits.at("max")));
+
+	    }
+	  catch (const std::out_of_range& ex)
+	    {
+	      // no limits defined for this parameter.
+	    }
+	}
+    }
+
+  cam_->StopEditingApplication();
+  cam_->DeleteApplication(new_idx);
+}
+
+
 TEST_F(AppImagerTest, ImagerConfig)
 {
   o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();

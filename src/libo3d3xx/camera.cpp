@@ -57,6 +57,8 @@ const std::string o3d3xx::XMLRPC_DEVICE = "device/";
 const std::string o3d3xx::XMLRPC_NET = "network/";
 const std::string o3d3xx::XMLRPC_APP = "application/";
 const std::string o3d3xx::XMLRPC_IMAGER = "imager_001/";
+const std::string o3d3xx::XMLRPC_SPATIALFILTER = "spatialfilter";
+const std::string o3d3xx::XMLRPC_TEMPORALFILTER = "temporalfilter";
 
 o3d3xx::Camera::Camera(const std::string& ip,
 		       const std::uint32_t xmlrpc_port,
@@ -602,6 +604,14 @@ std::unordered_map<std::string, std::string>
 o3d3xx::Camera::GetImagerParameters()
 {
   return o3d3xx::value_struct_to_map(this->_XCallImager("getAllParameters"));
+}
+
+std::unordered_map<std::string,
+		   std::unordered_map<std::string, std::string> >
+o3d3xx::Camera::GetImagerParameterLimits()
+{
+  return o3d3xx::value_struct_to_map_of_maps(
+    this->_XCallImager("getAllParameterLimits"));
 }
 
 o3d3xx::ImagerConfig::Ptr

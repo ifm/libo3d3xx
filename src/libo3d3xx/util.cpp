@@ -67,6 +67,41 @@ o3d3xx::value_struct_to_map(const xmlrpc_c::value_struct& vs)
   return retval;
 }
 
+std::unordered_map<std::string,
+		   std::unordered_map<std::string, std::string> > const
+o3d3xx::value_struct_to_map_of_maps(const xmlrpc_c::value_struct& vs)
+{
+  std::unordered_map<std::string,
+		     std::unordered_map<std::string, std::string> >
+    retval;
+
+
+  std::map<std::string, xmlrpc_c::value> const
+    outter_map(static_cast<std::map<std::string, xmlrpc_c::value> >
+  	       (vs));
+
+  for (auto& kv : outter_map)
+    {
+      xmlrpc_c::value_struct _vs(kv.second);
+
+      std::map<std::string, xmlrpc_c::value> const
+      	inner_map(static_cast<std::map<std::string, xmlrpc_c::value> >
+      		  (_vs));
+
+      std::unordered_map<std::string, std::string> inner_retval;
+
+      for (auto& inner_kv : inner_map)
+      	{
+      	  inner_retval[inner_kv.first] =
+      	    std::string(xmlrpc_c::value_string(inner_kv.second));
+      	}
+
+      retval[kv.first] = inner_retval;
+    }
+
+  return retval;
+}
+
 //--------------------------------------------------
 // Image processing utilities
 //--------------------------------------------------

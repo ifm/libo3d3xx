@@ -50,6 +50,8 @@ namespace o3d3xx
   extern const std::string XMLRPC_NET;
   extern const std::string XMLRPC_APP;
   extern const std::string XMLRPC_IMAGER;
+  extern const std::string XMLRPC_SPATIALFILTER;
+  extern const std::string XMLRPC_TEMPORALFILTER;
 
   /**
    * Software interface to the IFM O3D3XX camera.
@@ -106,7 +108,13 @@ namespace o3d3xx
      * Spatial filter types
      */
     enum class spatial_filter : int
-    { OFF = 0, MEDIAN_FILTER = 1 };
+    { OFF = 0, MEDIAN_FILTER = 1, MEAN_FILTER = 2, BILATERAL_FILTER = 3 };
+
+    /**
+     * Temporal filter types
+     */
+    enum class temporal_filter : int
+    { OFF = 0, TEMPORAL_MEAN_FILTER = 1, ADAPTIVE_EXPONENTIAL_FILTER = 2 };
 
     /**
      * Initializes the camera interface utilizing library defaults for
@@ -448,6 +456,15 @@ namespace o3d3xx
      * specified by index to `EditApplication(index)'.
      */
     std::unordered_map<std::string, std::string> GetImagerParameters();
+
+    /**
+     * Returns a mapping of imager parameters to their min/max values. This is
+     * based on the imager connected to the currently being edited
+     * application.
+     */
+    std::unordered_map<std::string,
+    		       std::unordered_map<std::string, std::string> >
+    GetImagerParameterLimits();
 
     /**
      * Returns an `ImagerConfig' instance for the imager configuration of the
