@@ -1,5 +1,6 @@
 #include "o3d3xx.h"
 #include <memory>
+#include <boost/algorithm/string/predicate.hpp>
 #include "gtest/gtest.h"
 
 //
@@ -231,26 +232,44 @@ TEST_F(AppImagerTest, GetImagerParameters)
       std::unordered_map<std::string, std::string> params =
 	cam_->GetImagerParameters();
 
-      ASSERT_NO_THROW(params.at("Type"));
-      ASSERT_NO_THROW(params.at("TypeHash"));
-      ASSERT_NO_THROW(params.at("ReduceMotionArtifacts"));
       ASSERT_NO_THROW(params.at("Channel"));
+      ASSERT_NO_THROW(params.at("ClippingBottom"));
       ASSERT_NO_THROW(params.at("ClippingLeft"));
       ASSERT_NO_THROW(params.at("ClippingRight"));
-      ASSERT_NO_THROW(params.at("ClippingBottom"));
       ASSERT_NO_THROW(params.at("ClippingTop"));
       ASSERT_NO_THROW(params.at("FrameRate"));
+      ASSERT_NO_THROW(params.at("MinimumAmplitude"));
+      ASSERT_NO_THROW(params.at("ReduceMotionArtifacts"));
       ASSERT_NO_THROW(params.at("SpatialFilterType"));
-      //ASSERT_NO_THROW(params.at("AverageFilterNumPictures"));
+      ASSERT_NO_THROW(params.at("SymmetryThreshold"));
+      ASSERT_NO_THROW(params.at("TemporalFilterType"));
+      ASSERT_NO_THROW(params.at("ThreeFreqMax2FLineDistPercentage"));
+      ASSERT_NO_THROW(params.at("ThreeFreqMax3FLineDistPercentage"));
+      ASSERT_NO_THROW(params.at("TwoFreqMaxLineDistPercentage"));
+      ASSERT_NO_THROW(params.at("Type"));
+      ASSERT_NO_THROW(params.at("TypeHash"));
 
-      if ((type == "under5m_high") ||
-	  (type == "upto30m_high"))
+
+      if (boost::algorithm::ends_with(type, "high"))
 	{
 	  ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
+	  ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
+
+	  ASSERT_EQ(params.size(), 16);
+	}
+      else if (boost::algorithm::ends_with(type, "low"))
+	{
+	  ASSERT_NO_THROW(params.at("ExposureTime"));
+	  ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
+
+	  ASSERT_EQ(params.size(), 17);
 	}
       else
 	{
 	  ASSERT_NO_THROW(params.at("ExposureTime"));
+	  ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
+
+	  ASSERT_EQ(params.size(), 18);
 	}
     }
 
@@ -331,31 +350,60 @@ TEST_F(AppImagerTest, ImagerConfig)
       o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
       ASSERT_EQ(im->Type(), type);
 
-      // need to do more investigation on this imager type
-      // ... for now skipping tests
-      if (type == "upto30m_high")
+      // mutate the config
+      if (boost::algorithm::ends_with(type, "high"))
 	{
-	  continue;
+
+	}
+      else if (boost::algorithm::ends_with(type, "low"))
+	{
+	  ASSERT_NO_THROW(im->SetExposureTime(2000));
+	}
+      else
+	{
+	  ASSERT_NO_THROW(im->SetExposureTime(2000));
+	  ASSERT_NO_THROW(im->SetExposureTimeRatio(5));
 	}
 
-      // mutate the config
-      ASSERT_NO_THROW(im->SetFrameRate(10));
-      ASSERT_NO_THROW(im->SetReduceMotionArtifacts(true));
-      ASSERT_NO_THROW(im->SetSpatialFilterType(1));
 
-      // XXX: For prototype camera, max here is 1
-      //ASSERT_NO_THROW(im->SetAverageFilterNumPictures(2));
+      ASSERT_NO_THROW(im->SetFrameRate(10));
+      ASSERT_NO_THROW(im->SetMinimumAmplitude(5));
+      ASSERT_NO_THROW(im->SetReduceMotionArtifacts(true));
+      ASSERT_NO_THROW(im->SetSpatialFilterType(
+        static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER)));
+      //ASSERT_NO_THROW(im->SetSymmetryThreshold(1));
+      ASSERT_NO_THROW(im->SetTemporalFilterType(
+        static_cast<int>(
+          o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER)));
 
       // send new config parameters to the sensor
       ASSERT_NO_THROW(cam_->SetImagerConfig(im.get()));
 
       // check if they are correct when queried again
       o3d3xx::ImagerConfig::Ptr im2 = cam_->GetImagerConfig();
-      ASSERT_EQ(im2->Type(), type);
-      ASSERT_EQ(im2->FrameRate() , 10);
-      ASSERT_EQ(im2->ReduceMotionArtifacts(), true);
-      ASSERT_EQ(im2->SpatialFilterType(), 1);
-      //ASSERT_EQ(im2->AverageFilterNumPictures(), 2);
+      ASSERT_EQ(im2->Type(), im->Type());
+
+      if (boost::algorithm::ends_with(type, "high"))
+	{
+
+	}
+      else if (boost::algorithm::ends_with(type, "low"))
+	{
+	  ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
+	}
+      else
+	{
+	  ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
+	  ASSERT_EQ(im2->ExposureTimeRatio(),
+		    im->ExposureTimeRatio());
+	}
+
+      ASSERT_EQ(im2->FrameRate() , im->FrameRate());
+      ASSERT_EQ(im2->MinimumAmplitude(), im->MinimumAmplitude());
+      ASSERT_EQ(im2->ReduceMotionArtifacts(), im->ReduceMotionArtifacts());
+      ASSERT_EQ(im2->SpatialFilterType(), im->SpatialFilterType());
+      //ASSERT_EQ(im2->SymmetryThreshold(), im->SymmetryThreshold());
+      ASSERT_EQ(im2->TemporalFilterType(), im->TemporalFilterType());
     }
 
   cam_->StopEditingApplication();
@@ -377,13 +425,6 @@ TEST_F(AppImagerTest, ImagerConfigValueOutOfRange)
 
       o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
       ASSERT_EQ(im->Type(), type);
-
-      // need to do more investigation on this imager type
-      // ... for now skipping tests
-      if (type == "upto30m_high")
-	{
-	  continue;
-	}
 
       // mutate the config
       ASSERT_NO_THROW(im->SetFrameRate(1000.0));
@@ -418,14 +459,40 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
 
   o3d3xx::ImagerConfig::Ptr im2 = o3d3xx::ImagerConfig::FromJSON(json);
 
-  ASSERT_EQ(im->FrameRate(), im2->FrameRate());
-  ASSERT_EQ(im->ClippingLeft(), im2->ClippingLeft());
-  ASSERT_EQ(im->ClippingTop(), im2->ClippingTop());
-  ASSERT_EQ(im->ClippingRight(), im2->ClippingRight());
+  ASSERT_EQ(im->Type(), im2->Type());
+  ASSERT_EQ(im->Channel(), im2->Channel());
   ASSERT_EQ(im->ClippingBottom(), im2->ClippingBottom());
+  ASSERT_EQ(im->ClippingLeft(), im2->ClippingLeft());
+  ASSERT_EQ(im->ClippingRight(), im2->ClippingRight());
+  ASSERT_EQ(im->ClippingTop(), im2->ClippingTop());
+
+  if (boost::algorithm::ends_with(im->Type(), "high"))
+    {
+
+    }
+  else if (boost::algorithm::ends_with(im->Type(), "low"))
+    {
+      ASSERT_EQ(im->ExposureTime(), im2->ExposureTime());
+    }
+  else
+    {
+      ASSERT_EQ(im->ExposureTime(), im2->ExposureTime());
+      ASSERT_EQ(im->ExposureTimeRatio(), im2->ExposureTimeRatio());
+    }
+
+  ASSERT_EQ(im->FrameRate(), im2->FrameRate());
+  ASSERT_EQ(im->MinimumAmplitude(), im2->MinimumAmplitude());
   ASSERT_EQ(im->ReduceMotionArtifacts(), im2->ReduceMotionArtifacts());
   ASSERT_EQ(im->SpatialFilterType(), im2->SpatialFilterType());
-  ASSERT_EQ(im->AverageFilterNumPictures(), im2->AverageFilterNumPictures());
+  ASSERT_EQ(im->SymmetryThreshold(), im2->SymmetryThreshold());
+  ASSERT_EQ(im->TemporalFilterType(), im2->TemporalFilterType());
+  ASSERT_EQ(im->ThreeFreqMax2FLineDistPercentage(),
+	    im2->ThreeFreqMax2FLineDistPercentage());
+  ASSERT_EQ(im->ThreeFreqMax3FLineDistPercentage(),
+	    im2->ThreeFreqMax3FLineDistPercentage());
+  ASSERT_EQ(im->TwoFreqMaxLineDistPercentage(),
+	    im2->TwoFreqMaxLineDistPercentage());
+  ASSERT_EQ(im->TypeHash(), im2->TypeHash());
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);

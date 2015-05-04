@@ -27,6 +27,7 @@
 #include <sstream>
 #include <unordered_map>
 #include <utility>
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/property_tree/exceptions.hpp>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
@@ -628,34 +629,22 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
   DLOG(INFO) << "Setting Imager Config for Type="
 	     << im->Type();
 
-  if (im->Type() != "under5m_high")
+  if (im->Channel() != config->Channel())
     {
-      if (im->ExposureTime() != config->ExposureTime())
-	{
-	  DLOG(INFO) << "Setting ExposureTime="
-		     << config->ExposureTime();
-
-	  this->_XCallImager("setParameter",
-			     "ExposureTime", config->ExposureTime());
-	}
-
-      if (im->Channel() != config->Channel())
-	{
-	  DLOG(INFO) << "Setting Channel="
-		     << config->Channel();
-
-	  this->_XCallImager("setParameter",
-			     "Channel", config->Channel());
-	}
-    }
-
-  if (im->FrameRate() != config->FrameRate())
-    {
-      DLOG(INFO) << "Setting FrameRate="
-		 << config->FrameRate();
+      DLOG(INFO) << "Setting Channel="
+		 << config->Channel();
 
       this->_XCallImager("setParameter",
-			 "FrameRate", config->FrameRate());
+			 "Channel", config->Channel());
+    }
+
+  if (im->ClippingBottom() != config->ClippingBottom())
+    {
+      DLOG(INFO) << "Setting ClippingBottom="
+		 << config->ClippingBottom();
+
+      this->_XCallImager("setParameter",
+			 "ClippingBottom", config->ClippingBottom());
     }
 
   if (im->ClippingLeft() != config->ClippingLeft())
@@ -667,15 +656,6 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 			 "ClippingLeft", config->ClippingLeft());
     }
 
-  if (im->ClippingTop() != config->ClippingTop())
-    {
-      DLOG(INFO) << "Setting ClippingTop="
-		 << config->ClippingTop();
-
-      this->_XCallImager("setParameter",
-			 "ClippingTop", config->ClippingTop());
-    }
-
   if (im->ClippingRight() != config->ClippingRight())
     {
       DLOG(INFO) << "Setting ClippingRight="
@@ -685,13 +665,71 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 			 "ClippingRight", config->ClippingRight());
     }
 
-  if (im->ClippingBottom() != config->ClippingBottom())
+
+  if (im->ClippingTop() != config->ClippingTop())
     {
-      DLOG(INFO) << "Setting ClippingBottom="
-		 << config->ClippingBottom();
+      DLOG(INFO) << "Setting ClippingTop="
+		 << config->ClippingTop();
 
       this->_XCallImager("setParameter",
-			 "ClippingBottom", config->ClippingBottom());
+			 "ClippingTop", config->ClippingTop());
+    }
+
+
+  if (boost::algorithm::ends_with(im->Type(), "high"))
+    {
+
+    }
+  else if (boost::algorithm::ends_with(im->Type(), "low"))
+    {
+      if (im->ExposureTime() != config->ExposureTime())
+	{
+	  DLOG(INFO) << "Setting ExposureTime="
+		     << config->ExposureTime();
+
+	  this->_XCallImager("setParameter",
+			     "ExposureTime", config->ExposureTime());
+	}
+    }
+  else
+    {
+      if (im->ExposureTime() != config->ExposureTime())
+	{
+	  DLOG(INFO) << "Setting ExposureTime="
+		     << config->ExposureTime();
+
+	  this->_XCallImager("setParameter",
+			     "ExposureTime", config->ExposureTime());
+	}
+
+      if (im->ExposureTimeRatio() != config->ExposureTimeRatio())
+	{
+	  DLOG(INFO) << "Setting ExposureTimeRatio="
+		     << config->ExposureTimeRatio();
+
+	  this->_XCallImager("setParameter",
+			     "ExposureTimeRatio",
+			     config->ExposureTimeRatio());
+	}
+    }
+
+
+  if (im->FrameRate() != config->FrameRate())
+    {
+      DLOG(INFO) << "Setting FrameRate="
+		 << config->FrameRate();
+
+      this->_XCallImager("setParameter",
+			 "FrameRate", config->FrameRate());
+    }
+
+  if (im->MinimumAmplitude() != config->MinimumAmplitude())
+    {
+      DLOG(INFO) << "Setting MinimumAmplitude="
+		 << config->MinimumAmplitude();
+
+      this->_XCallImager("setParameter",
+			 "MinimumAmplitude", config->MinimumAmplitude());
     }
 
   if (im->ReduceMotionArtifacts() != config->ReduceMotionArtifacts())
@@ -714,14 +752,58 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 			 config->SpatialFilterType());
     }
 
-  if (im->AverageFilterNumPictures() != config->AverageFilterNumPictures())
+  //! @todo Is SymmetryThreshold implemented in camera?
+  // if (im->SymmetryThreshold() != config->SymmetryThreshold())
+  //   {
+  //     DLOG(INFO) << "Setting SymmetryThreshold="
+  // 		 << config->SymmetryThreshold();
+
+  //     this->_XCallImager("setParameter",
+  // 			 "SymmetryTreshold",
+  // 			 config->SymmetryThreshold());
+  //   }
+
+  if (im->TemporalFilterType() != config->TemporalFilterType())
     {
-      DLOG(INFO) << "Setting AverageFilterNumPictures="
-		 << config->AverageFilterNumPictures();
+      DLOG(INFO) << "Setting TemporalFilterType="
+		 << config->TemporalFilterType();
 
       this->_XCallImager("setParameter",
-			 "AverageFilterNumPictures",
-			 config->AverageFilterNumPictures());
+			 "TemporalFilterType",
+			 config->TemporalFilterType());
+    }
+
+  if (im->ThreeFreqMax2FLineDistPercentage() !=
+      config->ThreeFreqMax2FLineDistPercentage())
+    {
+      DLOG(INFO) << "Setting ThreeFreqMax2FLineDistPercentage="
+		 << config->ThreeFreqMax2FLineDistPercentage();
+
+      this->_XCallImager("setParameter",
+			 "ThreeFreqMax2FLineDistPercentage",
+			 config->ThreeFreqMax2FLineDistPercentage());
+    }
+
+  if (im->ThreeFreqMax3FLineDistPercentage() !=
+      config->ThreeFreqMax3FLineDistPercentage())
+    {
+      DLOG(INFO) << "Setting ThreeFreqMax3FLineDistPercentage="
+		 << config->ThreeFreqMax3FLineDistPercentage();
+
+      this->_XCallImager("setParameter",
+			 "ThreeFreqMax3FLineDistPercentage",
+			 config->ThreeFreqMax3FLineDistPercentage());
+    }
+
+  if (im->TwoFreqMaxLineDistPercentage() !=
+      config->TwoFreqMaxLineDistPercentage())
+    {
+      DLOG(INFO) << "Setting TwoFreqMaxLineDistPercentage="
+		 << config->TwoFreqMaxLineDistPercentage();
+
+      this->_XCallImager("setParameter",
+			 "TwoFreqMaxLineDistPercentage",
+			 config->TwoFreqMaxLineDistPercentage());
     }
 }
 
