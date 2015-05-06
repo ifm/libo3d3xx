@@ -25,6 +25,7 @@
 #include "o3d3xx/device_config.h"
 #include "o3d3xx/net_config.h"
 #include "o3d3xx/app_config.h"
+#include "o3d3xx/spatial_filter_config.h"
 #include "o3d3xx/imager_config.h"
 #include "o3d3xx/image.h"
 #include "o3d3xx/camera.hpp"

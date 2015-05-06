@@ -713,7 +713,6 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 	}
     }
 
-
   if (im->FrameRate() != config->FrameRate())
     {
       DLOG(INFO) << "Setting FrameRate="
@@ -807,6 +806,79 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
     }
 }
 
+std::unordered_map<std::string, std::string>
+o3d3xx::Camera::GetSpatialFilterParameters()
+{
+  return o3d3xx::value_struct_to_map(
+    this->_XCallSpatialFilter("getAllParameters"));
+}
+
+std::unordered_map<std::string,
+		   std::unordered_map<std::string, std::string> >
+o3d3xx::Camera::GetSpatialFilterParameterLimits()
+{
+  return o3d3xx::value_struct_to_map_of_maps(
+    this->_XCallSpatialFilter("getAllParameterLimits"));
+}
+
+o3d3xx::SpatialFilterConfig::Ptr
+o3d3xx::Camera::GetSpatialFilterConfig()
+{
+  o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
+  int filter_type = im->SpatialFilterType();
+
+  std::unordered_map<std::string, std::string> params =
+    this->GetSpatialFilterParameters();
+
+  o3d3xx::SpatialFilterConfig::Ptr filt;
+
+  switch (filter_type)
+    {
+    case static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER):
+      filt = std::make_shared<o3d3xx::SpatialMedianFilterConfig>();
+      filt->SetMaskSize(std::stoi(params.at("MaskSize")));
+      break;
+
+    case static_cast<int>(o3d3xx::Camera::spatial_filter::MEAN_FILTER):
+      filt = std::make_shared<o3d3xx::SpatialMeanFilterConfig>();
+      filt->SetMaskSize(std::stoi(params.at("MaskSize")));
+      break;
+
+    case static_cast<int>(o3d3xx::Camera::spatial_filter::BILATERAL_FILTER):
+      filt = std::make_shared<o3d3xx::SpatialBilateralFilterConfig>();
+      filt->SetMaskSize(std::stoi(params.at("MaskSize")));
+      break;
+
+    default:
+      filt = std::make_shared<o3d3xx::SpatialFilterConfig>();
+      break;
+    }
+
+  return filt;
+}
+
+void
+o3d3xx::Camera::SetSpatialFilterConfig(
+  const o3d3xx::SpatialFilterConfig* config)
+{
+  DLOG(INFO) << "Setting Spatial Filter Config for Type="
+	     << config->Type();
+
+  o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
+  im->SetSpatialFilterType(config->Type());
+  this->SetImagerConfig(im.get());
+
+  if (config->Type() ==
+      static_cast<int>(o3d3xx::Camera::spatial_filter::OFF))
+    {
+      return;
+    }
+
+  this->_XCallSpatialFilter("setParameter",
+			    "MaskSize", config->MaskSize());
+}
+
+
 std::string
 o3d3xx::Camera::ToJSON()
 {
@@ -887,11 +959,21 @@ o3d3xx::Camera::ToJSON()
 	  app_pt.put("Index", app.index);
 	  app_pt.put("Id", app.id);
 
+	  // imager
 	  o3d3xx::ImagerConfig::Ptr im_ptr = this->GetImagerConfig();
 	  std::istringstream im_in(im_ptr->ToJSON());
 	  boost::property_tree::ptree im_pt;
 	  boost::property_tree::read_json(im_in, im_pt);
 
+	  // spatial filter
+	  o3d3xx::SpatialFilterConfig::Ptr sf_ptr =
+	    this->GetSpatialFilterConfig();
+	  std::istringstream sf_in(sf_ptr->ToJSON());
+	  boost::property_tree::ptree sf_pt;
+	  boost::property_tree::read_json(sf_in, sf_pt);
+	  im_pt.put_child("SpatialFilter", sf_pt);
+
+	  // now add the imager and filters to the app
 	  app_pt.put_child("Imager", im_pt);
 	  apps_pt.push_back(std::make_pair("", app_pt));
 
@@ -1027,6 +1109,27 @@ o3d3xx::Camera::FromJSON(const std::string& json)
 		    }
 
 		  this->SetImagerConfig(im.get());
+
+		  // add in the spatial filter
+		  try
+		    {
+		      boost::property_tree::ptree sf_pt =
+			im_pt.get_child("SpatialFilter");
+		      std::ostringstream sf_buff;
+		      boost::property_tree::write_json(sf_buff, sf_pt);
+		      o3d3xx::SpatialFilterConfig::Ptr sf_filt =
+			o3d3xx::SpatialFilterConfig::FromJSON(sf_buff.str());
+
+		      this->SetSpatialFilterConfig(sf_filt.get());
+		    }
+		  catch (const boost::property_tree::ptree_bad_path& path_ex)
+		    {
+		      LOG(WARNING) << "In `FromJSON(...)', "
+				   << "skipping `SpatialFilter' section.";
+		      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
+		    }
+
+
 		  this->SaveApp();
 		}
 	      catch (const boost::property_tree::ptree_bad_path& path_ex)

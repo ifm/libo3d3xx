@@ -31,6 +31,7 @@
 #include "o3d3xx/net_config.h"
 #include "o3d3xx/app_config.h"
 #include "o3d3xx/imager_config.h"
+#include "o3d3xx/spatial_filter_config.h"
 #include "o3d3xx/err.h"
 
 namespace o3d3xx
@@ -479,6 +480,42 @@ namespace o3d3xx
     void SetImagerConfig(const o3d3xx::ImagerConfig* config);
 
     //---------------------------------------------
+    // XMLRPC: SpatialFilter object
+    //---------------------------------------------
+
+    /**
+     * Returns a mapping of key/value pairs for the enabled spatial filter for
+     * the application that is currently being edited.
+     */
+    std::unordered_map<std::string, std::string> GetSpatialFilterParameters();
+
+    /**
+     * Returns a mapping of spatial filter parameters to their min/max
+     * allowable values. This is based on the spatial filter applied to the
+     * imager connected to the currently being edited application.
+     */
+    std::unordered_map<std::string,
+		       std::unordered_map<std::string, std::string> >
+    GetSpatialFilterParameterLimits();
+
+    /**
+     * Returns a `SpatialFilterConfig' instance for the imager configuration of
+     * the application currently attached to the XMLRPC server.
+     */
+    o3d3xx::SpatialFilterConfig::Ptr GetSpatialFilterConfig();
+
+    /**
+     * Sets parameters on the XMLRPC-attached imager's spatial filter based on
+     * the passed in `SpatialFilterConfig' pointer.
+     */
+    void SetSpatialFilterConfig(const o3d3xx::SpatialFilterConfig* config);
+
+    //---------------------------------------------
+    // XMLRPC: TemporalFilter object
+    //---------------------------------------------
+
+
+    //---------------------------------------------
     // XMLRPC: DeviceConfig object
     //---------------------------------------------
 
@@ -821,6 +858,40 @@ namespace o3d3xx
 	o3d3xx::XMLRPC_EDIT +
 	o3d3xx::XMLRPC_APP +
 	o3d3xx::XMLRPC_IMAGER;
+
+      return this->_XCall(url, sensor_method_name, args...);
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "SpatialFilter" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallSpatialFilter(const std::string& sensor_method_name, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT +
+	o3d3xx::XMLRPC_APP +
+	o3d3xx::XMLRPC_IMAGER +
+	o3d3xx::XMLRPC_SPATIALFILTER;
+
+      return this->_XCall(url, sensor_method_name, args...);
+    }
+
+    /** _XCall wrapper for XMLRPC calls to the "TemporalFilter" object */
+    template <typename... Args>
+    xmlrpc_c::value const
+    _XCallTemporalFilter(const std::string& sensor_method_name, Args... args)
+    {
+      std::string url =
+	this->GetXMLRPCURLPrefix() +
+	o3d3xx::XMLRPC_MAIN +
+	o3d3xx::XMLRPC_SESSION +
+	o3d3xx::XMLRPC_EDIT +
+	o3d3xx::XMLRPC_APP +
+	o3d3xx::XMLRPC_IMAGER +
+	o3d3xx::XMLRPC_TEMPORALFILTER;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
