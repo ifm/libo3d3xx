@@ -32,6 +32,7 @@
 #include "o3d3xx/app_config.h"
 #include "o3d3xx/imager_config.h"
 #include "o3d3xx/spatial_filter_config.h"
+#include "o3d3xx/temporal_filter_config.h"
 #include "o3d3xx/err.h"
 
 namespace o3d3xx
@@ -514,6 +515,32 @@ namespace o3d3xx
     // XMLRPC: TemporalFilter object
     //---------------------------------------------
 
+    /**
+     * Returns a mapping of key/value pairs for the enabled temporal filter for
+     * the application that is currently being edited.
+     */
+    std::unordered_map<std::string, std::string> GetTemporalFilterParameters();
+
+    /**
+     * Returns a mapping of temporal filter parameters to their min/max
+     * allowable values. This is based on the temporal filter applied to the
+     * imager connected to the currently being edited application.
+     */
+    std::unordered_map<std::string,
+		       std::unordered_map<std::string, std::string> >
+    GetTemporalFilterParameterLimits();
+
+    /**
+     * Returns a `TemporalFilterConfig' instance for the imager configuration
+     * of the application currently attached to the XMLRPC server.
+     */
+    o3d3xx::TemporalFilterConfig::Ptr GetTemporalFilterConfig();
+
+    /**
+     * Sets parameters on the XMLRPC-attached imager's temporal filter based on
+     * the passed in `TemporalFilterConfig' pointer.
+     */
+    void SetTemporalFilterConfig(const o3d3xx::TemporalFilterConfig* config);
 
     //---------------------------------------------
     // XMLRPC: DeviceConfig object

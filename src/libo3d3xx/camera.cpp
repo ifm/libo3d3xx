@@ -807,6 +807,71 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 }
 
 std::unordered_map<std::string, std::string>
+o3d3xx::Camera::GetTemporalFilterParameters()
+{
+  return o3d3xx::value_struct_to_map(
+    this->_XCallTemporalFilter("getAllParameters"));
+}
+
+std::unordered_map<std::string,
+		   std::unordered_map<std::string, std::string> >
+o3d3xx::Camera::GetTemporalFilterParameterLimits()
+{
+  return o3d3xx::value_struct_to_map_of_maps(
+    this->_XCallTemporalFilter("getAllParameterLimits"));
+}
+
+o3d3xx::TemporalFilterConfig::Ptr
+o3d3xx::Camera::GetTemporalFilterConfig()
+{
+  o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
+  int filter_type = im->TemporalFilterType();
+
+  std::unordered_map<std::string, std::string> params =
+    this->GetTemporalFilterParameters();
+
+  o3d3xx::TemporalFilterConfig::Ptr filt;
+
+  switch (filter_type)
+    {
+    case static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
+      filt = std::make_shared<o3d3xx::TemporalMeanFilterConfig>();
+      filt->SetNumberOfImages(std::stoi(params.at("NumberOfImages")));
+      break;
+
+    case static_cast<int>(o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
+      filt =
+	std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
+      break;
+
+    default:
+      filt = std::make_shared<o3d3xx::TemporalFilterConfig>();
+      break;
+    }
+
+  return filt;
+}
+
+void
+o3d3xx::Camera::SetTemporalFilterConfig(
+  const o3d3xx::TemporalFilterConfig* config)
+{
+  DLOG(INFO) << "Setting Temporal Filter Config for Type="
+	     << config->Type();
+
+  o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
+  im->SetTemporalFilterType(config->Type());
+  this->SetImagerConfig(im.get());
+
+  if (config->Type() ==
+      static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER))
+    {
+      this->_XCallTemporalFilter("setParameter",
+				 "NumberOfImages", config->NumberOfImages());
+    }
+}
+
+std::unordered_map<std::string, std::string>
 o3d3xx::Camera::GetSpatialFilterParameters()
 {
   return o3d3xx::value_struct_to_map(
@@ -877,7 +942,6 @@ o3d3xx::Camera::SetSpatialFilterConfig(
   this->_XCallSpatialFilter("setParameter",
 			    "MaskSize", config->MaskSize());
 }
-
 
 std::string
 o3d3xx::Camera::ToJSON()
@@ -972,6 +1036,14 @@ o3d3xx::Camera::ToJSON()
 	  boost::property_tree::ptree sf_pt;
 	  boost::property_tree::read_json(sf_in, sf_pt);
 	  im_pt.put_child("SpatialFilter", sf_pt);
+
+	  // temporal filter
+	  o3d3xx::TemporalFilterConfig::Ptr tf_ptr =
+	    this->GetTemporalFilterConfig();
+	  std::istringstream tf_in(tf_ptr->ToJSON());
+	  boost::property_tree::ptree tf_pt;
+	  boost::property_tree::read_json(tf_in, tf_pt);
+	  im_pt.put_child("TemporalFilter", tf_pt);
 
 	  // now add the imager and filters to the app
 	  app_pt.put_child("Imager", im_pt);
@@ -1129,6 +1201,24 @@ o3d3xx::Camera::FromJSON(const std::string& json)
 		      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
 		    }
 
+		  // add in the temporal filter
+		  try
+		    {
+		      boost::property_tree::ptree tf_pt =
+			im_pt.get_child("TemporalFilter");
+		      std::ostringstream tf_buff;
+		      boost::property_tree::write_json(tf_buff, tf_pt);
+		      o3d3xx::TemporalFilterConfig::Ptr tf_filt =
+			o3d3xx::TemporalFilterConfig::FromJSON(tf_buff.str());
+
+		      this->SetTemporalFilterConfig(tf_filt.get());
+		    }
+		  catch (const boost::property_tree::ptree_bad_path& path_ex)
+		    {
+		      LOG(WARNING) << "In `FromJSON(...)', "
+				   << "skipping `TemporalFilter' section.";
+		      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
+		    }
 
 		  this->SaveApp();
 		}

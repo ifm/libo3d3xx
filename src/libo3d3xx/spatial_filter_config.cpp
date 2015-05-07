@@ -36,9 +36,7 @@ o3d3xx::SpatialFilterConfig::SpatialFilterConfig(
   : type_(type),
     type_str_(type_str),
     mask_size_(-1)
-{
-
-}
+{ }
 
 int
 o3d3xx::SpatialFilterConfig::Type() const noexcept
@@ -120,10 +118,6 @@ o3d3xx::SpatialFilterConfig::FromJSON(const std::string& json)
 
   switch (type)
     {
-    case static_cast<int>(o3d3xx::Camera::spatial_filter::OFF):
-      filt = std::make_shared<o3d3xx::SpatialFilterConfig>();
-      break;
-
     case static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER):
       filt = std::make_shared<o3d3xx::SpatialMedianFilterConfig>();
       break;
@@ -134,6 +128,10 @@ o3d3xx::SpatialFilterConfig::FromJSON(const std::string& json)
 
     case static_cast<int>(o3d3xx::Camera::spatial_filter::BILATERAL_FILTER):
       filt = std::make_shared<o3d3xx::SpatialBilateralFilterConfig>();
+      break;
+
+    default:
+      filt = std::make_shared<o3d3xx::SpatialFilterConfig>();
       break;
     }
 

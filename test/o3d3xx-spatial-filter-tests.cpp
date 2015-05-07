@@ -86,7 +86,6 @@ TEST_F(SpatialFilterTest, SpatialFilterConfig_General)
 
   ASSERT_NO_THROW(filt->SetMaskSize(mask_size));
   ASSERT_EQ(mask_size, filt->MaskSize());
-
 }
 
 

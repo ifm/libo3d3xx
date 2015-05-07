@@ -25,8 +25,7 @@
 namespace o3d3xx
 {
   /**
-   * Base class for spatial filters. Effectively, this is the
-   * o3d3xx::Camera::spatial_filter::OFF type.
+   * Base class for spatial filters.
    */
   class SpatialFilterConfig
   {
