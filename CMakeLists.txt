@@ -13,8 +13,8 @@ include(MacroOutOfSourceBuild)
 macro_ensure_out_of_source_build("Please build ${PROJECT_NAME} out-of-source")
 
 # settings for controlling debug vs. release builds
-#set(CMAKE_BUILD_TYPE Release)
-set(CMAKE_BUILD_TYPE Debug)
+set(CMAKE_BUILD_TYPE Release)
+#set(CMAKE_BUILD_TYPE Debug)
 
 # if you want to customize the compiler flags based on build type, do that here
 set(CMAKE_CXX_FLAGS "-std=c++11") # turn on C++11 for g++
