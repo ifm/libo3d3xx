@@ -61,6 +61,11 @@ o3d3xx::DeviceConfig::DeviceConfig(
 	{
 	  // we expect this for the read-only params
 	}
+      catch (const std::invalid_argument& ia)
+	{
+	  LOG(ERROR) << "Invalid arg for: "
+		     << kv.first << "=" << kv.second;
+	}
     }
 }
 

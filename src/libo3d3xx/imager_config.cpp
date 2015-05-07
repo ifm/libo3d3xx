@@ -68,6 +68,11 @@ o3d3xx::ImagerConfig::ImagerConfig(
 		       << "parameter not present in mutator map: "
 		       << ex.what();
 	}
+      catch (const std::invalid_argument& ia)
+	{
+	  LOG(ERROR) << "Invalid arg for: "
+		     << kv.first << "=" << kv.second;
+	}
     }
 }
 

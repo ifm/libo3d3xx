@@ -49,6 +49,11 @@ o3d3xx::AppConfig::AppConfig(
 	{
 	  // we expect this for any read-only params
 	}
+      catch (const std::invalid_argument& ia)
+	{
+	  LOG(ERROR) << "Invalid arg for: "
+		     << kv.first << "=" << kv.second;
+	}
     }
 }
 
