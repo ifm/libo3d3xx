@@ -9,7 +9,7 @@ Library and utilities for working with IFM Efector O3D3xx Cameras.
 libo3d3xx provides facilities for interfacing with O3D3xx cameras built and
 sold by IFM Efector. The O3D3xx cameras are 3D cameras based on the PMD
 Tech Photonic Mixer Device time-of-flight imager. This toolbox bridges the IFM
-hardware to the state-of-the-art open source computer vision packages:
+hardware to the open-source computer vision packages:
 [OpenCV](http://opencv.org) and [PCL](http://pointclouds.org).
 
 At its core, libo3d3xx provides a way to stream images from an O3D3xx camera in
@@ -29,10 +29,20 @@ some tweaks will need to be made to use the software on other platforms. You
 can contact [Love Park Robotics](http://loveparkrobotics.com) for assistance in
 porting or file an [issue request](https://github.com/lovepark/libo3d3xx/issues)
 
-**NOTE:** As of this writing, the O3D3xx camera(s) are still in beta. To that
-  end, this software will also remain in beta with no guarantees of API
-  stability. Once an initial O3D3xx camera is released as production, the
-  `libo3d3xx` API will stabilize.
+Software Compatibility Matrix
+-----------------------------
+<table>
+  <tr>
+    <th>libo3d3xx version</th>
+    <th>IFM Firmware Version</th>
+    <th>Supported Cameras</th>
+  </tr>
+  <tr>
+    <td>0.1.7</td>
+    <td>0.06.13</td>
+    <td>O3D303</td>
+  </tr>
+</table>
 
 Features
 --------
