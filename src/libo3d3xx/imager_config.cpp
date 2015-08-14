@@ -34,7 +34,14 @@ o3d3xx::ImagerConfig::ImagerConfig()
     clipping_left_(0),
     clipping_right_(175),
     clipping_top_(0),
+    continuous_auto_exposure_(false),
+    enable_amplitude_correction_(true),
+    enable_filter_amplitude_image_(true),
+    enable_filter_distance_image_(true),
+    enable_rectification_amplitude_image_(false),
+    enable_rectification_distance_image_(false),
     exposure_time_(1000),
+    exposure_time_list_(""),
     exposure_time_ratio_(40),
     frame_rate_(5.0),
     minimum_amplitude_(0),
@@ -47,8 +54,7 @@ o3d3xx::ImagerConfig::ImagerConfig()
     three_freq_max_3f_line_dist_percentage_(0),
     three_freq_max_2f_line_dist_percentage_(0),
     two_freq_max_line_dist_percentage_(0),
-    type_("under5m_low"),
-    type_hash_("")
+    type_("under5m_low")
 { }
 
 o3d3xx::ImagerConfig::ImagerConfig(
@@ -58,21 +64,21 @@ o3d3xx::ImagerConfig::ImagerConfig(
   for (auto& kv : params)
     {
       try
-	{
-	  auto func = o3d3xx::ImagerConfig::mutator_map.at(kv.first);
-	  func(this, kv.second);
-	}
+        {
+          auto func = o3d3xx::ImagerConfig::mutator_map.at(kv.first);
+          func(this, kv.second);
+        }
       catch (const std::out_of_range& ex)
-	{
-	  LOG(WARNING) << "In ImagerConfig ctor, "
-		       << "parameter not present in mutator map: "
-		       << ex.what();
-	}
+        {
+          LOG(WARNING) << "In ImagerConfig ctor, "
+                       << "parameter not present in mutator map: "
+                       << ex.what();
+        }
       catch (const std::invalid_argument& ia)
-	{
-	  LOG(ERROR) << "Invalid arg for: "
-		     << kv.first << "=" << kv.second;
-	}
+        {
+          LOG(ERROR) << "Invalid arg for: "
+                     << kv.first << "=" << kv.second;
+        }
     }
 }
 
@@ -136,6 +142,79 @@ o3d3xx::ImagerConfig::SetClippingTop(int top) noexcept
   this->clipping_top_ = top;
 }
 
+bool
+o3d3xx::ImagerConfig::ContinuousAutoExposure() const noexcept
+{
+  return this->continuous_auto_exposure_;
+}
+
+void
+o3d3xx::ImagerConfig::SetContinuousAutoExposure(bool on) noexcept
+{
+  this->continuous_auto_exposure_ = on;
+}
+
+bool
+o3d3xx::ImagerConfig::EnableAmplitudeCorrection() const noexcept
+{
+  return this->enable_amplitude_correction_;
+}
+
+void
+o3d3xx::ImagerConfig::SetEnableAmplitudeCorrection(bool enable) noexcept
+{
+  this->enable_amplitude_correction_ = enable;
+}
+
+bool
+o3d3xx::ImagerConfig::EnableFilterAmplitudeImage() const noexcept
+{
+  return this->enable_filter_amplitude_image_;
+}
+
+void
+o3d3xx::ImagerConfig::SetEnableFilterAmplitudeImage(bool enable) noexcept
+{
+  this->enable_filter_amplitude_image_ = enable;
+}
+
+bool
+o3d3xx::ImagerConfig::EnableFilterDistanceImage() const noexcept
+{
+  return this->enable_filter_distance_image_;
+}
+
+void
+o3d3xx::ImagerConfig::SetEnableFilterDistanceImage(bool enable) noexcept
+{
+  this->enable_filter_distance_image_ = enable;
+}
+
+bool
+o3d3xx::ImagerConfig::EnableRectificationAmplitudeImage() const noexcept
+{
+  return this->enable_rectification_amplitude_image_;
+}
+
+void
+o3d3xx::ImagerConfig::SetEnableRectificationAmplitudeImage(bool enable)
+noexcept
+{
+  this->enable_rectification_amplitude_image_ = enable;
+}
+
+bool
+o3d3xx::ImagerConfig::EnableRectificationDistanceImage() const noexcept
+{
+  return this->enable_rectification_distance_image_;
+}
+
+void
+o3d3xx::ImagerConfig::SetEnableRectificationDistanceImage(bool enable) noexcept
+{
+  this->enable_rectification_distance_image_ = enable;
+}
+
 int
 o3d3xx::ImagerConfig::ExposureTime() const
 {
@@ -146,6 +225,18 @@ void
 o3d3xx::ImagerConfig::SetExposureTime(int usecs)
 {
   this->exposure_time_ = usecs;
+}
+
+std::string
+o3d3xx::ImagerConfig::ExposureTimeList() const noexcept
+{
+  return this->exposure_time_list_;
+}
+
+void
+o3d3xx::ImagerConfig::SetExposureTimeList(const std::string s) noexcept
+{
+  this->exposure_time_list_ = s;
 }
 
 int
@@ -283,26 +374,14 @@ o3d3xx::ImagerConfig::SetType(const std::string& type) noexcept
   this->type_ = type;
 }
 
-std::string
-o3d3xx::ImagerConfig::TypeHash() const noexcept
-{
-  return this->type_hash_;
-}
-
-void
-o3d3xx::ImagerConfig::SetTypeHash(const std::string& hash) noexcept
-{
-  this->type_hash_ = hash;
-}
-
 const std::unordered_map<std::string,
-			 std::function<void(o3d3xx::ImagerConfig*,
-					    const std::string&)> >
+                         std::function<void(o3d3xx::ImagerConfig*,
+                                            const std::string&)> >
 o3d3xx::ImagerConfig::mutator_map =
   {
     {"Channel",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetChannel(std::stoi(val)); } },
+     { im->SetChannel(std::stoi(val)); }},
 
     {"ClippingBottom",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
@@ -320,21 +399,49 @@ o3d3xx::ImagerConfig::mutator_map =
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetClippingTop(std::stoi(val)); }},
 
+    {"ContinuousAutoExposure",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetContinuousAutoExposure(o3d3xx::stob(val)); }},
+
+    {"EnableAmplitudeCorrection",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetEnableAmplitudeCorrection(o3d3xx::stob(val)); }},
+
+    {"EnableFilterAmplitudeImage",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetEnableFilterAmplitudeImage(o3d3xx::stob(val)); }},
+
+    {"EnableFilterDistanceImage",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetEnableFilterDistanceImage(o3d3xx::stob(val)); }},
+
+    {"EnableRectificationAmplitudeImage",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetEnableRectificationAmplitudeImage(o3d3xx::stob(val)); }},
+
+    {"EnableRectificationDistanceImage",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetEnableRectificationDistanceImage(o3d3xx::stob(val)); }},
+
     {"ExposureTime",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetExposureTime(std::stoi(val)); } },
+     { im->SetExposureTime(std::stoi(val)); }},
+
+    {"ExposureTimeList",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetExposureTimeList(val); }},
 
     {"ExposureTimeRatio",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetExposureTimeRatio(std::stoi(val)); } },
+     { im->SetExposureTimeRatio(std::stoi(val)); }},
 
     {"FrameRate",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetFrameRate(std::stod(val)); } },
+     { im->SetFrameRate(std::stod(val)); }},
 
     {"MinimumAmplitude",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetMinimumAmplitude(std::stoi(val)); } },
+     { im->SetMinimumAmplitude(std::stoi(val)); }},
 
     {"ReduceMotionArtifacts",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
@@ -342,35 +449,31 @@ o3d3xx::ImagerConfig::mutator_map =
 
     {"SpatialFilterType",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetSpatialFilterType(std::stoi(val)); } },
+     { im->SetSpatialFilterType(std::stoi(val)); }},
 
     {"SymmetryThreshold",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetSymmetryThreshold(std::stoi(val)); } },
+     { im->SetSymmetryThreshold(std::stoi(val)); }},
 
     {"TemporalFilterType",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetTemporalFilterType(std::stoi(val)); } },
+     { im->SetTemporalFilterType(std::stoi(val)); }},
 
     {"ThreeFreqMax2FLineDistPercentage",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetThreeFreqMax2FLineDistPercentage(std::stoi(val)); } },
+     { im->SetThreeFreqMax2FLineDistPercentage(std::stoi(val)); }},
 
     {"ThreeFreqMax3FLineDistPercentage",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetThreeFreqMax3FLineDistPercentage(std::stoi(val)); } },
+     { im->SetThreeFreqMax3FLineDistPercentage(std::stoi(val)); }},
 
     {"TwoFreqMaxLineDistPercentage",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetTwoFreqMaxLineDistPercentage(std::stoi(val)); } },
+     { im->SetTwoFreqMaxLineDistPercentage(std::stoi(val)); }},
 
     {"Type",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetType(val); } },
-
-    {"TypeHash",
-     [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetTypeHash(val); } },
+     { im->SetType(val); }},
   };
 
 std::string
@@ -383,18 +486,28 @@ o3d3xx::ImagerConfig::ToJSON() const
   pt.put("ClippingLeft", this->ClippingLeft());
   pt.put("ClippingRight", this->ClippingRight());
   pt.put("ClippingTop", this->ClippingTop());
+  pt.put("ContinuousAutoExposure", this->ContinuousAutoExposure());
+  pt.put("EnableAmplitudeCorrection", this->EnableAmplitudeCorrection());
+  pt.put("EnableFilterAmplitudeImage", this->EnableFilterAmplitudeImage());
+  pt.put("EnableFilterDistanceImage", this->EnableFilterDistanceImage());
+  pt.put("EnableRectificationAmplitudeImage",
+         this->EnableRectificationAmplitudeImage());
+  pt.put("EnableRectificationDistanceImage",
+         this->EnableRectificationDistanceImage());
 
   if (boost::algorithm::ends_with(this->Type(), "high"))
     {
-
+      pt.put("ExposureTimeList", this->ExposureTimeList());
     }
   else if (boost::algorithm::ends_with(this->Type(), "low"))
     {
       pt.put("ExposureTime", this->ExposureTime());
+      pt.put("ExposureTimeList", this->ExposureTimeList());
     }
   else
     {
       pt.put("ExposureTime", this->ExposureTime());
+      pt.put("ExposureTimeList", this->ExposureTimeList());
       pt.put("ExposureTimeRatio", this->ExposureTimeRatio());
     }
 
@@ -405,13 +518,12 @@ o3d3xx::ImagerConfig::ToJSON() const
   pt.put("SymmetryThreshold", this->SymmetryThreshold());
   pt.put("TemporalFilterType", this->TemporalFilterType());
   pt.put("ThreeFreqMax2FLineDistPercentage",
-	 this->ThreeFreqMax2FLineDistPercentage());
+         this->ThreeFreqMax2FLineDistPercentage());
   pt.put("ThreeFreqMax3FLineDistPercentage",
-	 this->ThreeFreqMax3FLineDistPercentage());
+         this->ThreeFreqMax3FLineDistPercentage());
   pt.put("TwoFreqMaxLineDistPercentage",
-	 this->TwoFreqMaxLineDistPercentage());
+         this->TwoFreqMaxLineDistPercentage());
   pt.put("Type", this->Type());
-  pt.put("TypeHash", this->TypeHash());
 
   std::ostringstream buf;
   boost::property_tree::write_json(buf, pt);
@@ -430,16 +542,16 @@ o3d3xx::ImagerConfig::FromJSON(const std::string& json)
   for (auto& kv : pt)
     {
       try
-	{
-	  auto func = o3d3xx::ImagerConfig::mutator_map.at(kv.first);
-	  func(im.get(), kv.second.data());
-	}
+        {
+          auto func = o3d3xx::ImagerConfig::mutator_map.at(kv.first);
+          func(im.get(), kv.second.data());
+        }
       catch (const std::out_of_range& ex)
-	{
-	  DLOG(WARNING) << "In FromJSON: "
-			<< kv.first << "=" << kv.second.data()
-			<< ": " << ex.what();
-	}
+        {
+          DLOG(WARNING) << "In FromJSON: "
+                        << kv.first << "=" << kv.second.data()
+                        << ": " << ex.what();
+        }
     }
 
   return im;

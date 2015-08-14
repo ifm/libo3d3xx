@@ -1,6 +1,11 @@
 #include "o3d3xx.h"
+#include <cstdlib>
 #include <memory>
+#include <string>
+#include <vector>
+#include <boost/algorithm/string/classification.hpp>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/algorithm/string/split.hpp>
 #include "gtest/gtest.h"
 
 //
@@ -24,10 +29,10 @@ protected:
 
     for (auto& app : cam_->GetApplicationList())
       {
-	if (app.index != active_idx)
-	  {
-	    cam_->DeleteApplication(app.index);
-	  }
+        if (app.index != active_idx)
+          {
+            cam_->DeleteApplication(app.index);
+          }
       }
 
     cam_->SaveDevice();
@@ -93,10 +98,10 @@ TEST_F(AppImagerTest, ChangeAppNameAndDescription)
   for (auto& a : apps)
     {
       if (a.index == new_idx)
-	{
-	  ASSERT_EQ(a.name, name);
-	  ASSERT_EQ(a.description, descr);
-	}
+        {
+          ASSERT_EQ(a.name, name);
+          ASSERT_EQ(a.description, descr);
+        }
     }
 
   cam_->DeleteApplication(new_idx);
@@ -171,9 +176,9 @@ TEST_F(AppImagerTest, AppConfig_JSON)
   ASSERT_EQ(app->Description(), app2->Description());
   ASSERT_EQ(app->TriggerMode(), app2->TriggerMode());
   ASSERT_EQ(app->PcicTcpResultOutputEnabled(),
-	    app2->PcicTcpResultOutputEnabled());
+            app2->PcicTcpResultOutputEnabled());
   ASSERT_EQ(app->PcicTcpResultSchema(),
-	    app2->PcicTcpResultSchema());
+            app2->PcicTcpResultSchema());
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);
@@ -207,7 +212,7 @@ TEST_F(AppImagerTest, ChangeImagerType)
       ASSERT_NO_THROW(cam_->ChangeImagerType(type));
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetImagerParameters();
+        cam_->GetImagerParameters();
 
       ASSERT_EQ(params.at("Type"), type);
     }
@@ -230,13 +235,20 @@ TEST_F(AppImagerTest, GetImagerParameters)
       cam_->ChangeImagerType(type);
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetImagerParameters();
+        cam_->GetImagerParameters();
 
       ASSERT_NO_THROW(params.at("Channel"));
       ASSERT_NO_THROW(params.at("ClippingBottom"));
       ASSERT_NO_THROW(params.at("ClippingLeft"));
       ASSERT_NO_THROW(params.at("ClippingRight"));
       ASSERT_NO_THROW(params.at("ClippingTop"));
+      ASSERT_NO_THROW(params.at("ContinuousAutoExposure"));
+      ASSERT_NO_THROW(params.at("EnableAmplitudeCorrection"));
+      ASSERT_NO_THROW(params.at("EnableFilterAmplitudeImage"));
+      ASSERT_NO_THROW(params.at("EnableFilterDistanceImage"));
+      ASSERT_NO_THROW(params.at("EnableRectificationAmplitudeImage"));
+      ASSERT_NO_THROW(params.at("EnableRectificationDistanceImage"));
+      ASSERT_NO_THROW(params.at("ExposureTimeList"));
       ASSERT_NO_THROW(params.at("FrameRate"));
       ASSERT_NO_THROW(params.at("MinimumAmplitude"));
       ASSERT_NO_THROW(params.at("ReduceMotionArtifacts"));
@@ -247,30 +259,28 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("ThreeFreqMax3FLineDistPercentage"));
       ASSERT_NO_THROW(params.at("TwoFreqMaxLineDistPercentage"));
       ASSERT_NO_THROW(params.at("Type"));
-      ASSERT_NO_THROW(params.at("TypeHash"));
-
 
       if (boost::algorithm::ends_with(type, "high"))
-	{
-	  ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
-	  ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
+        {
+          ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
+          ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-	  ASSERT_EQ(params.size(), 16);
-	}
+          ASSERT_EQ(params.size(), 22);
+        }
       else if (boost::algorithm::ends_with(type, "low"))
-	{
-	  ASSERT_NO_THROW(params.at("ExposureTime"));
-	  ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
+        {
+          ASSERT_NO_THROW(params.at("ExposureTime"));
+          ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-	  ASSERT_EQ(params.size(), 17);
-	}
+          ASSERT_EQ(params.size(), 23);
+        }
       else
-	{
-	  ASSERT_NO_THROW(params.at("ExposureTime"));
-	  ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
+        {
+          ASSERT_NO_THROW(params.at("ExposureTime"));
+          ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
 
-	  ASSERT_EQ(params.size(), 18);
-	}
+          ASSERT_EQ(params.size(), 24);
+        }
     }
 
   cam_->StopEditingApplication();
@@ -291,42 +301,42 @@ TEST_F(AppImagerTest, GetImagerParameterLimits)
       cam_->ChangeImagerType(type);
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetImagerParameters();
+        cam_->GetImagerParameters();
 
       //
       // tests that the call to fetch the parameter limits does not throw an
       // exception.
       //
       std::unordered_map<std::string,
-			 std::unordered_map<std::string,
-					    std::string> > limits =
-	cam_->GetImagerParameterLimits();
+                         std::unordered_map<std::string,
+                                            std::string> > limits =
+        cam_->GetImagerParameterLimits();
 
       for (auto& param : params)
-	{
-	  try
-	    {
-	      //
-	      // Now we simply want to make sure that
-	      // the only limits, if the parameter has
-	      // limits, are "min" and "max" ... and
-	      // that the values make some sort of sense.
-	      // Otherwise, we need to investigate further.
-	      //
+        {
+          try
+            {
+              //
+              // Now we simply want to make sure that
+              // the only limits, if the parameter has
+              // limits, are "min" and "max" ... and
+              // that the values make some sort of sense.
+              // Otherwise, we need to investigate further.
+              //
 
-	      std::unordered_map<std::string, std::string>
-		param_limits = limits.at(param.first);
+              std::unordered_map<std::string, std::string>
+                param_limits = limits.at(param.first);
 
-	      ASSERT_EQ(param_limits.size(), 2);
-	      ASSERT_LE(std::stod(param_limits.at("min")),
-			std::stod(param_limits.at("max")));
+              ASSERT_EQ(param_limits.size(), 2);
+              ASSERT_LE(std::stod(param_limits.at("min")),
+                        std::stod(param_limits.at("max")));
 
-	    }
-	  catch (const std::out_of_range& ex)
-	    {
-	      // no limits defined for this parameter.
-	    }
-	}
+            }
+          catch (const std::out_of_range& ex)
+            {
+              // no limits defined for this parameter.
+            }
+        }
     }
 
   cam_->StopEditingApplication();
@@ -350,21 +360,27 @@ TEST_F(AppImagerTest, ImagerConfig)
       o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
       ASSERT_EQ(im->Type(), type);
 
+      ASSERT_NO_THROW(im->SetContinuousAutoExposure(true));
+      ASSERT_NO_THROW(im->SetEnableAmplitudeCorrection(false));
+      ASSERT_NO_THROW(im->SetEnableFilterAmplitudeImage(false));
+      ASSERT_NO_THROW(im->SetEnableFilterDistanceImage(false));
+      ASSERT_NO_THROW(im->SetEnableRectificationAmplitudeImage(true));
+      ASSERT_NO_THROW(im->SetEnableRectificationDistanceImage(true));
+
       // mutate the config
       if (boost::algorithm::ends_with(type, "high"))
-	{
+        {
 
-	}
+        }
       else if (boost::algorithm::ends_with(type, "low"))
-	{
-	  ASSERT_NO_THROW(im->SetExposureTime(2000));
-	}
+        {
+          ASSERT_NO_THROW(im->SetExposureTime(2000));
+        }
       else
-	{
-	  ASSERT_NO_THROW(im->SetExposureTime(2000));
-	  ASSERT_NO_THROW(im->SetExposureTimeRatio(5));
-	}
-
+        {
+          ASSERT_NO_THROW(im->SetExposureTime(2000));
+          ASSERT_NO_THROW(im->SetExposureTimeRatio(5));
+        }
 
       ASSERT_NO_THROW(im->SetFrameRate(10));
       ASSERT_NO_THROW(im->SetMinimumAmplitude(5));
@@ -384,19 +400,19 @@ TEST_F(AppImagerTest, ImagerConfig)
       ASSERT_EQ(im2->Type(), im->Type());
 
       if (boost::algorithm::ends_with(type, "high"))
-	{
+        {
 
-	}
+        }
       else if (boost::algorithm::ends_with(type, "low"))
-	{
-	  ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
-	}
+        {
+          ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
+        }
       else
-	{
-	  ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
-	  ASSERT_EQ(im2->ExposureTimeRatio(),
-		    im->ExposureTimeRatio());
-	}
+        {
+          ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
+          ASSERT_EQ(im2->ExposureTimeRatio(),
+                    im->ExposureTimeRatio());
+        }
 
       ASSERT_EQ(im2->FrameRate() , im->FrameRate());
       ASSERT_EQ(im2->MinimumAmplitude(), im->MinimumAmplitude());
@@ -432,14 +448,14 @@ TEST_F(AppImagerTest, ImagerConfigValueOutOfRange)
       // send new config parameters to the sensor
       bool ex_thrown = false;
       try
-	{
-	  cam_->SetImagerConfig(im.get());
-	}
+        {
+          cam_->SetImagerConfig(im.get());
+        }
       catch (const o3d3xx::error_t& ex)
-	{
-	  ASSERT_EQ(ex.code(), O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
-	  ex_thrown = true;
-	}
+        {
+          ASSERT_EQ(ex.code(), O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
+          ex_thrown = true;
+        }
 
       ASSERT_TRUE(ex_thrown);
     }
@@ -465,6 +481,15 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
   ASSERT_EQ(im->ClippingLeft(), im2->ClippingLeft());
   ASSERT_EQ(im->ClippingRight(), im2->ClippingRight());
   ASSERT_EQ(im->ClippingTop(), im2->ClippingTop());
+  ASSERT_EQ(im->ContinuousAutoExposure() , im2->ContinuousAutoExposure());
+  ASSERT_EQ(im->EnableAmplitudeCorrection(), im2->EnableAmplitudeCorrection());
+  ASSERT_EQ(im->EnableFilterAmplitudeImage(),
+            im2->EnableFilterAmplitudeImage());
+  ASSERT_EQ(im->EnableFilterDistanceImage(), im2->EnableFilterDistanceImage());
+  ASSERT_EQ(im->EnableRectificationAmplitudeImage(),
+            im2->EnableRectificationAmplitudeImage());
+  ASSERT_EQ(im->EnableRectificationDistanceImage(),
+            im2->EnableRectificationDistanceImage());
 
   if (boost::algorithm::ends_with(im->Type(), "high"))
     {
@@ -480,6 +505,8 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
       ASSERT_EQ(im->ExposureTimeRatio(), im2->ExposureTimeRatio());
     }
 
+  ASSERT_EQ(im->ExposureTimeList(), im2->ExposureTimeList());
+
   ASSERT_EQ(im->FrameRate(), im2->FrameRate());
   ASSERT_EQ(im->MinimumAmplitude(), im2->MinimumAmplitude());
   ASSERT_EQ(im->ReduceMotionArtifacts(), im2->ReduceMotionArtifacts());
@@ -487,12 +514,75 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
   ASSERT_EQ(im->SymmetryThreshold(), im2->SymmetryThreshold());
   ASSERT_EQ(im->TemporalFilterType(), im2->TemporalFilterType());
   ASSERT_EQ(im->ThreeFreqMax2FLineDistPercentage(),
-	    im2->ThreeFreqMax2FLineDistPercentage());
+            im2->ThreeFreqMax2FLineDistPercentage());
   ASSERT_EQ(im->ThreeFreqMax3FLineDistPercentage(),
-	    im2->ThreeFreqMax3FLineDistPercentage());
+            im2->ThreeFreqMax3FLineDistPercentage());
   ASSERT_EQ(im->TwoFreqMaxLineDistPercentage(),
-	    im2->TwoFreqMaxLineDistPercentage());
-  ASSERT_EQ(im->TypeHash(), im2->TypeHash());
+            im2->TwoFreqMaxLineDistPercentage());
+
+  cam_->StopEditingApplication();
+  cam_->DeleteApplication(new_idx);
+}
+
+TEST_F(AppImagerTest, Exposure)
+{
+  o3d3xx::DeviceConfig::Ptr dev = cam_->GetDeviceConfig();
+  int new_idx = cam_->CopyApplication(dev->ActiveApplication());
+  cam_->EditApplication(new_idx);
+
+  std::vector<std::string> imager_types =
+    cam_->GetAvailableImagerTypes();
+
+  for (auto& type : imager_types)
+    {
+      ASSERT_NO_THROW(cam_->ChangeImagerType(type));
+
+      o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
+      ASSERT_EQ(im->Type(), type);
+
+      // mutate the config
+      if (boost::algorithm::ends_with(type, "high"))
+        {
+
+        }
+      else if (boost::algorithm::ends_with(type, "low"))
+        {
+          ASSERT_NO_THROW(im->SetExposureTime(2000));
+        }
+      else
+        {
+          ASSERT_NO_THROW(im->SetExposureTime(2000));
+          ASSERT_NO_THROW(im->SetExposureTimeRatio(5));
+        }
+
+      // send new config parameters to the sensor
+      ASSERT_NO_THROW(cam_->SetImagerConfig(im.get()));
+
+      // verify the absolute exposure times
+      im = cam_->GetImagerConfig();
+      std::vector<std::string> exposure_strings;
+      std::string exposure_time_list = im->ExposureTimeList();
+
+      boost::split(exposure_strings,
+                   exposure_time_list,
+                   boost::is_any_of(";"));
+
+      if (boost::algorithm::ends_with(type, "high"))
+        {
+          ASSERT_EQ(exposure_strings.size(), 3);
+        }
+      else if (boost::algorithm::ends_with(type, "low"))
+        {
+          ASSERT_EQ(exposure_strings.size(), 1);
+          ASSERT_EQ(std::atoi(exposure_strings.at(0).c_str()), 2000);
+        }
+      else
+        {
+          ASSERT_EQ(exposure_strings.size(), 2);
+          ASSERT_EQ(std::atoi(exposure_strings.at(0).c_str()), 2000/5);
+          ASSERT_EQ(std::atoi(exposure_strings.at(1).c_str()), 2000);
+        }
+    }
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);

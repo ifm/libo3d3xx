@@ -42,6 +42,11 @@ Software Compatibility Matrix
     <td>0.06.13</td>
     <td>O3D303</td>
   </tr>
+  <tr>
+    <td>0.1.8</td>
+    <td>0.06.39</td>
+    <td>O3D303</td>
+  </tr>
 </table>
 
 Features

@@ -39,8 +39,8 @@ namespace o3d3xx
      */
     static const
     std::unordered_map<std::string,
-		       std::function<void(ImagerConfig*,
-					  const std::string&)> >
+                       std::function<void(ImagerConfig*,
+                                          const std::string&)> >
     mutator_map;
 
     /**
@@ -84,8 +84,29 @@ namespace o3d3xx
     int ClippingTop() const noexcept;
     void SetClippingTop(int top) noexcept;
 
+    bool ContinuousAutoExposure() const noexcept;
+    void SetContinuousAutoExposure(bool on) noexcept;
+
+    bool EnableAmplitudeCorrection() const noexcept;
+    void SetEnableAmplitudeCorrection(bool enable) noexcept;
+
+    bool EnableFilterAmplitudeImage() const noexcept;
+    void SetEnableFilterAmplitudeImage(bool enable) noexcept;
+
+    bool EnableFilterDistanceImage() const noexcept;
+    void SetEnableFilterDistanceImage(bool enable) noexcept;
+
+    bool EnableRectificationAmplitudeImage() const noexcept;
+    void SetEnableRectificationAmplitudeImage(bool enable) noexcept;
+
+    bool EnableRectificationDistanceImage() const noexcept;
+    void SetEnableRectificationDistanceImage(bool enable) noexcept;
+
     int ExposureTime() const;
     void SetExposureTime(int usecs);
+
+    std::string ExposureTimeList() const noexcept;
+    void SetExposureTimeList(const std::string s) noexcept;
 
     int ExposureTimeRatio() const;
     void SetExposureTimeRatio(int ratio);
@@ -124,9 +145,6 @@ namespace o3d3xx
     std::string Type() const noexcept;
     void SetType(const std::string& type) noexcept;
 
-    std::string TypeHash() const noexcept;
-    void SetTypeHash(const std::string& hash) noexcept;
-
   protected:
     /** channel */
     int channel_;
@@ -143,6 +161,24 @@ namespace o3d3xx
     /** Clipping-area lower value in height dimension */
     int clipping_top_;
 
+    /** Undocumented: Flag to turn on/off continuous auto-exposure */
+    bool continuous_auto_exposure_;
+
+    /** Undocumented: Flag to turn on/off amplitude correction */
+    bool enable_amplitude_correction_;
+
+    /** Undocumented: Flag to turn on/off aplitude image filter */
+    bool enable_filter_amplitude_image_;
+
+    /** Undocumented: Flag to turn on/off distance image filter */
+    bool enable_filter_distance_image_;
+
+    /** Undocumented: Flag to turn on/off amplitude image rectification */
+    bool enable_rectification_amplitude_image_;
+
+    /** Undocumented: Flag to turn on/off distance image rectification */
+    bool enable_rectification_distance_image_;
+
     /**
      * For the low dynamic range imager: this is the exposure time
      *
@@ -156,6 +192,14 @@ namespace o3d3xx
      * Exposure time is expressed in microsecs.
      */
     int exposure_time_;
+
+    /**
+     * This is a semi-colon separated string of absolute exposure times in
+     * microseconds. As opposed to computing the absolute exposure from the
+     * `exposure_time_` and `exposure_time_ratio_` (where applicable), this can
+     * be consulted for absolute values.
+     */
+    std::string exposure_time_list_;
 
     /** Ratio of long to short exposure time */
     int exposure_time_ratio_;
@@ -183,9 +227,6 @@ namespace o3d3xx
 
     /** Type of imager */
     std::string type_;
-
-    /** Unique hash for imager type */
-    std::string type_hash_;
 
   }; // end: class ImagerConfig
 

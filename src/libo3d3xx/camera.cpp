@@ -62,24 +62,24 @@ const std::string o3d3xx::XMLRPC_SPATIALFILTER = "spatialfilter";
 const std::string o3d3xx::XMLRPC_TEMPORALFILTER = "temporalfilter";
 
 o3d3xx::Camera::Camera(const std::string& ip,
-		       const std::uint32_t xmlrpc_port,
-		       const std::string& password)
+                       const std::uint32_t xmlrpc_port,
+                       const std::string& password)
   : password_(password),
     ip_(ip),
     xmlrpc_port_(xmlrpc_port),
     xmlrpc_url_prefix_("http://" + ip + ":" + std::to_string(xmlrpc_port_)),
     xclient_(new xmlrpc_c::client_xml(
                xmlrpc_c::clientXmlTransportPtr(
-		 new xmlrpc_c::clientXmlTransport_curl(
-	           xmlrpc_c::clientXmlTransport_curl::constrOpt().
-		   timeout(o3d3xx::NET_WAIT))))),
+                 new xmlrpc_c::clientXmlTransport_curl(
+                   xmlrpc_c::clientXmlTransport_curl::constrOpt().
+                   timeout(o3d3xx::NET_WAIT))))),
     session_("")
 {
   DLOG(INFO) << "Initializing Camera: ip="
-	     << this->ip_
-	     << ", xmlrpc_port=" << this->xmlrpc_port_
-	     << ", password=" << this->password_
-	     << ", xmlrpc_url_prefix=" << this->xmlrpc_url_prefix_;
+             << this->ip_
+             << ", xmlrpc_port=" << this->xmlrpc_port_
+             << ", password=" << this->password_
+             << ", xmlrpc_url_prefix=" << this->xmlrpc_url_prefix_;
 }
 
 o3d3xx::Camera::~Camera()
@@ -145,7 +145,7 @@ std::string o3d3xx::Camera::GetXMLRPCURLPrefix()
 }
 
 void o3d3xx::Camera::SetXMLRPCURLPrefix(const std::string& ip,
-					const std::uint32_t& port)
+                                        const std::uint32_t& port)
 {
   std::lock_guard<std::mutex> lock(this->xmlrpc_url_prefix_mutex_);
   this->xmlrpc_url_prefix_ =
@@ -156,7 +156,7 @@ std::string
 o3d3xx::Camera::GetParameter(const std::string& param)
 {
   xmlrpc_c::value_string result(this->_XCallMain("getParameter",
-						 param.c_str()));
+                                                 param.c_str()));
   return std::string(result);
 }
 
@@ -189,7 +189,7 @@ o3d3xx::Camera::GetApplicationList()
     {
       xmlrpc_c::value_struct const entry_st(entry);
       std::map<std::string, xmlrpc_c::value>
-	entry_map(static_cast<std::map<std::string, xmlrpc_c::value> >
+        entry_map(static_cast<std::map<std::string, xmlrpc_c::value> >
           (entry_st));
 
       o3d3xx::Camera::app_entry_t app;
@@ -197,7 +197,7 @@ o3d3xx::Camera::GetApplicationList()
       app.id = xmlrpc_c::value_int(entry_map["Id"]).cvalue();
       app.name = xmlrpc_c::value_string(entry_map["Name"]).cvalue();
       app.description =
-	xmlrpc_c::value_string(entry_map["Description"]).cvalue();
+        xmlrpc_c::value_string(entry_map["Description"]).cvalue();
 
       retval.push_back(app);
     }
@@ -215,8 +215,8 @@ o3d3xx::Camera::RequestSession()
 {
   xmlrpc_c::value_string val_str(
     this->_XCallMain("requestSession",
-		     this->GetPassword().c_str(),
-		     std::string("")));
+                     this->GetPassword().c_str(),
+                     std::string("")));
 
   this->SetSessionID(static_cast<std::string>(val_str));
   this->Heartbeat(o3d3xx::MAX_HEARTBEAT);
@@ -231,18 +231,18 @@ o3d3xx::Camera::CancelSession()
   if (this->GetSessionID() != "")
     {
       try
-	{
-	  this->_XCallSession("cancelSession");
-	  this->SetSessionID("");
-	}
+        {
+          this->_XCallSession("cancelSession");
+          this->SetSessionID("");
+        }
       catch (const o3d3xx::error_t& ex)
-	{
-	  LOG(ERROR) << "Failed to cancel session: "
-		     << this->GetSessionID() << " -> "
-		     << ex.what();
+        {
+          LOG(ERROR) << "Failed to cancel session: "
+                     << this->GetSessionID() << " -> "
+                     << ex.what();
 
-	  retval = false;
-	}
+          retval = false;
+        }
     }
 
   return retval;
@@ -271,7 +271,7 @@ void
 o3d3xx::Camera::ActivatePassword()
 {
   this->_XCallDevice("activatePassword",
-		     this->GetPassword().c_str());
+                     this->GetPassword().c_str());
 }
 
 void
@@ -296,86 +296,86 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
   if (dev->Name() != config->Name())
     {
       this->_XCallDevice("setParameter", "Name",
-			 config->Name().c_str());
+                         config->Name().c_str());
     }
 
   if (dev->Description() != config->Description())
     {
       this->_XCallDevice("setParameter", "Description",
-			 config->Description().c_str());
+                         config->Description().c_str());
     }
 
   if (dev->ActiveApplication() != config->ActiveApplication())
     {
       this->_XCallDevice("setParameter", "ActiveApplication",
-			 config->ActiveApplication());
+                         config->ActiveApplication());
     }
 
   if (dev->PcicTCPPort() != config->PcicTCPPort())
     {
       this->_XCallDevice("setParameter", "PcicTcpPort",
-			 config->PcicTCPPort());
+                         config->PcicTCPPort());
     }
 
   if (dev->PcicProtocolVersion() != config->PcicProtocolVersion())
     {
       this->_XCallDevice("setParameter", "PcicProtocolVersion",
-			 config->PcicProtocolVersion());
+                         config->PcicProtocolVersion());
     }
 
   if (dev->IOLogicType() != config->IOLogicType())
     {
       this->_XCallDevice("setParameter", "IOLogicType",
-			 config->IOLogicType());
+                         config->IOLogicType());
     }
 
   if (dev->IOExternApplicationSwitch() !=
       config->IOExternApplicationSwitch())
     {
       this->_XCallDevice("setParameter", "IOExternApplicationSwitch",
-			 config->IOExternApplicationSwitch());
+                         config->IOExternApplicationSwitch());
     }
 
   if (dev->SessionTimeout() != config->SessionTimeout())
     {
       this->_XCallDevice("setParameter", "SessionTimeout",
-			 config->SessionTimeout());
+                         config->SessionTimeout());
     }
 
   if (dev->ExtrinsicCalibTransX() != config->ExtrinsicCalibTransX())
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibTransX",
-			 config->ExtrinsicCalibTransX());
+                         config->ExtrinsicCalibTransX());
     }
 
   if (dev->ExtrinsicCalibTransY() != config->ExtrinsicCalibTransY())
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibTransY",
-			 config->ExtrinsicCalibTransY());
+                         config->ExtrinsicCalibTransY());
     }
 
   if (dev->ExtrinsicCalibTransZ() != config->ExtrinsicCalibTransZ())
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibTransZ",
-			 config->ExtrinsicCalibTransZ());
+                         config->ExtrinsicCalibTransZ());
     }
 
   if (dev->ExtrinsicCalibRotX() != config->ExtrinsicCalibRotX())
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibRotX",
-			 config->ExtrinsicCalibRotX());
+                         config->ExtrinsicCalibRotX());
     }
 
   if (dev->ExtrinsicCalibRotY() != config->ExtrinsicCalibRotY())
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibRotY",
-			 config->ExtrinsicCalibRotY());
+                         config->ExtrinsicCalibRotY());
     }
 
   if (dev->ExtrinsicCalibRotZ() != config->ExtrinsicCalibRotZ())
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibRotZ",
-			 config->ExtrinsicCalibRotZ());
+                         config->ExtrinsicCalibRotZ());
     }
 }
 
@@ -401,28 +401,28 @@ o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config)
   if (net->StaticIPv4Address() != config->StaticIPv4Address())
     {
       this->_XCallNet("setParameter",
-		      "StaticIPv4Address",
-		      config->StaticIPv4Address().c_str());
+                      "StaticIPv4Address",
+                      config->StaticIPv4Address().c_str());
     }
 
   if (net->StaticIPv4Gateway() != config->StaticIPv4Gateway())
     {
       this->_XCallNet("setParameter",
-		      "StaticIPv4Gateway",
-		      config->StaticIPv4Gateway().c_str());
+                      "StaticIPv4Gateway",
+                      config->StaticIPv4Gateway().c_str());
     }
 
   if (net->StaticIPv4SubNetMask() != config->StaticIPv4SubNetMask())
     {
       this->_XCallNet("setParameter",
-		      "StaticIPv4SubNetMask",
-		      config->StaticIPv4SubNetMask().c_str());
+                      "StaticIPv4SubNetMask",
+                      config->StaticIPv4SubNetMask().c_str());
     }
 
   if (net->UseDHCP() != config->UseDHCP())
     {
       this->_XCallNet("setParameter",
-		      "UseDHCP", config->UseDHCP() ? "true" : "false");
+                      "UseDHCP", config->UseDHCP() ? "true" : "false");
     }
 }
 
@@ -441,9 +441,9 @@ o3d3xx::Camera::SaveNet()
   catch (const o3d3xx::error_t& ex)
     {
       if (ex.code() != O3D3XX_XMLRPC_TIMEOUT)
-	{
-	  throw ex;
-	}
+        {
+          throw ex;
+        }
     }
 
   this->SetSessionID("");
@@ -461,8 +461,8 @@ o3d3xx::Camera::CopyApplication(int idx)
   catch (const o3d3xx::error_t& ex)
     {
       LOG(ERROR) << "Failed to copy application with index="
-		 << idx << ": "
-		 << ex.what();
+                 << idx << ": "
+                 << ex.what();
 
       throw ex;
     }
@@ -485,7 +485,7 @@ o3d3xx::Camera::CreateApplication()
   catch (const o3d3xx::error_t& ex)
     {
       LOG(ERROR) << "Failed to create application: "
-		 << ex.what();
+                 << ex.what();
 
       throw ex;
     }
@@ -493,11 +493,11 @@ o3d3xx::Camera::CreateApplication()
 
 void
 o3d3xx::Camera::ChangeAppNameAndDescription(int idx,
-					    const std::string& name,
-					    const std::string& descr)
+                                            const std::string& name,
+                                            const std::string& descr)
 {
   this->_XCallEdit("changeNameAndDescription",
-		   idx, name.c_str(), descr.c_str());
+                   idx, name.c_str(), descr.c_str());
 }
 
 void
@@ -534,7 +534,7 @@ o3d3xx::AppConfig::Ptr
 o3d3xx::Camera::GetAppConfig()
 {
   return o3d3xx::AppConfig::Ptr(
-	   new o3d3xx::AppConfig(this->GetAppParameters()));
+           new o3d3xx::AppConfig(this->GetAppParameters()));
 }
 
 void
@@ -545,38 +545,38 @@ o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
   if (app->Name() != config->Name())
     {
       this->_XCallApp("setParameter",
-		      "Name", config->Name().c_str());
+                      "Name", config->Name().c_str());
     }
 
   if (app->Description() != config->Description())
     {
       this->_XCallApp("setParameter",
-		      "Description", config->Description().c_str());
+                      "Description", config->Description().c_str());
     }
 
   if (app->TriggerMode() != config->TriggerMode())
     {
       this->_XCallApp("setParameter",
-		      "TriggerMode", config->TriggerMode());
+                      "TriggerMode", config->TriggerMode());
     }
 
   if (app->PcicTcpResultOutputEnabled() !=
       config->PcicTcpResultOutputEnabled())
     {
       this->_XCallApp("setParameter",
-		      "PcicTcpResultOutputEnabled",
-		      config->PcicTcpResultOutputEnabled());
+                      "PcicTcpResultOutputEnabled",
+                      config->PcicTcpResultOutputEnabled());
     }
 
   if (app->PcicTcpResultSchema() != config->PcicTcpResultSchema())
     {
       LOG(WARNING) << "Setting the PCIC Result Schema "
-		   << "may break the framegrabber!";
+                   << "may break the framegrabber!";
       LOG(WARNING) << config->PcicTcpResultSchema();
 
       this->_XCallApp("setParameter",
-		      "PcicTcpResultSchema",
-		      config->PcicTcpResultSchema());
+                      "PcicTcpResultSchema",
+                      config->PcicTcpResultSchema());
     }
 }
 
@@ -608,7 +608,7 @@ o3d3xx::Camera::GetImagerParameters()
 }
 
 std::unordered_map<std::string,
-		   std::unordered_map<std::string, std::string> >
+                   std::unordered_map<std::string, std::string> >
 o3d3xx::Camera::GetImagerParameterLimits()
 {
   return o3d3xx::value_struct_to_map_of_maps(
@@ -627,54 +627,115 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
   o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
 
   DLOG(INFO) << "Setting Imager Config for Type="
-	     << im->Type();
+             << im->Type();
 
   if (im->Channel() != config->Channel())
     {
       DLOG(INFO) << "Setting Channel="
-		 << config->Channel();
+                 << config->Channel();
 
       this->_XCallImager("setParameter",
-			 "Channel", config->Channel());
+                         "Channel", config->Channel());
     }
 
   if (im->ClippingBottom() != config->ClippingBottom())
     {
       DLOG(INFO) << "Setting ClippingBottom="
-		 << config->ClippingBottom();
+                 << config->ClippingBottom();
 
       this->_XCallImager("setParameter",
-			 "ClippingBottom", config->ClippingBottom());
+                         "ClippingBottom", config->ClippingBottom());
     }
 
   if (im->ClippingLeft() != config->ClippingLeft())
     {
       DLOG(INFO) << "Setting ClippingLeft="
-		 << config->ClippingLeft();
+                 << config->ClippingLeft();
 
       this->_XCallImager("setParameter",
-			 "ClippingLeft", config->ClippingLeft());
+                         "ClippingLeft", config->ClippingLeft());
     }
 
   if (im->ClippingRight() != config->ClippingRight())
     {
       DLOG(INFO) << "Setting ClippingRight="
-		 << config->ClippingRight();
+                 << config->ClippingRight();
 
       this->_XCallImager("setParameter",
-			 "ClippingRight", config->ClippingRight());
+                         "ClippingRight", config->ClippingRight());
     }
 
 
   if (im->ClippingTop() != config->ClippingTop())
     {
       DLOG(INFO) << "Setting ClippingTop="
-		 << config->ClippingTop();
+                 << config->ClippingTop();
 
       this->_XCallImager("setParameter",
-			 "ClippingTop", config->ClippingTop());
+                         "ClippingTop", config->ClippingTop());
     }
 
+  if (im->ContinuousAutoExposure() != config->ContinuousAutoExposure())
+    {
+      DLOG(INFO) << "Setting ContinuousAutoExposure="
+                 << config->ContinuousAutoExposure();
+
+      this->_XCallImager("setParameter",
+                         "ContinuousAutoExposure",
+                         config->ContinuousAutoExposure());
+    }
+
+  if (im->EnableAmplitudeCorrection() != config->EnableAmplitudeCorrection())
+    {
+      DLOG(INFO) << "Setting EnableAmplitudeCorrection="
+                 << config->EnableAmplitudeCorrection();
+
+      this->_XCallImager("setParameter",
+                         "EnableAmplitudeCorrection",
+                         config->EnableAmplitudeCorrection());
+    }
+
+  if (im->EnableFilterAmplitudeImage() != config->EnableFilterAmplitudeImage())
+    {
+      DLOG(INFO) << "Setting EnableFilterAmplitudeImage="
+                 << config->EnableFilterAmplitudeImage();
+
+      this->_XCallImager("setParameter",
+                         "EnableFilterAmplitudeImage",
+                         config->EnableFilterAmplitudeImage());
+    }
+
+  if (im->EnableFilterDistanceImage() != config->EnableFilterDistanceImage())
+    {
+      DLOG(INFO) << "Setting EnableFilterDistanceImage="
+                 << config->EnableFilterDistanceImage();
+
+      this->_XCallImager("setParameter",
+                         "EnableFilterDistanceImage",
+                         config->EnableFilterDistanceImage());
+    }
+
+  if (im->EnableRectificationAmplitudeImage() !=
+      config->EnableRectificationAmplitudeImage())
+    {
+      DLOG(INFO) << "Setting EnableRectificationAmplitudeImage="
+                 << config->EnableRectificationAmplitudeImage();
+
+      this->_XCallImager("setParameter",
+                         "EnableRectificationAmplitudeImage",
+                         config->EnableRectificationAmplitudeImage());
+    }
+
+  if (im->EnableRectificationDistanceImage() !=
+      config->EnableRectificationDistanceImage())
+    {
+      DLOG(INFO) << "Setting EnableRectificationDistanceImage="
+                 << config->EnableRectificationDistanceImage();
+
+      this->_XCallImager("setParameter",
+                         "EnableRectificationDistanceImage",
+                         config->EnableRectificationDistanceImage());
+    }
 
   if (boost::algorithm::ends_with(im->Type(), "high"))
     {
@@ -683,126 +744,126 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
   else if (boost::algorithm::ends_with(im->Type(), "low"))
     {
       if (im->ExposureTime() != config->ExposureTime())
-	{
-	  DLOG(INFO) << "Setting ExposureTime="
-		     << config->ExposureTime();
+        {
+          DLOG(INFO) << "Setting ExposureTime="
+                     << config->ExposureTime();
 
-	  this->_XCallImager("setParameter",
-			     "ExposureTime", config->ExposureTime());
-	}
+          this->_XCallImager("setParameter",
+                             "ExposureTime", config->ExposureTime());
+        }
     }
   else
     {
       if (im->ExposureTime() != config->ExposureTime())
-	{
-	  DLOG(INFO) << "Setting ExposureTime="
-		     << config->ExposureTime();
+        {
+          DLOG(INFO) << "Setting ExposureTime="
+                     << config->ExposureTime();
 
-	  this->_XCallImager("setParameter",
-			     "ExposureTime", config->ExposureTime());
-	}
+          this->_XCallImager("setParameter",
+                             "ExposureTime", config->ExposureTime());
+        }
 
       if (im->ExposureTimeRatio() != config->ExposureTimeRatio())
-	{
-	  DLOG(INFO) << "Setting ExposureTimeRatio="
-		     << config->ExposureTimeRatio();
+        {
+          DLOG(INFO) << "Setting ExposureTimeRatio="
+                     << config->ExposureTimeRatio();
 
-	  this->_XCallImager("setParameter",
-			     "ExposureTimeRatio",
-			     config->ExposureTimeRatio());
-	}
+          this->_XCallImager("setParameter",
+                             "ExposureTimeRatio",
+                             config->ExposureTimeRatio());
+        }
     }
 
   if (im->FrameRate() != config->FrameRate())
     {
       DLOG(INFO) << "Setting FrameRate="
-		 << config->FrameRate();
+                 << config->FrameRate();
 
       this->_XCallImager("setParameter",
-			 "FrameRate", config->FrameRate());
+                         "FrameRate", config->FrameRate());
     }
 
   if (im->MinimumAmplitude() != config->MinimumAmplitude())
     {
       DLOG(INFO) << "Setting MinimumAmplitude="
-		 << config->MinimumAmplitude();
+                 << config->MinimumAmplitude();
 
       this->_XCallImager("setParameter",
-			 "MinimumAmplitude", config->MinimumAmplitude());
+                         "MinimumAmplitude", config->MinimumAmplitude());
     }
 
   if (im->ReduceMotionArtifacts() != config->ReduceMotionArtifacts())
     {
       DLOG(INFO) << "Setting ReduceMotionArtifacts="
-		 << config->ReduceMotionArtifacts();
+                 << config->ReduceMotionArtifacts();
 
       this->_XCallImager("setParameter",
-			 "ReduceMotionArtifacts",
-			 config->ReduceMotionArtifacts());
+                         "ReduceMotionArtifacts",
+                         config->ReduceMotionArtifacts());
     }
 
   if (im->SpatialFilterType() != config->SpatialFilterType())
     {
       DLOG(INFO) << "Setting SpatialFilterType="
-		 << config->SpatialFilterType();
+                 << config->SpatialFilterType();
 
       this->_XCallImager("setParameter",
-			 "SpatialFilterType",
-			 config->SpatialFilterType());
+                         "SpatialFilterType",
+                         config->SpatialFilterType());
     }
 
   //! @todo Is SymmetryThreshold implemented in camera?
   // if (im->SymmetryThreshold() != config->SymmetryThreshold())
   //   {
   //     DLOG(INFO) << "Setting SymmetryThreshold="
-  // 		 << config->SymmetryThreshold();
+  //             << config->SymmetryThreshold();
 
   //     this->_XCallImager("setParameter",
-  // 			 "SymmetryTreshold",
-  // 			 config->SymmetryThreshold());
+  //                     "SymmetryTreshold",
+  //                     config->SymmetryThreshold());
   //   }
 
   if (im->TemporalFilterType() != config->TemporalFilterType())
     {
       DLOG(INFO) << "Setting TemporalFilterType="
-		 << config->TemporalFilterType();
+                 << config->TemporalFilterType();
 
       this->_XCallImager("setParameter",
-			 "TemporalFilterType",
-			 config->TemporalFilterType());
+                         "TemporalFilterType",
+                         config->TemporalFilterType());
     }
 
   if (im->ThreeFreqMax2FLineDistPercentage() !=
       config->ThreeFreqMax2FLineDistPercentage())
     {
       DLOG(INFO) << "Setting ThreeFreqMax2FLineDistPercentage="
-		 << config->ThreeFreqMax2FLineDistPercentage();
+                 << config->ThreeFreqMax2FLineDistPercentage();
 
       this->_XCallImager("setParameter",
-			 "ThreeFreqMax2FLineDistPercentage",
-			 config->ThreeFreqMax2FLineDistPercentage());
+                         "ThreeFreqMax2FLineDistPercentage",
+                         config->ThreeFreqMax2FLineDistPercentage());
     }
 
   if (im->ThreeFreqMax3FLineDistPercentage() !=
       config->ThreeFreqMax3FLineDistPercentage())
     {
       DLOG(INFO) << "Setting ThreeFreqMax3FLineDistPercentage="
-		 << config->ThreeFreqMax3FLineDistPercentage();
+                 << config->ThreeFreqMax3FLineDistPercentage();
 
       this->_XCallImager("setParameter",
-			 "ThreeFreqMax3FLineDistPercentage",
-			 config->ThreeFreqMax3FLineDistPercentage());
+                         "ThreeFreqMax3FLineDistPercentage",
+                         config->ThreeFreqMax3FLineDistPercentage());
     }
 
   if (im->TwoFreqMaxLineDistPercentage() !=
       config->TwoFreqMaxLineDistPercentage())
     {
       DLOG(INFO) << "Setting TwoFreqMaxLineDistPercentage="
-		 << config->TwoFreqMaxLineDistPercentage();
+                 << config->TwoFreqMaxLineDistPercentage();
 
       this->_XCallImager("setParameter",
-			 "TwoFreqMaxLineDistPercentage",
-			 config->TwoFreqMaxLineDistPercentage());
+                         "TwoFreqMaxLineDistPercentage",
+                         config->TwoFreqMaxLineDistPercentage());
     }
 }
 
@@ -814,7 +875,7 @@ o3d3xx::Camera::GetTemporalFilterParameters()
 }
 
 std::unordered_map<std::string,
-		   std::unordered_map<std::string, std::string> >
+                   std::unordered_map<std::string, std::string> >
 o3d3xx::Camera::GetTemporalFilterParameterLimits()
 {
   return o3d3xx::value_struct_to_map_of_maps(
@@ -834,14 +895,14 @@ o3d3xx::Camera::GetTemporalFilterConfig()
 
   switch (filter_type)
     {
-    case static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
+    case static_cast<int>(      o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
       filt = std::make_shared<o3d3xx::TemporalMeanFilterConfig>();
       filt->SetNumberOfImages(std::stoi(params.at("NumberOfImages")));
       break;
 
     case static_cast<int>(o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
       filt =
-	std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
+        std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
       break;
 
     default:
@@ -857,7 +918,7 @@ o3d3xx::Camera::SetTemporalFilterConfig(
   const o3d3xx::TemporalFilterConfig* config)
 {
   DLOG(INFO) << "Setting Temporal Filter Config for Type="
-	     << config->Type();
+             << config->Type();
 
   o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
   im->SetTemporalFilterType(config->Type());
@@ -867,7 +928,7 @@ o3d3xx::Camera::SetTemporalFilterConfig(
       static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER))
     {
       this->_XCallTemporalFilter("setParameter",
-				 "NumberOfImages", config->NumberOfImages());
+                                 "NumberOfImages", config->NumberOfImages());
     }
 }
 
@@ -879,7 +940,7 @@ o3d3xx::Camera::GetSpatialFilterParameters()
 }
 
 std::unordered_map<std::string,
-		   std::unordered_map<std::string, std::string> >
+                   std::unordered_map<std::string, std::string> >
 o3d3xx::Camera::GetSpatialFilterParameterLimits()
 {
   return o3d3xx::value_struct_to_map_of_maps(
@@ -927,7 +988,7 @@ o3d3xx::Camera::SetSpatialFilterConfig(
   const o3d3xx::SpatialFilterConfig* config)
 {
   DLOG(INFO) << "Setting Spatial Filter Config for Type="
-	     << config->Type();
+             << config->Type();
 
   o3d3xx::ImagerConfig::Ptr im = this->GetImagerConfig();
   im->SetSpatialFilterType(config->Type());
@@ -940,7 +1001,7 @@ o3d3xx::Camera::SetSpatialFilterConfig(
     }
 
   this->_XCallSpatialFilter("setParameter",
-			    "MaskSize", config->MaskSize());
+                            "MaskSize", config->MaskSize());
 }
 
 std::string
@@ -950,45 +1011,45 @@ o3d3xx::Camera::ToJSON()
   std::string root = "o3d3xx";
   boost::property_tree::ptree pt;
   pt.put(root + "." + std::string(O3D3XX_LIBRARY_NAME),
-	 O3D3XX_VERSION);
+         O3D3XX_VERSION);
 
   std::ostringstream time_buf;
   std::time_t t = std::time(nullptr);
   time_buf << std::asctime(std::localtime(&t));
   std::string time_str = time_buf.str();
   time_str.erase(std::remove(time_str.begin(), time_str.end(), '\n'),
-		 time_str.end());
+                 time_str.end());
   pt.put(root + ".Date", time_str);
 
   try
     {
       if (this->GetSessionID() == "")
-	{
-	  this->RequestSession();
-	  do_cancel = true;
-	}
+        {
+          this->RequestSession();
+          do_cancel = true;
+        }
 
       // serialize the hardware info
       boost::property_tree::ptree hw_pt;
       std::unordered_map<std::string, std::string> hwinfo =
-	this->GetHWInfo();
+        this->GetHWInfo();
 
       for (auto& kv : hwinfo)
-	{
-	  hw_pt.put(kv.first, kv.second);
-	}
+        {
+          hw_pt.put(kv.first, kv.second);
+        }
 
       pt.put_child(root + ".HWInfo", hw_pt);
 
       // serialize the software info
       boost::property_tree::ptree sw_pt;
       std::unordered_map<std::string, std::string> swinfo =
-	this->GetSWVersion();
+        this->GetSWVersion();
 
       for (auto& kv : swinfo)
-	{
-	  sw_pt.put(kv.first, kv.second);
-	}
+        {
+          sw_pt.put(kv.first, kv.second);
+        }
 
       pt.put_child(root + ".SWVersion", sw_pt);
 
@@ -1014,43 +1075,43 @@ o3d3xx::Camera::ToJSON()
       boost::property_tree::ptree apps_pt;
 
       for (auto& app : this->GetApplicationList())
-	{
-	  this->EditApplication(app.index);
-	  o3d3xx::AppConfig::Ptr app_ptr = this->GetAppConfig();
-	  std::istringstream app_in(app_ptr->ToJSON());
-	  boost::property_tree::ptree app_pt;
-	  boost::property_tree::read_json(app_in, app_pt);
-	  app_pt.put("Index", app.index);
-	  app_pt.put("Id", app.id);
+        {
+          this->EditApplication(app.index);
+          o3d3xx::AppConfig::Ptr app_ptr = this->GetAppConfig();
+          std::istringstream app_in(app_ptr->ToJSON());
+          boost::property_tree::ptree app_pt;
+          boost::property_tree::read_json(app_in, app_pt);
+          app_pt.put("Index", app.index);
+          app_pt.put("Id", app.id);
 
-	  // imager
-	  o3d3xx::ImagerConfig::Ptr im_ptr = this->GetImagerConfig();
-	  std::istringstream im_in(im_ptr->ToJSON());
-	  boost::property_tree::ptree im_pt;
-	  boost::property_tree::read_json(im_in, im_pt);
+          // imager
+          o3d3xx::ImagerConfig::Ptr im_ptr = this->GetImagerConfig();
+          std::istringstream im_in(im_ptr->ToJSON());
+          boost::property_tree::ptree im_pt;
+          boost::property_tree::read_json(im_in, im_pt);
 
-	  // spatial filter
-	  o3d3xx::SpatialFilterConfig::Ptr sf_ptr =
-	    this->GetSpatialFilterConfig();
-	  std::istringstream sf_in(sf_ptr->ToJSON());
-	  boost::property_tree::ptree sf_pt;
-	  boost::property_tree::read_json(sf_in, sf_pt);
-	  im_pt.put_child("SpatialFilter", sf_pt);
+          // spatial filter
+          o3d3xx::SpatialFilterConfig::Ptr sf_ptr =
+            this->GetSpatialFilterConfig();
+          std::istringstream sf_in(sf_ptr->ToJSON());
+          boost::property_tree::ptree sf_pt;
+          boost::property_tree::read_json(sf_in, sf_pt);
+          im_pt.put_child("SpatialFilter", sf_pt);
 
-	  // temporal filter
-	  o3d3xx::TemporalFilterConfig::Ptr tf_ptr =
-	    this->GetTemporalFilterConfig();
-	  std::istringstream tf_in(tf_ptr->ToJSON());
-	  boost::property_tree::ptree tf_pt;
-	  boost::property_tree::read_json(tf_in, tf_pt);
-	  im_pt.put_child("TemporalFilter", tf_pt);
+          // temporal filter
+          o3d3xx::TemporalFilterConfig::Ptr tf_ptr =
+            this->GetTemporalFilterConfig();
+          std::istringstream tf_in(tf_ptr->ToJSON());
+          boost::property_tree::ptree tf_pt;
+          boost::property_tree::read_json(tf_in, tf_pt);
+          im_pt.put_child("TemporalFilter", tf_pt);
 
-	  // now add the imager and filters to the app
-	  app_pt.put_child("Imager", im_pt);
-	  apps_pt.push_back(std::make_pair("", app_pt));
+          // now add the imager and filters to the app
+          app_pt.put_child("Imager", im_pt);
+          apps_pt.push_back(std::make_pair("", app_pt));
 
-	  this->StopEditingApplication();
-	}
+          this->StopEditingApplication();
+        }
 
       pt.put_child(root + ".Apps", apps_pt);
     }
@@ -1087,10 +1148,10 @@ o3d3xx::Camera::FromJSON(const std::string& json)
   try
     {
       if (this->GetSessionID() == "")
-	{
-	  this->RequestSession();
-	  do_cancel = true;
-	}
+        {
+          this->RequestSession();
+          do_cancel = true;
+        }
 
       this->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
 
@@ -1098,173 +1159,173 @@ o3d3xx::Camera::FromJSON(const std::string& json)
       // device config
       //
       try
-	{
-	  boost::property_tree::ptree dev_pt = pt.get_child("o3d3xx.Device");
-	  std::ostringstream dev_buf;
-	  boost::property_tree::write_json(dev_buf, dev_pt);
-	  o3d3xx::DeviceConfig::Ptr dev =
-	    o3d3xx::DeviceConfig::FromJSON(dev_buf.str());
-	  this->SetDeviceConfig(dev.get());
-	  this->SaveDevice();
+        {
+          boost::property_tree::ptree dev_pt = pt.get_child("o3d3xx.Device");
+          std::ostringstream dev_buf;
+          boost::property_tree::write_json(dev_buf, dev_pt);
+          o3d3xx::DeviceConfig::Ptr dev =
+            o3d3xx::DeviceConfig::FromJSON(dev_buf.str());
+          this->SetDeviceConfig(dev.get());
+          this->SaveDevice();
 
-	  try
-	    {
-	      desired_active_application =
-		dev_pt.get<int>("ActiveApplication");
-	    }
-	  catch (const std::exception& ex)
-	    {
-	      // no "ActiveApplication" specified
-	    }
-	}
+          try
+            {
+              desired_active_application =
+                dev_pt.get<int>("ActiveApplication");
+            }
+          catch (const std::exception& ex)
+            {
+              // no "ActiveApplication" specified
+            }
+        }
       catch (const boost::property_tree::ptree_bad_path& ex)
-	{
-	  LOG(WARNING) << "In `FromJSON(...)', skipping `Device' section";
-	  LOG(WARNING) << "ptree_bad_path: " << ex.what();
-	}
+        {
+          LOG(WARNING) << "In `FromJSON(...)', skipping `Device' section";
+          LOG(WARNING) << "ptree_bad_path: " << ex.what();
+        }
 
       //
       // app config
       //
       std::set<int> app_indices;
       for (auto& app : this->GetApplicationList())
-	{
-	  app_indices.insert(app.index);
-	}
+        {
+          app_indices.insert(app.index);
+        }
 
       try
-	{
-	  boost::property_tree::ptree apps_pt = pt.get_child("o3d3xx.Apps");
-	  for (auto& kv : apps_pt)
-	    {
-	      boost::property_tree::ptree app_pt = kv.second;
-	      std::ostringstream app_buff;
-	      boost::property_tree::write_json(app_buff, app_pt);
-	      o3d3xx::AppConfig::Ptr app =
-		o3d3xx::AppConfig::FromJSON(app_buff.str());
+        {
+          boost::property_tree::ptree apps_pt = pt.get_child("o3d3xx.Apps");
+          for (auto& kv : apps_pt)
+            {
+              boost::property_tree::ptree app_pt = kv.second;
+              std::ostringstream app_buff;
+              boost::property_tree::write_json(app_buff, app_pt);
+              o3d3xx::AppConfig::Ptr app =
+                o3d3xx::AppConfig::FromJSON(app_buff.str());
 
-	      int index = -1;
+              int index = -1;
 
-	      try
-		{
-		  index = app_pt.get<int>("Index");
-		}
-	      catch (const std::exception& ex)
-		{
-		  // no index, so, we will have to create the application
-		}
+              try
+                {
+                  index = app_pt.get<int>("Index");
+                }
+              catch (const std::exception& ex)
+                {
+                  // no index, so, we will have to create the application
+                }
 
-	      if (app_indices.find(index) == app_indices.end())
-		{
-		  index = this->CreateApplication();
-		}
+              if (app_indices.find(index) == app_indices.end())
+                {
+                  index = this->CreateApplication();
+                }
 
-	      this->EditApplication(index);
-	      this->SetAppConfig(app.get());
-	      this->SaveApp();
+              this->EditApplication(index);
+              this->SetAppConfig(app.get());
+              this->SaveApp();
 
-	      try
-		{
-		  boost::property_tree::ptree im_pt =
-		    app_pt.get_child("Imager");
-		  std::ostringstream im_buff;
-		  boost::property_tree::write_json(im_buff, im_pt);
-		  o3d3xx::ImagerConfig::Ptr im =
-		    o3d3xx::ImagerConfig::FromJSON(im_buff.str());
+              try
+                {
+                  boost::property_tree::ptree im_pt =
+                    app_pt.get_child("Imager");
+                  std::ostringstream im_buff;
+                  boost::property_tree::write_json(im_buff, im_pt);
+                  o3d3xx::ImagerConfig::Ptr im =
+                    o3d3xx::ImagerConfig::FromJSON(im_buff.str());
 
-		  o3d3xx::ImagerConfig::Ptr current_im =
-		    this->GetImagerConfig();
+                  o3d3xx::ImagerConfig::Ptr current_im =
+                    this->GetImagerConfig();
 
-		  if (current_im->Type() != im->Type())
-		    {
-		      this->ChangeImagerType(im->Type());
-		    }
+                  if (current_im->Type() != im->Type())
+                    {
+                      this->ChangeImagerType(im->Type());
+                    }
 
-		  this->SetImagerConfig(im.get());
+                  this->SetImagerConfig(im.get());
 
-		  // add in the spatial filter
-		  try
-		    {
-		      boost::property_tree::ptree sf_pt =
-			im_pt.get_child("SpatialFilter");
-		      std::ostringstream sf_buff;
-		      boost::property_tree::write_json(sf_buff, sf_pt);
-		      o3d3xx::SpatialFilterConfig::Ptr sf_filt =
-			o3d3xx::SpatialFilterConfig::FromJSON(sf_buff.str());
+                  // add in the spatial filter
+                  try
+                    {
+                      boost::property_tree::ptree sf_pt =
+                        im_pt.get_child("SpatialFilter");
+                      std::ostringstream sf_buff;
+                      boost::property_tree::write_json(sf_buff, sf_pt);
+                      o3d3xx::SpatialFilterConfig::Ptr sf_filt =
+                        o3d3xx::SpatialFilterConfig::FromJSON(sf_buff.str());
 
-		      this->SetSpatialFilterConfig(sf_filt.get());
-		    }
-		  catch (const boost::property_tree::ptree_bad_path& path_ex)
-		    {
-		      LOG(WARNING) << "In `FromJSON(...)', "
-				   << "skipping `SpatialFilter' section.";
-		      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
-		    }
+                      this->SetSpatialFilterConfig(sf_filt.get());
+                    }
+                  catch (const boost::property_tree::ptree_bad_path& path_ex)
+                    {
+                      LOG(WARNING) << "In `FromJSON(...)', "
+                                   << "skipping `SpatialFilter' section.";
+                      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
+                    }
 
-		  // add in the temporal filter
-		  try
-		    {
-		      boost::property_tree::ptree tf_pt =
-			im_pt.get_child("TemporalFilter");
-		      std::ostringstream tf_buff;
-		      boost::property_tree::write_json(tf_buff, tf_pt);
-		      o3d3xx::TemporalFilterConfig::Ptr tf_filt =
-			o3d3xx::TemporalFilterConfig::FromJSON(tf_buff.str());
+                  // add in the temporal filter
+                  try
+                    {
+                      boost::property_tree::ptree tf_pt =
+                        im_pt.get_child("TemporalFilter");
+                      std::ostringstream tf_buff;
+                      boost::property_tree::write_json(tf_buff, tf_pt);
+                      o3d3xx::TemporalFilterConfig::Ptr tf_filt =
+                        o3d3xx::TemporalFilterConfig::FromJSON(tf_buff.str());
 
-		      this->SetTemporalFilterConfig(tf_filt.get());
-		    }
-		  catch (const boost::property_tree::ptree_bad_path& path_ex)
-		    {
-		      LOG(WARNING) << "In `FromJSON(...)', "
-				   << "skipping `TemporalFilter' section.";
-		      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
-		    }
+                      this->SetTemporalFilterConfig(tf_filt.get());
+                    }
+                  catch (const boost::property_tree::ptree_bad_path& path_ex)
+                    {
+                      LOG(WARNING) << "In `FromJSON(...)', "
+                                   << "skipping `TemporalFilter' section.";
+                      LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
+                    }
 
-		  this->SaveApp();
-		}
-	      catch (const boost::property_tree::ptree_bad_path& path_ex)
-		{
-		  LOG(WARNING) << "In `FromJSON(...)', "
-			       << "skipping `Imager' section for app";
-		  LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
-		}
+                  this->SaveApp();
+                }
+              catch (const boost::property_tree::ptree_bad_path& path_ex)
+                {
+                  LOG(WARNING) << "In `FromJSON(...)', "
+                               << "skipping `Imager' section for app";
+                  LOG(WARNING) << "ptree_bad_path: " << path_ex.what();
+                }
 
-	      this->StopEditingApplication();
-	    }
-	}
+              this->StopEditingApplication();
+            }
+        }
       catch (const boost::property_tree::ptree_bad_path& ex)
-	{
-	  LOG(WARNING) << "In `FromJSON(...)', skipping `Apps' section";
-	  LOG(WARNING) << "ptree_bad_path: " << ex.what();
-	}
+        {
+          LOG(WARNING) << "In `FromJSON(...)', skipping `Apps' section";
+          LOG(WARNING) << "ptree_bad_path: " << ex.what();
+        }
 
       // set the active application
       if (desired_active_application > 0)
-	{
-	  o3d3xx::DeviceConfig::Ptr newdev = this->GetDeviceConfig();
-	  newdev->SetActiveApplication(desired_active_application);
-	  this->SetDeviceConfig(newdev.get());
-	  this->SaveDevice();
-	}
+        {
+          o3d3xx::DeviceConfig::Ptr newdev = this->GetDeviceConfig();
+          newdev->SetActiveApplication(desired_active_application);
+          this->SetDeviceConfig(newdev.get());
+          this->SaveDevice();
+        }
 
       //
       // net config
       //
       try
-	{
-	  boost::property_tree::ptree net_pt = pt.get_child("o3d3xx.Net");
-	  std::ostringstream net_buf;
-	  boost::property_tree::write_json(net_buf, net_pt);
-	  o3d3xx::NetConfig::Ptr net =
-	    o3d3xx::NetConfig::FromJSON(net_buf.str());
-	  this->SetNetConfig(net.get());
-	  this->SaveNet();
-	}
+        {
+          boost::property_tree::ptree net_pt = pt.get_child("o3d3xx.Net");
+          std::ostringstream net_buf;
+          boost::property_tree::write_json(net_buf, net_pt);
+          o3d3xx::NetConfig::Ptr net =
+            o3d3xx::NetConfig::FromJSON(net_buf.str());
+          this->SetNetConfig(net.get());
+          this->SaveNet();
+        }
       catch (const boost::property_tree::ptree_bad_path& ex)
-	{
-	  LOG(WARNING) << "In `FromJSON(...)', skipping `Net' section";
-	  LOG(WARNING) << "ptree_bad_path: " << ex.what();
-	}
+        {
+          LOG(WARNING) << "In `FromJSON(...)', skipping `Net' section";
+          LOG(WARNING) << "ptree_bad_path: " << ex.what();
+        }
     }
   catch (const o3d3xx::error_t& ex)
     {
