@@ -44,52 +44,52 @@ int main(int argc, const char** argv)
 
       po::options_description config_opts("Config Information");
       config_opts.add_options()
-	("file,f",
-	 po::value<std::string>()->default_value("-"),
-	 "Input JSON configuration file");
+        ("file,f",
+         po::value<std::string>()->default_value("-"),
+         "Input JSON configuration file");
 
       opts.visible.add(config_opts);
 
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       infile.assign(opts.vm["file"].as<std::string>());
 
       if (infile == "-")
-	{
-	  std::string line;
-	  std::ostringstream buff;
-	  while (std::getline(std::cin, line))
-	    {
-	      buff << line << std::endl;
-	    }
+        {
+          std::string line;
+          std::ostringstream buff;
+          while (std::getline(std::cin, line))
+            {
+              buff << line << std::endl;
+            }
 
-	  json.assign(buff.str());
-	}
+          json.assign(buff.str());
+        }
       else
-	{
-	  std::ifstream ifs(infile, std::ios::in);
-	  if (! ifs)
-	    {
-	      throw o3d3xx::error_t(O3D3XX_IO_ERROR);
-	    }
+        {
+          std::ifstream ifs(infile, std::ios::in);
+          if (! ifs)
+            {
+              throw o3d3xx::error_t(O3D3XX_IO_ERROR);
+            }
 
-	  json.assign((std::istreambuf_iterator<char>(ifs)),
-		      (std::istreambuf_iterator<char>()));
-	}
+          json.assign((std::istreambuf_iterator<char>(ifs)),
+                      (std::istreambuf_iterator<char>()));
+        }
 
       o3d3xx::Camera::Ptr cam =
-	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       cam->FromJSON(json);
     }
   catch (const std::exception& e)
     {
       std::cerr << "Failed to configure camera from JSON config '"
-		<< infile << "':"
-		<< std::endl << e.what() << std::endl;
+                << infile << "':"
+                << std::endl << e.what() << std::endl;
       return 1;
     }
 
