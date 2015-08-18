@@ -16,8 +16,9 @@ serialization scheme.
 Unlocking the 100K pixel support on the O3D303 is not yet (as of this writing)
 officially supported by IFM and you should only use this feature at your own
 risk. However, if you like to live on the edge, you can play with this feature
-now. We have provided an application, `apps/100k.o3d3xxapp`, that unlocks this
-feature into a new application on your camera. You can import this application
-using `o3d3xx-ifm-import` and then mark it active using `o3d3xx-config`.
+now. We have provided an application, `test/data/100k.o3d3xxapp`, that unlocks
+this feature into a new application on your camera. You can import this
+application using `o3d3xx-ifm-import` and then mark it active using
+`o3d3xx-config`.
 
 ## The initial release of libo3d3xx was 0.1.7
