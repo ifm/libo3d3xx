@@ -3,21 +3,25 @@ libo3d3xx Command Line Utilities
 
 The following command-line utilities are provided with `libo3d3xx`:
 
-0. o3d3xx-viewer
-1. o3d3xx-config
-2. o3d3xx-dump
-3. o3d3xx-ls
-4. o3d3xx-reboot
-5. o3d3xx-reset
-6. o3d3xx-rm
-7. o3d3xx-version
-8. o3d3xx-hz
+0. [o3d3xx-viewer](#viewer)
+1. [o3d3xx-config](#config)
+2. [o3d3xx-dump](#dump)
+3. [o3d3xx-ls](#ls)
+4. [o3d3xx-reboot](#reboot)
+5. [o3d3xx-reset](#reset)
+6. [o3d3xx-rm](#rm)
+7. [o3d3xx-version](#version)
+8. [o3d3xx-hz](#hz)
+9. [o3d3xx-ifm-import](#ifmimport)
+10. [o3d3xx-ifm-export](#ifmexport)
 
 All of the command-line utilities accept the `--help` and the `--version`
 flags. `--help` will list the arguments accepted by the program and `--version`
 will display the version of `libo3d3xx` that the program is linked to.
 
 A brief description of each program now follows:
+
+<a name="viewer"></a>
 
 o3d3xx-viewer
 -------------
@@ -49,6 +53,8 @@ a histogram showing the gray value distribution of the amplitude image -- a
 nice check to quickly visualize the current configuration's dynamic range.
 
 
+<a name="config"></a>
+
 o3d3xx-config
 -------------
 
@@ -74,6 +80,8 @@ application to the application located at index 1, you can:
 
 The JSON syntax is available as an example in this [camera.json](./camera.json).
 
+<a name="dump"></a>
+
 o3d3xx-dump
 -----------
 
@@ -85,6 +93,8 @@ facilities:
 
 An example of the produced JSON is available in this
 [camera.json](./camera.json).
+
+<a name="ls"></a>
 
 o3d3xx-ls
 ---------
@@ -100,15 +110,20 @@ example of running this program and its output is show below:
 In this example, there is only one application on the camera and it is marked
 as active. The number in square brackets indicates the application index.
 
+<a name="reboot"></a>
+
 o3d3xx-reboot
 -------------
 
 This program performs a soft boot of the camera.
 
+<a name="reset"></a>
 o3d3xx-reset
 ------------
 
 This program will return the camera to factory default settings.
+
+<a name="rm"></a>
 
 o3d3xx-rm
 ---------
@@ -117,10 +132,14 @@ This program is used to remove an application from the camera. It takes the
 application index as an argument. NOTE: to add applications you can use
 `o3d3xx-config` (see above).
 
+<a name="version"></a>
+
 o3d3xx-version
 --------------
 
 This program displays the version of the library.
+
+<a name="hz"></a>
 
 o3d3xx-hz
 ---------
@@ -129,3 +148,20 @@ This program can be used to measure the effective frame rate achieved by the
 FrameGrabber based upon the imager config of the active application. The
 program allows for configuring a number of frames to capture and a number of
 runs to perform before computing the FPS statistics. See `--help` for details.
+
+<a name="ifmimport"></a>
+
+o3d3xx-ifm-import
+-----------------
+
+This program can be used to import IFM Vision Assistant files (e.g.,
+applications) into the camera.
+
+
+<a name="ifmexport"></a>
+
+o3d3xx-ifm-export
+-----------------
+
+This program can be used to export data (e.g., applications) from the camera
+into a format that is compatible with IFM Vision Assistant.
