@@ -895,15 +895,17 @@ o3d3xx::Camera::GetTemporalFilterConfig()
 
   switch (filter_type)
     {
-    case static_cast<int>(      o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
-      filt = std::make_shared<o3d3xx::TemporalMeanFilterConfig>();
-      filt->SetNumberOfImages(std::stoi(params.at("NumberOfImages")));
-      break;
+    case static_cast<int>(
+      o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
+        filt = std::make_shared<o3d3xx::TemporalMeanFilterConfig>();
+        filt->SetNumberOfImages(std::stoi(params.at("NumberOfImages")));
+        break;
 
-    case static_cast<int>(o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
-      filt =
-        std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
-      break;
+    case static_cast<int>(
+      o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
+        filt =
+          std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
+        break;
 
     default:
       filt = std::make_shared<o3d3xx::TemporalFilterConfig>();
@@ -1338,4 +1340,75 @@ o3d3xx::Camera::FromJSON(const std::string& json)
     {
       this->CancelSession();
     }
+}
+
+int
+o3d3xx::Camera::ImportIFMApp(const std::vector<std::uint8_t>& bytes)
+{
+  bool do_cancel = false;
+  int index = -1;
+
+  try
+    {
+      if (this->GetSessionID() == "")
+        {
+          this->RequestSession();
+          do_cancel = true;
+        }
+
+      this->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+      // this will base64 encode the data for us
+      xmlrpc_c::value_int v_int(this->_XCallSession("importApplication",
+                                                    bytes));
+      index = v_int.cvalue();
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << ex.what();
+      this->CancelSession();
+      throw ex;
+    }
+
+  if (do_cancel)
+    {
+      this->CancelSession();
+    }
+
+  return index;
+}
+
+std::vector<std::uint8_t>
+o3d3xx::Camera::ExportIFMApp(int idx)
+{
+  std::vector<std::uint8_t> retval;
+  bool do_cancel = false;
+
+  try
+    {
+      if (this->GetSessionID() == "")
+        {
+          this->RequestSession();
+          do_cancel = true;
+        }
+
+      this->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+      const xmlrpc_c::value_bytestring v_bytes =
+        this->_XCallSession("exportApplication", idx);
+
+      retval = v_bytes.vectorUcharValue();
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << ex.what();
+      this->CancelSession();
+      throw ex;
+    }
+
+  if (do_cancel)
+    {
+      this->CancelSession();
+    }
+
+  return retval;
 }

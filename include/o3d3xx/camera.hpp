@@ -130,8 +130,8 @@ namespace o3d3xx
      *                     camera parameters.
      */
     Camera(const std::string& ip = o3d3xx::DEFAULT_IP,
-	   const std::uint32_t xmlrpc_port = o3d3xx::DEFAULT_XMLRPC_PORT,
-	   const std::string& password = o3d3xx::DEFAULT_PASSWORD);
+           const std::uint32_t xmlrpc_port = o3d3xx::DEFAULT_XMLRPC_PORT,
+           const std::string& password = o3d3xx::DEFAULT_PASSWORD);
 
     /**
      * Dtor will cancel any open sessions with the camera hardware.
@@ -304,7 +304,8 @@ namespace o3d3xx
 
     /**
      * Heartbeat messages are used to keep a session with the sensor
-     * alive. This function sends a heartbeat message to the sensor and sets when
+     * alive. This function sends a heartbeat message to the sensor and sets
+     * when
      * the next heartbeat message is required.
      *
      * @param[in] hb The time (seconds) of when the next heartbeat message will
@@ -330,6 +331,34 @@ namespace o3d3xx
     //---------------------------------------------
     // XMLRPC: EditMode object
     //---------------------------------------------
+
+    /**
+     * Imports an IFM-serialized application to the camera. As
+     * of this writing, the IFM serialization is a zip-compressed
+     * JSON file.
+     *
+     * This method will create a new application and return its index.
+     *
+     * @param[in] bytes A byte buffer containing the IFM-serialized
+     *                  application.
+     * @return The index of the new application.
+     *
+     * @throw o3d3xx::error_t upon error.
+     */
+    int ImportIFMApp(const std::vector<std::uint8_t>& bytes);
+
+    /**
+     * Export the application at the specified index into a byte
+     * array suitable to writing to a file. The exported bytes
+     * represent the IFM serialization of an application.
+     *
+     * @param[in] idx The index of the application to export
+     * @return A vector of bytes representing the IFM serialization of
+     *         the exported application.
+     *
+     * @throw o3d3xx::error_t upon error.
+     */
+    std::vector<std::uint8_t> ExportIFMApp(int idx);
 
     /**
      * Copies the application currently stored at `idx' to a new application
@@ -371,8 +400,8 @@ namespace o3d3xx
      * @throw o3d3xx::error_t upon error
      */
     void ChangeAppNameAndDescription(int idx,
-				     const std::string& name,
-				     const std::string& descr);
+                                     const std::string& name,
+                                     const std::string& descr);
 
     /**
      * Puts the specified application into edit-status. This will attach an
@@ -465,7 +494,7 @@ namespace o3d3xx
      * application.
      */
     std::unordered_map<std::string,
-    		       std::unordered_map<std::string, std::string> >
+                       std::unordered_map<std::string, std::string> >
     GetImagerParameterLimits();
 
     /**
@@ -496,7 +525,7 @@ namespace o3d3xx
      * imager connected to the currently being edited application.
      */
     std::unordered_map<std::string,
-		       std::unordered_map<std::string, std::string> >
+                       std::unordered_map<std::string, std::string> >
     GetSpatialFilterParameterLimits();
 
     /**
@@ -527,7 +556,7 @@ namespace o3d3xx
      * imager connected to the currently being edited application.
      */
     std::unordered_map<std::string,
-		       std::unordered_map<std::string, std::string> >
+                       std::unordered_map<std::string, std::string> >
     GetTemporalFilterParameterLimits();
 
     /**
@@ -708,7 +737,7 @@ namespace o3d3xx
     template <typename... Args>
     xmlrpc_c::value const
     _XCall(std::string& url, const std::string& sensor_method_name,
-	   Args... args)
+           Args... args)
     {
       xmlrpc_c::paramList params;
       this->_XSetParams(params, args...);
@@ -719,76 +748,76 @@ namespace o3d3xx
 
       std::lock_guard<std::mutex> lock(this->xclient_mutex_);
       try
-	{
-	  rpc->call(this->xclient_.get(), &cparam);
-	  return rpc->getResult();
-	}
+        {
+          rpc->call(this->xclient_.get(), &cparam);
+          return rpc->getResult();
+        }
       catch (const std::exception& ex)
-	{
-	  LOG(ERROR) << url << " -> "
-	  	     << sensor_method_name << " : "
-	  	     << ex.what();
+        {
+          LOG(ERROR) << url << " -> "
+                     << sensor_method_name << " : "
+                     << ex.what();
 
-	  if (! rpc->isFinished())
-	    {
-	      throw(o3d3xx::error_t(O3D3XX_XMLRPC_TIMEOUT));
-	    }
-	  else if (! rpc->isSuccessful())
-	    {
-	      xmlrpc_c::fault f = rpc->getFault();
-	      int ifm_error = f.getCode();
+          if (! rpc->isFinished())
+            {
+              throw(o3d3xx::error_t(O3D3XX_XMLRPC_TIMEOUT));
+            }
+          else if (! rpc->isSuccessful())
+            {
+              xmlrpc_c::fault f = rpc->getFault();
+              int ifm_error = f.getCode();
 
-	      switch (ifm_error)
-		{
-		case 101000:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_PARAM);
-		  break;
+              switch (ifm_error)
+                {
+                case 101000:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_PARAM);
+                  break;
 
-		case 100000:
-		  LOG(WARNING) << "Invalid session object? "
-			       << this->GetSessionID();
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_OBJ_NOT_FOUND);
-		  break;
+                case 100000:
+                  LOG(WARNING) << "Invalid session object? "
+                               << this->GetSessionID();
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_OBJ_NOT_FOUND);
+                  break;
 
-		case 100001:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_METHOD_NOT_FOUND);
-		  break;
+                case 100001:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_METHOD_NOT_FOUND);
+                  break;
 
-		case 101002:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
-		  break;
+                case 101002:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
+                  break;
 
-		case 101004:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE);
-		  break;
+                case 101004:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_EDIT_SESSION_ALREADY_ACTIVE);
+                  break;
 
-		case 101013:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_APPLICATION);
-		  break;
+                case 101013:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_INVALID_APPLICATION);
+                  break;
 
-		case 101014:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE);
-		  break;
+                case 101014:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_APPLICATION_IN_EDIT_MODE);
+                  break;
 
-		case 101015:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS);
-		  break;
+                case 101015:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_TOO_MANY_APPLICATIONS);
+                  break;
 
-		case 101016:
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_NOT_EDITING_APPLICATION);
-		  break;
+                case 101016:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_NOT_EDITING_APPLICATION);
+                  break;
 
-		default:
-		  LOG(ERROR) << "IFM error code: " << ifm_error;
-		  throw o3d3xx::error_t(O3D3XX_XMLRPC_FINFAIL);
-		  break;
-		}
-	    }
-	  else
-	    {
-	      throw o3d3xx::error_t(O3D3XX_XMLRPC_FAILURE);
-	    }
-	}
+                default:
+                  LOG(ERROR) << "IFM error code: " << ifm_error;
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_FINFAIL);
+                  break;
+                }
+            }
+          else
+            {
+              throw o3d3xx::error_t(O3D3XX_XMLRPC_FAILURE);
+            }
+        }
     }
 
     /** _XCall wrapper for XMLRPC calls to the "Main" object */
@@ -806,9 +835,9 @@ namespace o3d3xx
     _XCallSession(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -819,10 +848,10 @@ namespace o3d3xx
     _XCallEdit(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -833,11 +862,11 @@ namespace o3d3xx
     _XCallDevice(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT +
-	o3d3xx::XMLRPC_DEVICE;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT +
+        o3d3xx::XMLRPC_DEVICE;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -848,12 +877,12 @@ namespace o3d3xx
     _XCallNet(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT +
-	o3d3xx::XMLRPC_DEVICE +
-	o3d3xx::XMLRPC_NET;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT +
+        o3d3xx::XMLRPC_DEVICE +
+        o3d3xx::XMLRPC_NET;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -864,11 +893,11 @@ namespace o3d3xx
     _XCallApp(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT +
-	o3d3xx::XMLRPC_APP;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT +
+        o3d3xx::XMLRPC_APP;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -879,12 +908,12 @@ namespace o3d3xx
     _XCallImager(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT +
-	o3d3xx::XMLRPC_APP +
-	o3d3xx::XMLRPC_IMAGER;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT +
+        o3d3xx::XMLRPC_APP +
+        o3d3xx::XMLRPC_IMAGER;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -895,13 +924,13 @@ namespace o3d3xx
     _XCallSpatialFilter(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT +
-	o3d3xx::XMLRPC_APP +
-	o3d3xx::XMLRPC_IMAGER +
-	o3d3xx::XMLRPC_SPATIALFILTER;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT +
+        o3d3xx::XMLRPC_APP +
+        o3d3xx::XMLRPC_IMAGER +
+        o3d3xx::XMLRPC_SPATIALFILTER;
 
       return this->_XCall(url, sensor_method_name, args...);
     }
@@ -912,13 +941,13 @@ namespace o3d3xx
     _XCallTemporalFilter(const std::string& sensor_method_name, Args... args)
     {
       std::string url =
-	this->GetXMLRPCURLPrefix() +
-	o3d3xx::XMLRPC_MAIN +
-	o3d3xx::XMLRPC_SESSION +
-	o3d3xx::XMLRPC_EDIT +
-	o3d3xx::XMLRPC_APP +
-	o3d3xx::XMLRPC_IMAGER +
-	o3d3xx::XMLRPC_TEMPORALFILTER;
+        this->GetXMLRPCURLPrefix() +
+        o3d3xx::XMLRPC_MAIN +
+        o3d3xx::XMLRPC_SESSION +
+        o3d3xx::XMLRPC_EDIT +
+        o3d3xx::XMLRPC_APP +
+        o3d3xx::XMLRPC_IMAGER +
+        o3d3xx::XMLRPC_TEMPORALFILTER;
 
       return this->_XCall(url, sensor_method_name, args...);
     }

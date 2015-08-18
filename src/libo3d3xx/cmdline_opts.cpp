@@ -54,17 +54,17 @@ o3d3xx::CmdLineOpts::CmdLineOpts(const std::string& description)
 
 int
 o3d3xx::CmdLineOpts::Parse(int argc, const char **argv,
-			   std::string *ip,
-			   std::uint32_t *xmlrpc_port,
-			   std::string *password,
-			   std::function<void()> fn,
-			   std::ostream& out)
+                           std::string *ip,
+                           std::uint32_t *xmlrpc_port,
+                           std::string *password,
+                           std::function<void()> fn,
+                           std::ostream& out)
 {
   int retval = 1;
   int major, minor, patch;
 
   po::store(po::command_line_parser(argc, argv).
-	    options(this->visible).run(), this->vm);
+            options(this->visible).run(), this->vm);
 
   po::notify(this->vm);
 
@@ -77,27 +77,27 @@ o3d3xx::CmdLineOpts::Parse(int argc, const char **argv,
     {
       o3d3xx::version(&major, &minor, &patch);
       out << O3D3XX_LIBRARY_NAME
-	  << ": version=" << major << "."
-	  << minor << "." << patch << std::endl;
+          << ": version=" << major << "."
+          << minor << "." << patch << std::endl;
       retval = 0;
     }
 
   if (retval != 0)
     {
       if (ip != nullptr)
-	{
-	  ip->assign(this->vm["ip"].as<std::string>());
-	}
+        {
+          ip->assign(this->vm["ip"].as<std::string>());
+        }
 
       if (xmlrpc_port != nullptr)
-	{
-	  *xmlrpc_port = this->vm["xmlrpc-port"].as<std::uint32_t>();
-	}
+        {
+          *xmlrpc_port = this->vm["xmlrpc-port"].as<std::uint32_t>();
+        }
 
       if (password != nullptr)
-	{
-	  password->assign(this->vm["password"].as<std::string>());
-	}
+        {
+          password->assign(this->vm["password"].as<std::string>());
+        }
 
       fn();
     }

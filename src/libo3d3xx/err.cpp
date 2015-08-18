@@ -35,6 +35,7 @@ const int O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE = -9013;
 const int O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE = -9014;
 const int O3D3XX_IO_ERROR = -9015;
 const int O3D3XX_VALUE_OUT_OF_RANGE = -9016;
+const int O3D3XX_INVALID_ARGUMENT = -9017;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -75,6 +76,8 @@ const char *o3d3xx::strerror(int errnum)
     return "I/O error";
   case O3D3XX_VALUE_OUT_OF_RANGE:
     return "Value out of range";
+  case O3D3XX_INVALID_ARGUMENT:
+    return "Invalid argument(s)";
   default:
     return ::strerror(errnum);
   }

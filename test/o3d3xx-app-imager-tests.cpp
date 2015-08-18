@@ -9,10 +9,8 @@
 #include "gtest/gtest.h"
 
 //
-// Due to a current bug in the sensor, we are separating out the `application'
-// and `imager' unit tests from the other `camera' tests. The `SetUp' and
-// `TearDown' functions on the test fixture here are leveraged to put the
-// camera into a testable state.
+// The `SetUp' and `TearDown' functions on the test fixture here are
+// leveraged to put the camera into a testable state.
 //
 
 class AppImagerTest : public ::testing::Test

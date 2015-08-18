@@ -36,20 +36,20 @@ TEST(Camera_Tests, GetXMLRPCURLPrefix)
     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
 
   EXPECT_EQ(cam->GetXMLRPCURLPrefix(),
-	    std::string("http://" + cam->GetIP() +
-			":" + std::to_string(cam->GetXMLRPCPort())));
+            std::string("http://" + cam->GetIP() +
+                        ":" + std::to_string(cam->GetXMLRPCPort())));
 
   cam->SetIP("192.168.0.100");
   EXPECT_EQ(cam->GetIP(), std::string("192.168.0.100"));
   EXPECT_EQ(cam->GetXMLRPCURLPrefix(),
-	    std::string("http://" + cam->GetIP() +
-			":" + std::to_string(cam->GetXMLRPCPort())));
+            std::string("http://" + cam->GetIP() +
+                        ":" + std::to_string(cam->GetXMLRPCPort())));
 
   cam->SetXMLRPCPort(8080);
   EXPECT_EQ(cam->GetXMLRPCPort(), 8080);
   EXPECT_EQ(cam->GetXMLRPCURLPrefix(),
-	    std::string("http://" + cam->GetIP() +
-			":" + std::to_string(cam->GetXMLRPCPort())));
+            std::string("http://" + cam->GetIP() +
+                        ":" + std::to_string(cam->GetXMLRPCPort())));
 }
 
 TEST(Camera_Tests, GetAllParameters)
@@ -78,7 +78,7 @@ TEST(Camera_Tests, GetParameter)
     }
 
   EXPECT_THROW(cam->GetParameter("Bogus Parameter"),
-	       o3d3xx::error_t);
+               o3d3xx::error_t);
 }
 
 TEST(Camera_Tests, GetSWVersion)
@@ -158,7 +158,7 @@ TEST(Camera_Tests, SetOperatingMode)
   cam->RequestSession();
   EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
   EXPECT_EQ(static_cast<int>(o3d3xx::Camera::operating_mode::EDIT),
-	    std::stoi(cam->GetParameter("OperatingMode")));
+            std::stoi(cam->GetParameter("OperatingMode")));
 
   // after session is cancelled (by dtor), camera automatically goes back
   // into RUN mode.
@@ -193,26 +193,26 @@ TEST(Camera_Tests, GetDeviceConfig)
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
   EXPECT_EQ(std::stoi(params.at("ActiveApplication")),
-	    dev->ActiveApplication());
+            dev->ActiveApplication());
   EXPECT_EQ(std::stoi(params.at("PcicTcpPort")), dev->PcicTCPPort());
   EXPECT_EQ(std::stoi(params.at("PcicProtocolVersion")), dev->PcicProtocolVersion());
   EXPECT_EQ(std::stoi(params.at("IOLogicType")), dev->IOLogicType());
   EXPECT_EQ(o3d3xx::stob(params.at("IODebouncing")), dev->IODebouncing());
   EXPECT_EQ(std::stoi(params.at("IOExternApplicationSwitch")),
-	    dev->IOExternApplicationSwitch());
+            dev->IOExternApplicationSwitch());
   EXPECT_EQ(std::stoi(params.at("SessionTimeout")), dev->SessionTimeout());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransX")),
-	    dev->ExtrinsicCalibTransX());
+            dev->ExtrinsicCalibTransX());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransY")),
-	    dev->ExtrinsicCalibTransY());
+            dev->ExtrinsicCalibTransY());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransZ")),
-	    dev->ExtrinsicCalibTransZ());
+            dev->ExtrinsicCalibTransZ());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotX")),
-	    dev->ExtrinsicCalibRotX());
+            dev->ExtrinsicCalibRotX());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
-	    dev->ExtrinsicCalibRotY());
+            dev->ExtrinsicCalibRotY());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
-	    dev->ExtrinsicCalibRotY());
+            dev->ExtrinsicCalibRotY());
 }
 
 TEST(Camera_Tests, ActivateDisablePassword)
@@ -280,7 +280,7 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->IOLogicType(), dev2->IOLogicType());
   EXPECT_EQ(dev->IODebouncing(), dev2->IODebouncing());
   EXPECT_EQ(dev->IOExternApplicationSwitch(),
-	    dev2->IOExternApplicationSwitch());
+            dev2->IOExternApplicationSwitch());
   EXPECT_EQ(dev->SessionTimeout(), dev2->SessionTimeout());
   EXPECT_EQ(dev->ExtrinsicCalibTransX(), dev2->ExtrinsicCalibTransX());
   EXPECT_EQ(dev->ExtrinsicCalibTransY(), dev2->ExtrinsicCalibTransY());

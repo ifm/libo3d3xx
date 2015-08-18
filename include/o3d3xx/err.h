@@ -38,6 +38,7 @@ extern const int O3D3XX_EXPOSURE_TIME_NOT_ACCESSIBLE;
 extern const int O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE;
 extern const int O3D3XX_IO_ERROR;
 extern const int O3D3XX_VALUE_OUT_OF_RANGE;
+extern const int O3D3XX_INVALID_ARGUMENT;
 
 namespace o3d3xx
 {
