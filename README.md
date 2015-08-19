@@ -124,6 +124,7 @@ Running
 
 * [Using the library](doc/using.md)
 * [Command-line utilities](doc/utils.md)
+* [Unlocking the 100k Pixel Imager](doc/100k.md)
 
 TODO
 ----
