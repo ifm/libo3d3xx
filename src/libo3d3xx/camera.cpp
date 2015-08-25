@@ -568,11 +568,24 @@ o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
                       config->PcicTcpResultOutputEnabled());
     }
 
-  if (app->PcicTcpResultSchema() != config->PcicTcpResultSchema())
+  //
+  // To avoid making extraneous network calls, we compare the
+  // parsed JSON and not the JSON strings for the result schema.
+  //
+  boost::property_tree::ptree app_schema_pt;
+  boost::property_tree::ptree config_schema_pt;
+  std::istringstream app_is(app->PcicTcpResultSchema());
+  std::istringstream config_is(config->PcicTcpResultSchema());
+  app_is.seekg(0, app_is.beg);
+  config_is.seekg(0, config_is.beg);
+  boost::property_tree::read_json(app_is, app_schema_pt);
+  boost::property_tree::read_json(config_is, config_schema_pt);
+
+  //if (app->PcicTcpResultSchema() != config->PcicTcpResultSchema())
+  if (app_schema_pt != config_schema_pt)
     {
-      LOG(WARNING) << "Setting the PCIC Result Schema "
-                   << "may break the framegrabber!";
-      LOG(WARNING) << config->PcicTcpResultSchema();
+      LOG(WARNING) << "Setting PCIC TCP Result Schema to: "
+                   << config->PcicTcpResultSchema();
 
       this->_XCallApp("setParameter",
                       "PcicTcpResultSchema",

@@ -20,6 +20,7 @@
 #include <cstdint>
 #include <exception>
 #include <functional>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <system_error>
@@ -27,14 +28,46 @@
 #include <boost/system/system_error.hpp>
 #include <glog/logging.h>
 #include "o3d3xx/image.h"
+#include "o3d3xx/app_config.h"
+#include "o3d3xx/device_config.h"
 #include "o3d3xx/camera.hpp"
 #include "o3d3xx/err.h"
 
+const std::string o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA =
+  "{ \"layouter\": \"flexible\", \"format\": { \"dataencoding\": \"ascii\" }, \
+  \"elements\": [ { \"type\": \"string\", \"value\": \"star\", \"id\": \
+  \"start_string\" }, { \"type\": \"blob\", \"id\": \
+  \"normalized_amplitude_image\" }, { \"type\": \"blob\", \"id\": \
+  \"distance_image\" }, { \"type\": \"blob\", \"id\": \"x_image\" }, { \
+  \"type\": \"blob\", \"id\": \"y_image\" }, { \"type\": \"blob\", \"id\": \
+  \"z_image\" }, { \"type\": \"blob\", \"id\": \"confidence_image\" }, { \
+  \"type\": \"blob\", \"id\": \"diagnostic_data\" }, { \"type\": \"string\", \
+  \"value\": \"stop\", \"id\": \"end_string\" } ] }";
+
 o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam)
   : cam_(cam),
-    io_service_(),
-    thread_(new std::thread(std::bind(&o3d3xx::FrameGrabber::Run, this)))
-{ }
+    io_service_()
+{
+  // Set the result schema to a known byte stream
+  // saving the original schema
+  this->cam_->RequestSession();
+  this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  o3d3xx::DeviceConfig::Ptr dev = this->cam_->GetDeviceConfig();
+  this->cam_->EditApplication(dev->ActiveApplication());
+  o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
+  this->result_schema_ = app->PcicTcpResultSchema();
+  LOG(WARNING) << "Temporarily applying the default result schema";
+  app->SetPcicTcpResultSchema(o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA);
+  this->cam_->SetAppConfig(app.get());
+  this->cam_->SaveApp();
+  this->cam_->StopEditingApplication();
+  this->cam_->CancelSession();
+
+  // start the frame grabbing thread
+  this->thread_ =
+    std::unique_ptr<std::thread>(
+      new std::thread(std::bind(&o3d3xx::FrameGrabber::Run, this)));
+}
 
 o3d3xx::FrameGrabber::~FrameGrabber()
 {
@@ -47,6 +80,27 @@ o3d3xx::FrameGrabber::~FrameGrabber()
       // will never get emitted.
       this->Stop();
       this->thread_->join();
+    }
+
+  // restore the original result schema
+  try
+    {
+      this->cam_->RequestSession();
+      this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+      o3d3xx::DeviceConfig::Ptr dev = this->cam_->GetDeviceConfig();
+      this->cam_->EditApplication(dev->ActiveApplication());
+      o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
+      LOG(WARNING) << "Restoring PCIC TCP Result Schema";
+      app->SetPcicTcpResultSchema(this->result_schema_);
+      this->cam_->SetAppConfig(app.get());
+      this->cam_->SaveApp();
+      this->cam_->StopEditingApplication();
+      this->cam_->CancelSession();
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "Could not restore original result schema!"
+                 << ex.what();
     }
 
   DLOG(INFO) << "FrameGrabber done.";
@@ -131,7 +185,7 @@ o3d3xx::FrameGrabber::Run()
   try
     {
       this->cam_->RequestSession();
-      this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
+       this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
       this->cam_->CancelSession();
     }
   catch (const o3d3xx::error_t& ex)

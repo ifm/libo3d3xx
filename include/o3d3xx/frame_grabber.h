@@ -22,6 +22,7 @@
 #include <functional>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <thread>
 #include <vector>
 #include <boost/asio.hpp>
@@ -34,6 +35,8 @@
 
 namespace o3d3xx
 {
+  extern const std::string DEFAULT_PCIC_TCP_RESULT_SCHEMA;
+
   /**
    * The FrameGrabber is a class that, when given access to an
    * o3d3xx::Camera::Ptr, it will grab frames from the camera in a separate
@@ -171,6 +174,11 @@ namespace o3d3xx
      * Condition variable used to notify clients when image data are ready
      */
     std::condition_variable front_buffer_cv_;
+
+    /**
+     * The application's result schema (queried from the camera at runtime)
+     */
+    std::string result_schema_;
 
   }; // end: class FrameGrabber
 
