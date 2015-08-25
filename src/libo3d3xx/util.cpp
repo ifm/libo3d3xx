@@ -137,9 +137,11 @@ o3d3xx::hist1(const cv::Mat& img, int histsize)
     {
       cv::line(histimg,
                cv::Point(bin_width*(i-1),
-                         hist_height - static_cast<int>(std::round(hist.at<float>(i-1)))),
+                         hist_height -
+                           static_cast<int>(std::round(hist.at<float>(i-1)))),
                cv::Point(bin_width*(i),
-                         hist_height - static_cast<int>(std::round(hist.at<float>(i)))),
+                         hist_height -
+                           static_cast<int>(std::round(hist.at<float>(i)))),
                CV_RGB(65535, 65535, 65535),  // line color
                1,                   // line thickness
                8,                   // line type (8 = connected)
