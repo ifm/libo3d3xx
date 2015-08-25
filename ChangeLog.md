@@ -1,5 +1,16 @@
 ## Changes between libo3d3xx 0.1.7 and 0.1.8
 
+### Schema-aware FrameGrabber
+
+https://github.com/lovepark/libo3d3xx/issues/4
+
+Per suggestion by @graugans (IFM), the `FrameGrabber` will now apply a known
+schema at runtime in the event the configured schema for the active application
+is different than what is expected. Additionally, the configured schema gets
+restored once the FrameGrabber is destroyed. This allows for compatibility with
+other computing environments that may expect the configured schema to be
+returned.
+
 ### Interoperability with IFM's Vision Assistant
 
 IFM's software provides the means to import/export applications to/from the
