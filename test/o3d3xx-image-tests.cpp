@@ -211,7 +211,7 @@ TEST(ImageBuffers_Tests, CopyConstructor)
       EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
       o3d3xx::ImageBuffer::Ptr img2 =
-	o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer(*(img.get())));
+        o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer(*(img.get())));
 
       EXPECT_TRUE(img2->Bytes() == img->Bytes());
 

@@ -43,33 +43,33 @@ int main(int argc, const char** argv)
 
       po::options_description rm_opts("Remove");
       rm_opts.add_options()
-	("index,i",
-	 po::value<int>()->default_value(-1),
-	 "Index of application to remove");
+        ("index,i",
+         po::value<int>()->default_value(-1),
+         "Index of application to remove");
 
       opts.visible.add(rm_opts);
 
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       index = opts.vm["index"].as<int>();
       if (index > 0)
-	{
-	  o3d3xx::Camera::Ptr cam =
-	    std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        {
+          o3d3xx::Camera::Ptr cam =
+            std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
-	  cam->RequestSession();
-	  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-	  cam->DeleteApplication(index);
-	}
+          cam->RequestSession();
+          cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+          cam->DeleteApplication(index);
+        }
     }
   catch (const std::exception& e)
     {
       std::cerr << "Failed to remove application at index='"
-		<< index << "':"
-		<< std::endl << e.what() << std::endl;
+                << index << "':"
+                << std::endl << e.what() << std::endl;
       return 1;
     }
 

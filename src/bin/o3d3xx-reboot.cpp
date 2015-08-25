@@ -35,12 +35,12 @@ int main(int argc, const char** argv)
     {
       o3d3xx::CmdLineOpts opts("o3d3xx Reboot");
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       o3d3xx::Camera::Ptr cam =
-	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       cam->Reboot();
     }

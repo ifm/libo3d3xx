@@ -39,8 +39,8 @@ namespace o3d3xx
      */
     static const
     std::unordered_map<std::string,
-		       std::function<void(AppConfig*,
-					  const std::string&)> >
+                       std::function<void(AppConfig*,
+                                          const std::string&)> >
     mutator_map;
 
     /**

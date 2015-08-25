@@ -141,13 +141,13 @@ o3d3xx::SpatialFilterConfig::FromJSON(const std::string& json)
       static_cast<int>(o3d3xx::Camera::spatial_filter::OFF))
     {
       try
-	{
-	  filt->SetMaskSize(pt.get<int>("MaskSize"));
-	}
+        {
+          filt->SetMaskSize(pt.get<int>("MaskSize"));
+        }
       catch (const boost::property_tree::ptree_bad_path& ex)
-	{
-	  LOG(WARNING) << "Failed to extract 'MaskSize': " << ex.what();
-	}
+        {
+          LOG(WARNING) << "Failed to extract 'MaskSize': " << ex.what();
+        }
     }
 
   return filt;

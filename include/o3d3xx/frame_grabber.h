@@ -105,9 +105,9 @@ namespace o3d3xx
      * otherwise.
      */
     bool WaitForFrame(o3d3xx::ImageBuffer* img,
-		      long timeout_millis = 0,
-		      bool copy_buff = false,
-		      bool organize = true);
+                      long timeout_millis = 0,
+                      bool copy_buff = false,
+                      bool organize = true);
 
   protected:
     /**

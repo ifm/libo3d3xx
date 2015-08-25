@@ -31,35 +31,35 @@ int main(int argc, const char** argv)
     {
       o3d3xx::CmdLineOpts opts("o3d3xx Application Listing");
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       o3d3xx::Camera::Ptr cam =
-      	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       std::unordered_map<std::string, std::string> params =
-	cam->GetAllParameters();
+        cam->GetAllParameters();
 
       int active_app = std::stoi(params["ActiveApplication"]);
 
       std::vector<o3d3xx::Camera::app_entry_t> apps = cam->GetApplicationList();
       for (auto& app : apps)
-	{
-	  if (app.index == active_app)
-	    {
-	      std::cout << "* ";
-	    }
-	  else
-	    {
-	      std::cout << "  ";
-	    }
+        {
+          if (app.index == active_app)
+            {
+              std::cout << "* ";
+            }
+          else
+            {
+              std::cout << "  ";
+            }
 
-	  std::cout << "[" << app.index
-		    << "] id=" << app.id << ", name="
-		    << app.name << ", description=" << app.description
-		    << std::endl;
-	}
+          std::cout << "[" << app.index
+                    << "] id=" << app.id << ", name="
+                    << app.name << ", description=" << app.description
+                    << std::endl;
+        }
 
     }
   catch (const std::exception& e)

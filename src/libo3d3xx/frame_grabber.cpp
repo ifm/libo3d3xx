@@ -61,9 +61,9 @@ o3d3xx::FrameGrabber::Stop()
 
 bool
 o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer* img,
-				   long timeout_millis,
-				   bool copy_buff,
-				   bool organize)
+                                   long timeout_millis,
+                                   bool copy_buff,
+                                   bool organize)
 {
   // mutex will unlock in `unique_lock' dtor if not explicitly unlocked prior
   std::unique_lock<std::mutex> lock(this->front_buffer_mutex_);
@@ -71,19 +71,19 @@ o3d3xx::FrameGrabber::WaitForFrame(o3d3xx::ImageBuffer* img,
   try
     {
       if (timeout_millis <= 0)
-	{
-	  this->front_buffer_cv_.wait(lock);
-	}
+        {
+          this->front_buffer_cv_.wait(lock);
+        }
       else
-	{
-	  if (this->front_buffer_cv_.wait_for(
-	       lock, std::chrono::milliseconds(timeout_millis)) ==
-	      std::cv_status::timeout)
-	    {
-	      LOG(WARNING) << "Timeout waiting for image buffer from camera";
-	      return false;
-	    }
-	}
+        {
+          if (this->front_buffer_cv_.wait_for(
+               lock, std::chrono::milliseconds(timeout_millis)) ==
+              std::cv_status::timeout)
+            {
+              LOG(WARNING) << "Timeout waiting for image buffer from camera";
+              return false;
+            }
+        }
     }
   catch (const std::system_error& ex)
     {
@@ -121,12 +121,12 @@ o3d3xx::FrameGrabber::Run()
   catch (const o3d3xx::error_t& ex)
     {
       LOG(ERROR) << "Could not get IP/Port of the camera: "
-		 << ex.what();
+                 << ex.what();
       return;
     }
 
   LOG(INFO) << "Camera connection info: ip=" << cam_ip
-	    << ", port=" << cam_port;
+            << ", port=" << cam_port;
 
   try
     {
@@ -137,7 +137,7 @@ o3d3xx::FrameGrabber::Run()
   catch (const o3d3xx::error_t& ex)
     {
       LOG(ERROR) << "Failed to setup camera for image acquisition: "
-		 << ex.what();
+                 << ex.what();
       return;
     }
 
@@ -172,41 +172,41 @@ o3d3xx::FrameGrabber::Run()
       //           << buff_sz;
 
       if (bytes_read == buff_sz)
-  	{
-  	  DLOG(INFO) << "Got full image!";
-  	  bytes_read = 0;
+        {
+          DLOG(INFO) << "Got full image!";
+          bytes_read = 0;
 
-	  // 1. verify the data
-	  if (o3d3xx::verify_image_buffer(this->back_buffer_))
-	    {
-	      DLOG(INFO) << "Image OK";
+          // 1. verify the data
+          if (o3d3xx::verify_image_buffer(this->back_buffer_))
+            {
+              DLOG(INFO) << "Image OK";
 
-	      // 2. move the data to the front buffer in O(1) time complexity
-	      this->front_buffer_mutex_.lock();
-	      this->back_buffer_.swap(this->front_buffer_);
-	      this->front_buffer_mutex_.unlock();
+              // 2. move the data to the front buffer in O(1) time complexity
+              this->front_buffer_mutex_.lock();
+              this->back_buffer_.swap(this->front_buffer_);
+              this->front_buffer_mutex_.unlock();
 
-	      // 3. notify waiting clients
-	      this->front_buffer_cv_.notify_all();
-	    }
-	  else
-	    {
-	      LOG(WARNING) << "Bad image!";
-	    }
+              // 3. notify waiting clients
+              this->front_buffer_cv_.notify_all();
+            }
+          else
+            {
+              LOG(WARNING) << "Bad image!";
+            }
 
-	  // read another ticket
-	  sock.async_read_some(
-	       boost::asio::buffer(this->ticket_buffer_.data(),
-				   o3d3xx::IMG_TICKET_SZ),
-	       ticket_handler);
+          // read another ticket
+          sock.async_read_some(
+               boost::asio::buffer(this->ticket_buffer_.data(),
+                                   o3d3xx::IMG_TICKET_SZ),
+               ticket_handler);
 
-	  return;
-  	}
+          return;
+        }
 
       sock.async_read_some(
         boost::asio::buffer(&this->back_buffer_[bytes_read],
-  			    buff_sz - bytes_read),
-  	image_handler);
+                            buff_sz - bytes_read),
+        image_handler);
     };
 
   //
@@ -227,33 +227,33 @@ o3d3xx::FrameGrabber::Run()
                  << " ticket bytes of " << ticket_buff_sz;
 
       if (ticket_bytes_read == ticket_buff_sz)
-	{
-	  DLOG(INFO) << "Got full ticket!";
-	  ticket_bytes_read = 0;
+        {
+          DLOG(INFO) << "Got full ticket!";
+          ticket_bytes_read = 0;
 
-	  if (o3d3xx::verify_ticket_buffer(this->ticket_buffer_))
-	    {
-	      DLOG(INFO) << "Ticket OK";
+          if (o3d3xx::verify_ticket_buffer(this->ticket_buffer_))
+            {
+              DLOG(INFO) << "Ticket OK";
 
-	      buff_sz = o3d3xx::get_image_buffer_size(this->ticket_buffer_);
-	      DLOG(INFO) << "Image buffer size: " << buff_sz;
-	      this->back_buffer_.resize(buff_sz);
+              buff_sz = o3d3xx::get_image_buffer_size(this->ticket_buffer_);
+              DLOG(INFO) << "Image buffer size: " << buff_sz;
+              this->back_buffer_.resize(buff_sz);
 
-	      sock.async_read_some(
-		   boost::asio::buffer(this->back_buffer_.data(),
-				       buff_sz),
-		   image_handler);
+              sock.async_read_some(
+                   boost::asio::buffer(this->back_buffer_.data(),
+                                       buff_sz),
+                   image_handler);
 
-	      return;
-	    }
+              return;
+            }
 
-	  LOG(WARNING) << "Bad ticket!";
-	}
+          LOG(WARNING) << "Bad ticket!";
+        }
 
       sock.async_read_some(
-	   boost::asio::buffer(&this->ticket_buffer_[ticket_bytes_read],
-			       ticket_buff_sz - ticket_bytes_read),
-	   ticket_handler);
+           boost::asio::buffer(&this->ticket_buffer_[ticket_bytes_read],
+                               ticket_buff_sz - ticket_bytes_read),
+           ticket_handler);
     };
 
   //
@@ -262,16 +262,16 @@ o3d3xx::FrameGrabber::Run()
   try
     {
       sock.async_connect(endpoint,
-			 [&, this]
-			 (const boost::system::error_code& ec)
-			 {
-			   if (ec) { throw o3d3xx::error_t(ec.value()); }
+                         [&, this]
+                         (const boost::system::error_code& ec)
+                         {
+                           if (ec) { throw o3d3xx::error_t(ec.value()); }
 
-			   sock.async_read_some(
-			     boost::asio::buffer(
-			       this->ticket_buffer_.data(), ticket_buff_sz),
-			     ticket_handler);
-			 });
+                           sock.async_read_some(
+                             boost::asio::buffer(
+                               this->ticket_buffer_.data(), ticket_buff_sz),
+                             ticket_handler);
+                         });
 
       this->io_service_.run();
     }

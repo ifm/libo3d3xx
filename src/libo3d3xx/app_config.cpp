@@ -41,19 +41,19 @@ o3d3xx::AppConfig::AppConfig(
   for (auto& kv : params)
     {
       try
-	{
-	  auto func = o3d3xx::AppConfig::mutator_map.at(kv.first);
-	  func(this, kv.second);
-	}
+        {
+          auto func = o3d3xx::AppConfig::mutator_map.at(kv.first);
+          func(this, kv.second);
+        }
       catch (const std::out_of_range& ex)
-	{
-	  // we expect this for any read-only params
-	}
+        {
+          // we expect this for any read-only params
+        }
       catch (const std::invalid_argument& ia)
-	{
-	  LOG(ERROR) << "Invalid arg for: "
-		     << kv.first << "=" << kv.second;
-	}
+        {
+          LOG(ERROR) << "Invalid arg for: "
+                     << kv.first << "=" << kv.second;
+        }
     }
 }
 
@@ -118,8 +118,8 @@ o3d3xx::AppConfig::SetPcicTcpResultSchema(const std::string& schema) noexcept
 }
 
 const std::unordered_map<std::string,
-			 std::function<void(o3d3xx::AppConfig*,
-					    const std::string&)> >
+                         std::function<void(o3d3xx::AppConfig*,
+                                            const std::string&)> >
 o3d3xx::AppConfig::mutator_map =
   {
     {"Name",
@@ -172,16 +172,16 @@ o3d3xx::AppConfig::FromJSON(const std::string& json)
   for (auto& kv : pt)
     {
       try
-	{
-	  auto func = o3d3xx::AppConfig::mutator_map.at(kv.first);
-	  func(app.get(), kv.second.data());
-	}
+        {
+          auto func = o3d3xx::AppConfig::mutator_map.at(kv.first);
+          func(app.get(), kv.second.data());
+        }
       catch (const std::out_of_range& ex)
-	{
-	  DLOG(WARNING) << "In FromJSON: "
-			<< kv.first << "=" << kv.second.data()
-			<< ": " << ex.what();
-	}
+        {
+          DLOG(WARNING) << "In FromJSON: "
+                        << kv.first << "=" << kv.second.data()
+                        << ": " << ex.what();
+        }
     }
 
   return app;

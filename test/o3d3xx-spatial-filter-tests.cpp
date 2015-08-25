@@ -19,10 +19,10 @@ protected:
 
     for (auto& app : cam_->GetApplicationList())
       {
-	if (app.index != active_idx)
-	  {
-	    cam_->DeleteApplication(app.index);
-	  }
+        if (app.index != active_idx)
+          {
+            cam_->DeleteApplication(app.index);
+          }
       }
 
     cam_->SaveDevice();
@@ -42,7 +42,7 @@ TEST_F(SpatialFilterTest, SpatialFilterConfig_General)
     std::make_shared<o3d3xx::SpatialFilterConfig>();
 
   ASSERT_EQ(filt->Type(),
-	    static_cast<int>(o3d3xx::Camera::spatial_filter::OFF));
+            static_cast<int>(o3d3xx::Camera::spatial_filter::OFF));
 
   ASSERT_THROW(filt->SetMaskSize(0), o3d3xx::error_t);
 
@@ -54,7 +54,7 @@ TEST_F(SpatialFilterTest, SpatialFilterConfig_General)
   filt = std::make_shared<o3d3xx::SpatialMeanFilterConfig>();
 
   ASSERT_EQ(filt->Type(),
-	    static_cast<int>(o3d3xx::Camera::spatial_filter::MEAN_FILTER));
+            static_cast<int>(o3d3xx::Camera::spatial_filter::MEAN_FILTER));
 
   int mask_size =
     static_cast<int>(o3d3xx::SpatialFilterConfig::mask_size::_5x5);
@@ -69,7 +69,7 @@ TEST_F(SpatialFilterTest, SpatialFilterConfig_General)
   filt = std::make_shared<o3d3xx::SpatialMedianFilterConfig>();
 
   ASSERT_EQ(filt->Type(),
-	    static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER));
+            static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER));
 
   ASSERT_NO_THROW(filt->SetMaskSize(mask_size));
   ASSERT_EQ(mask_size, filt->MaskSize());
@@ -82,7 +82,7 @@ TEST_F(SpatialFilterTest, SpatialFilterConfig_General)
   filt = std::make_shared<o3d3xx::SpatialBilateralFilterConfig>();
 
   ASSERT_EQ(filt->Type(),
-	    static_cast<int>(o3d3xx::Camera::spatial_filter::BILATERAL_FILTER));
+            static_cast<int>(o3d3xx::Camera::spatial_filter::BILATERAL_FILTER));
 
   ASSERT_NO_THROW(filt->SetMaskSize(mask_size));
   ASSERT_EQ(mask_size, filt->MaskSize());
@@ -109,32 +109,32 @@ TEST_F(SpatialFilterTest, GetSpatialFilterParameters)
       cam_->SetImagerConfig(im.get());
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetSpatialFilterParameters();
+        cam_->GetSpatialFilterParameters();
 
       switch (filt)
-	{
-	case o3d3xx::Camera::spatial_filter::MEDIAN_FILTER:
-	  ASSERT_EQ(params.size(), 1);
-	  ASSERT_NO_THROW(params.at("MaskSize"));
-	  break;
+        {
+        case o3d3xx::Camera::spatial_filter::MEDIAN_FILTER:
+          ASSERT_EQ(params.size(), 1);
+          ASSERT_NO_THROW(params.at("MaskSize"));
+          break;
 
-	case o3d3xx::Camera::spatial_filter::MEAN_FILTER:
-	  ASSERT_EQ(params.size(), 1);
-	  ASSERT_NO_THROW(params.at("MaskSize"));
-	  break;
+        case o3d3xx::Camera::spatial_filter::MEAN_FILTER:
+          ASSERT_EQ(params.size(), 1);
+          ASSERT_NO_THROW(params.at("MaskSize"));
+          break;
 
-	case o3d3xx::Camera::spatial_filter::BILATERAL_FILTER:
-	  // Despite with the docs say, the sensor currently only
-	  // supports the `MaskSize` parameter.
-	  // ASSERT_EQ(params.size(), 3);
-	  ASSERT_EQ(params.size(), 1);
-	  ASSERT_NO_THROW(params.at("MaskSize"));
-	  break;
+        case o3d3xx::Camera::spatial_filter::BILATERAL_FILTER:
+          // Despite with the docs say, the sensor currently only
+          // supports the `MaskSize` parameter.
+          // ASSERT_EQ(params.size(), 3);
+          ASSERT_EQ(params.size(), 1);
+          ASSERT_NO_THROW(params.at("MaskSize"));
+          break;
 
-	default:
-	  ASSERT_EQ(params.size(), 0);
-	  break;
-	}
+        default:
+          ASSERT_EQ(params.size(), 0);
+          break;
+        }
     }
 
   cam_->StopEditingApplication();
@@ -161,22 +161,22 @@ TEST_F(SpatialFilterTest, GetSpatialFilterParameterLimits)
       cam_->SetImagerConfig(im.get());
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetSpatialFilterParameters();
+        cam_->GetSpatialFilterParameters();
 
       std::unordered_map<std::string,
-			 std::unordered_map<std::string,
-					    std::string> > limits =
-	cam_->GetSpatialFilterParameterLimits();
+                         std::unordered_map<std::string,
+                                            std::string> > limits =
+        cam_->GetSpatialFilterParameterLimits();
 
       for (auto& param : params)
-	{
-	  std::unordered_map<std::string, std::string>
-	    param_limits = limits.at(param.first);
+        {
+          std::unordered_map<std::string, std::string>
+            param_limits = limits.at(param.first);
 
-	  ASSERT_EQ(param_limits.size(), 2);
-	  ASSERT_LE(std::stoi(param_limits.at("min")),
-		    std::stoi(param_limits.at("max")));
-	}
+          ASSERT_EQ(param_limits.size(), 2);
+          ASSERT_LE(std::stoi(param_limits.at("min")),
+                    std::stoi(param_limits.at("max")));
+        }
     }
 
   cam_->StopEditingApplication();

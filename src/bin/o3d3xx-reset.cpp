@@ -39,28 +39,28 @@ int main(int argc, const char** argv)
 
       po::options_description reset_opts("Reset Information");
       reset_opts.add_options()
-	("reboot", "Reboot the sensor after reset");
+        ("reboot", "Reboot the sensor after reset");
       opts.visible.add(reset_opts);
 
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       //---------------------------------------------------
       // Reset the camera
       //---------------------------------------------------
       o3d3xx::Camera::Ptr cam =
-	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       cam->RequestSession();
       cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
       cam->FactoryReset();
 
       if (opts.vm.count("reboot"))
-	{
-	  cam->Reboot();
-	}
+        {
+          cam->Reboot();
+        }
     }
   catch (const std::exception& e)
     {

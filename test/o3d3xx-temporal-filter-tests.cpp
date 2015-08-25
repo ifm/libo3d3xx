@@ -19,10 +19,10 @@ protected:
 
     for (auto& app : cam_->GetApplicationList())
       {
-	if (app.index != active_idx)
-	  {
-	    cam_->DeleteApplication(app.index);
-	  }
+        if (app.index != active_idx)
+          {
+            cam_->DeleteApplication(app.index);
+          }
       }
 
     cam_->SaveDevice();
@@ -44,7 +44,7 @@ TEST_F(TemporalFilterTest, TemporalFilterConfig_General)
     std::make_shared<o3d3xx::TemporalFilterConfig>();
 
   ASSERT_EQ(filt->Type(),
-	    static_cast<int>(o3d3xx::Camera::temporal_filter::OFF));
+            static_cast<int>(o3d3xx::Camera::temporal_filter::OFF));
 
   ASSERT_THROW(filt->SetNumberOfImages(n_imgs), o3d3xx::error_t);
 
@@ -90,31 +90,31 @@ TEST_F(TemporalFilterTest, GetTemporalFilterParameters)
       cam_->SetImagerConfig(im.get());
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetTemporalFilterParameters();
+        cam_->GetTemporalFilterParameters();
 
       switch (filt)
-	{
-	case o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER:
-	  ASSERT_EQ(params.size(), 1);
-	  ASSERT_NO_THROW(params.at("NumberOfImages"));
-	  break;
+        {
+        case o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER:
+          ASSERT_EQ(params.size(), 1);
+          ASSERT_NO_THROW(params.at("NumberOfImages"));
+          break;
 
-	case o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER:
-	  // Despite what the docs sya, the sensor currently does not truly
-	  // support this filter type ... you can set it, but you cannot
-	  // configure it.
-	  //ASSERT_EQ(params.size(), 4);
-	  //ASSERT_NO_THROW(params.at("MinSmoothDiff"));
-	  //ASSERT_NO_THROW(params.at("MinSDAlpha"));
-	  //ASSERT_NO_THROW(params.at("MaxSmoothDiff"));
-	  //ASSERT_NO_THROW(params.at("MaxSDAlpha"));
-	  ASSERT_EQ(params.size(), 0);
-	  break;
+        case o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER:
+          // Despite what the docs sya, the sensor currently does not truly
+          // support this filter type ... you can set it, but you cannot
+          // configure it.
+          //ASSERT_EQ(params.size(), 4);
+          //ASSERT_NO_THROW(params.at("MinSmoothDiff"));
+          //ASSERT_NO_THROW(params.at("MinSDAlpha"));
+          //ASSERT_NO_THROW(params.at("MaxSmoothDiff"));
+          //ASSERT_NO_THROW(params.at("MaxSDAlpha"));
+          ASSERT_EQ(params.size(), 0);
+          break;
 
-	default:
-	  ASSERT_EQ(params.size(), 0);
-	  break;
-	}
+        default:
+          ASSERT_EQ(params.size(), 0);
+          break;
+        }
     }
 
   cam_->StopEditingApplication();
@@ -140,22 +140,22 @@ TEST_F(TemporalFilterTest, GetTemporalFilterParameterLimits)
       cam_->SetImagerConfig(im.get());
 
       std::unordered_map<std::string, std::string> params =
-	cam_->GetTemporalFilterParameters();
+        cam_->GetTemporalFilterParameters();
 
       std::unordered_map<std::string,
-			 std::unordered_map<std::string,
-					    std::string> > limits =
-	cam_->GetTemporalFilterParameterLimits();
+                         std::unordered_map<std::string,
+                                            std::string> > limits =
+        cam_->GetTemporalFilterParameterLimits();
 
       for (auto& param : params)
-	{
-	  std::unordered_map<std::string, std::string>
-	    param_limits = limits.at(param.first);
+        {
+          std::unordered_map<std::string, std::string>
+            param_limits = limits.at(param.first);
 
-	  ASSERT_EQ(param_limits.size(), 2);
-	  ASSERT_LE(std::stoi(param_limits.at("min")),
-		    std::stoi(param_limits.at("max")));
-	}
+          ASSERT_EQ(param_limits.size(), 2);
+          ASSERT_LE(std::stoi(param_limits.at("min")),
+                    std::stoi(param_limits.at("max")));
+        }
     }
 
   cam_->StopEditingApplication();

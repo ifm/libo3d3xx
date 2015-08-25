@@ -27,8 +27,8 @@ int main(int argc, const char **argv)
 
   o3d3xx::version(&major, &minor, &patch);
   std::cout << O3D3XX_LIBRARY_NAME
-	    << ": version=" << major << "."
-	    << minor << "." << patch << std::endl;
+            << ": version=" << major << "."
+            << minor << "." << patch << std::endl;
 
   return 0;
 }

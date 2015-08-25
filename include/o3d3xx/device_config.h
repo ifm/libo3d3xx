@@ -40,8 +40,8 @@ namespace o3d3xx
      */
     static const
     std::unordered_map<std::string,
-     		       std::function<void(DeviceConfig*,
-					  const std::string&)> >
+                       std::function<void(DeviceConfig*,
+                                          const std::string&)> >
     mutator_map;
 
     /**

@@ -68,33 +68,33 @@ o3d3xx::value_struct_to_map(const xmlrpc_c::value_struct& vs)
 }
 
 std::unordered_map<std::string,
-		   std::unordered_map<std::string, std::string> > const
+                   std::unordered_map<std::string, std::string> > const
 o3d3xx::value_struct_to_map_of_maps(const xmlrpc_c::value_struct& vs)
 {
   std::unordered_map<std::string,
-		     std::unordered_map<std::string, std::string> >
+                     std::unordered_map<std::string, std::string> >
     retval;
 
 
   std::map<std::string, xmlrpc_c::value> const
     outter_map(static_cast<std::map<std::string, xmlrpc_c::value> >
-  	       (vs));
+               (vs));
 
   for (auto& kv : outter_map)
     {
       xmlrpc_c::value_struct _vs(kv.second);
 
       std::map<std::string, xmlrpc_c::value> const
-      	inner_map(static_cast<std::map<std::string, xmlrpc_c::value> >
-      		  (_vs));
+        inner_map(static_cast<std::map<std::string, xmlrpc_c::value> >
+                  (_vs));
 
       std::unordered_map<std::string, std::string> inner_retval;
 
       for (auto& inner_kv : inner_map)
-      	{
-      	  inner_retval[inner_kv.first] =
-      	    std::string(xmlrpc_c::value_string(inner_kv.second));
-      	}
+        {
+          inner_retval[inner_kv.first] =
+            std::string(xmlrpc_c::value_string(inner_kv.second));
+        }
 
       retval[kv.first] = inner_retval;
     }
@@ -116,15 +116,15 @@ o3d3xx::hist1(const cv::Mat& img, int histsize)
 
   cv::Mat hist;
   cv::calcHist(&img,        // source image
-	       1,           // number of source images
-	       0,           // channels used to compute hist
-	       cv::Mat(),   // mask
-	       hist,        // output histogram
-	       1,           // dimensionality of histogram
-	       &histsize,   // histogram size in each dimension
-	       &histrange,  // bin boundaries in each dimension
-	       true,        // uniform flag
-	       true);       // accumulate flag
+               1,           // number of source images
+               0,           // channels used to compute hist
+               cv::Mat(),   // mask
+               hist,        // output histogram
+               1,           // dimensionality of histogram
+               &histsize,   // histogram size in each dimension
+               &histrange,  // bin boundaries in each dimension
+               true,        // uniform flag
+               true);       // accumulate flag
 
   int hist_width = img.cols;
   int hist_height = img.rows;
@@ -136,14 +136,14 @@ o3d3xx::hist1(const cv::Mat& img, int histsize)
   for (int i = 1; i < histsize; i++)
     {
       cv::line(histimg,
-	       cv::Point(bin_width*(i-1),
-			 hist_height - static_cast<int>(std::round(hist.at<float>(i-1)))),
-	       cv::Point(bin_width*(i),
-			 hist_height - static_cast<int>(std::round(hist.at<float>(i)))),
-	       CV_RGB(65535, 65535, 65535),  // line color
-	       1,                   // line thickness
-	       8,                   // line type (8 = connected)
-	       0);                  // fractional bits in the point coords
+               cv::Point(bin_width*(i-1),
+                         hist_height - static_cast<int>(std::round(hist.at<float>(i-1)))),
+               cv::Point(bin_width*(i),
+                         hist_height - static_cast<int>(std::round(hist.at<float>(i)))),
+               CV_RGB(65535, 65535, 65535),  // line color
+               1,                   // line thickness
+               8,                   // line type (8 = connected)
+               0);                  // fractional bits in the point coords
     }
 
   return histimg;

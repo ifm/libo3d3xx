@@ -75,10 +75,10 @@ namespace o3d3xx
    * @param[in] xmlrpc_c::value_struct Structure of strings mapped to other
    *            value_struct objects which map strings to stings.
    * @return std::unordered_map<std::string,
-   *		     std::unordered_map<std::string, std::string> >
+   *                 std::unordered_map<std::string, std::string> >
    */
   std::unordered_map<std::string,
-		     std::unordered_map<std::string, std::string> > const
+                     std::unordered_map<std::string, std::string> > const
   value_struct_to_map_of_maps(const xmlrpc_c::value_struct& vs);
 
   /**

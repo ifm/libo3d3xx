@@ -47,80 +47,80 @@ int main(int argc, const char** argv)
 
       po::options_description hz_opts("Hz");
       hz_opts.add_options()
-	("nframes,f",
-	 po::value<int>()->default_value(10),
-	 "Number of frames to capture")
+        ("nframes,f",
+         po::value<int>()->default_value(10),
+         "Number of frames to capture")
 
-	("nruns,r",
-	 po::value<int>()->default_value(1),
-	 "Number of runs to average")
+        ("nruns,r",
+         po::value<int>()->default_value(1),
+         "Number of runs to average")
 
-	("organize,o",
-	 po::value<bool>()->default_value(false),
-	 "Include image/pcl construction to timing stats");
+        ("organize,o",
+         po::value<bool>()->default_value(false),
+         "Include image/pcl construction to timing stats");
 
       opts.visible.add(hz_opts);
 
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       nframes = opts.vm["nframes"].as<int>();
       nruns = opts.vm["nruns"].as<int>();
       organize = opts.vm["organize"].as<bool>();
 
       if (nframes <= 0)
-	{
-	  nframes = 10;
-	}
+        {
+          nframes = 10;
+        }
 
       std::vector<double> stats;
 
       o3d3xx::Camera::Ptr cam =
-	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       o3d3xx::FrameGrabber::Ptr fg =
-	std::make_shared<o3d3xx::FrameGrabber>(cam);
+        std::make_shared<o3d3xx::FrameGrabber>(cam);
 
       o3d3xx::ImageBuffer::Ptr buff =
-	std::make_shared<o3d3xx::ImageBuffer>();
+        std::make_shared<o3d3xx::ImageBuffer>();
 
       for (int i = 0; i < nruns; i++)
-	{
-	  auto start = std::chrono::steady_clock::now();
-	  for (int j = 0; j < nframes; j++)
-	    {
-	      if (! fg->WaitForFrame(buff.get(), 1000, false, organize))
-		{
-		  std::cerr << "Timeout waiting for camera!"
-			    << std::endl;
-		  return -1;
-		}
-	    }
-	  auto stop = std::chrono::steady_clock::now();
-	  auto diff = stop - start;
-	  stats.push_back(std::chrono::duration<double>(diff).count());
-	}
+        {
+          auto start = std::chrono::steady_clock::now();
+          for (int j = 0; j < nframes; j++)
+            {
+              if (! fg->WaitForFrame(buff.get(), 1000, false, organize))
+                {
+                  std::cerr << "Timeout waiting for camera!"
+                            << std::endl;
+                  return -1;
+                }
+            }
+          auto stop = std::chrono::steady_clock::now();
+          auto diff = stop - start;
+          stats.push_back(std::chrono::duration<double>(diff).count());
+        }
 
       if (nruns >= 1)
-	{
-	  mean =
+        {
+          mean =
             std::accumulate<std::vector<double>::iterator,double>(
-	      stats.begin(), stats.end(), 0.0) / (double) nruns;
+              stats.begin(), stats.end(), 0.0) / (double) nruns;
 
-	  std::cout << "FrameGrabber running at: "
-		    << nframes / mean << " Hz"
-		    << std::endl
-		    << nframes << " frames captured; averaged over "
-		    << nruns << " runs"
-		    << std::endl;
-	}
+          std::cout << "FrameGrabber running at: "
+                    << nframes / mean << " Hz"
+                    << std::endl
+                    << nframes << " frames captured; averaged over "
+                    << nruns << " runs"
+                    << std::endl;
+        }
     }
   catch (const std::exception& e)
     {
       std::cerr << "Failed to compute frame grabber speed: "
-		<< e.what() << std::endl;
+                << e.what() << std::endl;
       return 1;
     }
 

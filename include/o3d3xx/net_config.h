@@ -39,8 +39,8 @@ namespace o3d3xx
      */
     static const
     std::unordered_map<std::string,
-		       std::function<void(NetConfig*,
-					  const std::string&)> >
+                       std::function<void(NetConfig*,
+                                          const std::string&)> >
     mutator_map;
 
     /**
@@ -101,7 +101,7 @@ namespace o3d3xx
     std::string subnet_;
 
     /** flag indicating whether or not the IP address of the sensor is obtained
-	via DHCP or static */
+        via DHCP or static */
     bool use_dhcp_;
 
   }; // end: class NetConfig

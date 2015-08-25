@@ -35,19 +35,19 @@ int main(int argc, const char** argv)
     {
       o3d3xx::CmdLineOpts opts("o3d3xx Dump");
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       o3d3xx::Camera::Ptr cam =
-      	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       std::cout << cam->ToJSON() << std::endl;
     }
   catch (const std::exception& e)
     {
       std::cerr << "Failed to dump camera configuration: "
-		<< std::endl << e.what() << std::endl;
+                << std::endl << e.what() << std::endl;
       return 1;
     }
 

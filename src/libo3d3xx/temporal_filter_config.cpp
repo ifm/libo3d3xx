@@ -57,7 +57,7 @@ o3d3xx::TemporalFilterConfig::NumberOfImages() const
       static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER))
     {
       LOG(ERROR) << "Filter of type=" << this->Type()
-		 << " does not support the 'NumberOfImages' parameter";
+                 << " does not support the 'NumberOfImages' parameter";
       throw o3d3xx::error_t(O3D3XX_VALUE_OUT_OF_RANGE);
     }
 
@@ -71,7 +71,7 @@ o3d3xx::TemporalFilterConfig::SetNumberOfImages(int n_imgs)
       static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER))
     {
       LOG(ERROR) << "Filter of type=" << this->Type()
-		 << " does not support the 'NumberOfImages' parameter";
+                 << " does not support the 'NumberOfImages' parameter";
       throw o3d3xx::error_t(O3D3XX_VALUE_OUT_OF_RANGE);
     }
 
@@ -99,7 +99,7 @@ o3d3xx::TemporalFilterConfig::FromJSON(const std::string& json)
     case static_cast<int>(
       o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
       filt =
-	std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
+        std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
       break;
 
     default:
@@ -111,14 +111,14 @@ o3d3xx::TemporalFilterConfig::FromJSON(const std::string& json)
       static_cast<int>(o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER))
     {
       try
-	{
-	  filt->SetNumberOfImages(pt.get<int>("NumberOfImages"));
-	}
+        {
+          filt->SetNumberOfImages(pt.get<int>("NumberOfImages"));
+        }
       catch (const boost::property_tree::ptree_bad_path& ex)
-	{
-	  LOG(WARNING) << "Failed to extract 'NumberOfImages': "
-		       << ex.what();
-	}
+        {
+          LOG(WARNING) << "Failed to extract 'NumberOfImages': "
+                       << ex.what();
+        }
     }
 
   return filt;

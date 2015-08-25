@@ -68,11 +68,11 @@ namespace o3d3xx
      * should continue processing.
      */
     int Parse(int argc, const char **argv,
-	      std::string *ip = nullptr,
-	      std::uint32_t *xmlrpc_port = nullptr,
-	      std::string *password = nullptr,
-	      std::function<void()> fn = [](){ o3d3xx::Logging::Init(); },
-	      std::ostream& out = std::cout);
+              std::string *ip = nullptr,
+              std::uint32_t *xmlrpc_port = nullptr,
+              std::string *password = nullptr,
+              std::function<void()> fn = [](){ o3d3xx::Logging::Init(); },
+              std::ostream& out = std::cout);
 
     // provides raw acess to boost::program_options structures
     po::variables_map vm;

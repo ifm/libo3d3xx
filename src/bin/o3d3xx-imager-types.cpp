@@ -44,21 +44,21 @@ int main(int argc, const char** argv)
 
       po::options_description im_opts("Imager Types");
       im_opts.add_options()
-	("params,p",
-	 po::value<bool>()->default_value(false),
-	 "Include tunable parameters for each imager type");
+        ("params,p",
+         po::value<bool>()->default_value(false),
+         "Include tunable parameters for each imager type");
 
       opts.visible.add(im_opts);
 
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
-	{
-	  return 0;
-	}
+        {
+          return 0;
+        }
 
       verbose = opts.vm["params"].as<bool>();
 
       o3d3xx::Camera::Ptr cam =
-	std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
+        std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
       cam->RequestSession();
       cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
@@ -70,56 +70,56 @@ int main(int argc, const char** argv)
       std::sort(imager_types.begin(), imager_types.end());
 
       for (auto& type : imager_types)
-	{
-	  std::cout << type << std::endl;
+        {
+          std::cout << type << std::endl;
 
-	  if (verbose)
-	    {
-	      cam->ChangeImagerType(type);
+          if (verbose)
+            {
+              cam->ChangeImagerType(type);
 
-	      std::unordered_map<std::string, std::string> params =
-		cam->GetImagerParameters();
+              std::unordered_map<std::string, std::string> params =
+                cam->GetImagerParameters();
 
-	      std::unordered_map<std::string,
-				 std::unordered_map<std::string,
-						    std::string> > limits =
-		cam->GetImagerParameterLimits();
+              std::unordered_map<std::string,
+                                 std::unordered_map<std::string,
+                                                    std::string> > limits =
+                cam->GetImagerParameterLimits();
 
-	      std::map<std::string, std::string>
-		params_sorted(params.begin(), params.end());
+              std::map<std::string, std::string>
+                params_sorted(params.begin(), params.end());
 
-	      for (auto it = params_sorted.begin();
-		   it != params_sorted.end(); ++it)
-		{
-		  std::cout << "\t" << it->first << ": ";
+              for (auto it = params_sorted.begin();
+                   it != params_sorted.end(); ++it)
+                {
+                  std::cout << "\t" << it->first << ": ";
 
-		  try
-		    {
-		      std::unordered_map<std::string, std::string>
-			param_limits = limits.at(it->first);
+                  try
+                    {
+                      std::unordered_map<std::string, std::string>
+                        param_limits = limits.at(it->first);
 
-		      std::cout << "[min=" << param_limits.at("min")
-				<< ", max=" << param_limits.at("max")
-				<< "]";
-		    }
-		  catch (const std::out_of_range& ex)
-		    {
-		      // no limits defined for this parameter
-		      std::cout << "no limits defined";
-		    }
+                      std::cout << "[min=" << param_limits.at("min")
+                                << ", max=" << param_limits.at("max")
+                                << "]";
+                    }
+                  catch (const std::out_of_range& ex)
+                    {
+                      // no limits defined for this parameter
+                      std::cout << "no limits defined";
+                    }
 
-		  std::cout << std::endl;
-		}
+                  std::cout << std::endl;
+                }
 
-	      std::cout << std::endl;
-	    }
-	}
+              std::cout << std::endl;
+            }
+        }
       cam->StopEditingApplication();
     }
   catch (const std::exception& ex)
     {
       std::cerr << "Failed to list available imagers: "
-		<< ex.what() << std::endl;
+                << ex.what() << std::endl;
       return 1;
     }
 

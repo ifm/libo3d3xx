@@ -59,17 +59,17 @@ o3d3xx::get_image_buffer_size(const std::vector<std::uint8_t>& buff)
 
 std::size_t
 o3d3xx::get_chunk_index(const std::vector<std::uint8_t>& buff,
-			o3d3xx::image_chunk chunk_type)
+                        o3d3xx::image_chunk chunk_type)
 {
   std::size_t idx = 8; // start of first chunk
 
   while (buff.begin()+idx < buff.end())
     {
       if (static_cast<std::uint32_t>(chunk_type) ==
-	  o3d3xx::mkval<std::uint32_t>(buff.data()+idx))
-	{
-	  return idx;
-	}
+          o3d3xx::mkval<std::uint32_t>(buff.data()+idx))
+        {
+          return idx;
+        }
 
       // move to the beginning of the next chunk
       idx += o3d3xx::mkval<std::uint32_t>(buff.data()+idx+4);
@@ -124,7 +124,7 @@ o3d3xx::ImageBuffer::ImageBuffer(const o3d3xx::ImageBuffer& src_buff)
   : o3d3xx::ImageBuffer()
 {
   this->SetBytes(const_cast<std::vector<std::uint8_t>&>(src_buff.bytes_),
-		 true);
+                 true);
 }
 
 o3d3xx::ImageBuffer&
@@ -136,7 +136,7 @@ o3d3xx::ImageBuffer::operator= (const o3d3xx::ImageBuffer& src_buff)
     }
 
   this->SetBytes(const_cast<std::vector<std::uint8_t>&>(src_buff.bytes_),
-		 true);
+                 true);
   return *this;
 }
 
@@ -147,7 +147,7 @@ o3d3xx::ImageBuffer::~ImageBuffer()
 
 void
 o3d3xx::ImageBuffer::SetBytes(std::vector<std::uint8_t>& buff,
-			      bool copy)
+                              bool copy)
 {
   if (copy)
     {
@@ -155,8 +155,8 @@ o3d3xx::ImageBuffer::SetBytes(std::vector<std::uint8_t>& buff,
       this->bytes_.resize(sz);
 
       std::copy(buff.begin(),
-		buff.begin() + sz,
-		this->bytes_.begin());
+                buff.begin() + sz,
+                this->bytes_.begin());
     }
   else
     {
@@ -236,11 +236,11 @@ o3d3xx::ImageBuffer::Organize()
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::RADIAL_DISTANCE);
 
   DLOG(INFO) << "xidx=" << xidx
-	     << ", yidx=" << yidx
-	     << ", zidx=" << zidx
-	     << ", aidx=" << aidx
-	     << ", cidx=" << cidx
-	     << ", didx=" << didx;
+             << ", yidx=" << yidx
+             << ", zidx=" << zidx
+             << ", aidx=" << aidx
+             << ", cidx=" << cidx
+             << ", didx=" << didx;
 
   // Get how many bytes to increment in the buffer for each pixel
   // NOTE: These can be discovered dynamically, howver, for now we use our a
@@ -261,8 +261,8 @@ o3d3xx::ImageBuffer::Organize()
   std::uint32_t num_points = width * height;
 
   DLOG(INFO) << "width=" << width
-	     << ", height=" << height
-	     << ", num_points=" << num_points;
+             << ", height=" << height
+             << ", num_points=" << num_points;
 
   this->cloud_->header.frame_id = "/o3d3xx";
   this->cloud_->width = width;
@@ -289,45 +289,45 @@ o3d3xx::ImageBuffer::Organize()
   std::uint8_t* conf_row_ptr;
   for (std::size_t i = 0; i < num_points;
        ++i, xidx += xincr, yidx += yincr, zidx += zincr,
-	 cidx += cincr, aidx += aincr, didx += dincr)
+         cidx += cincr, aidx += aincr, didx += dincr)
     {
       o3d3xx::PointT& pt = this->cloud_->points[i];
 
       col = i % width;
       if (col == 0)
-	{
-	  row += 1;
-	  depth_row_ptr = this->depth_.ptr<std::uint16_t>(row);
-	  amp_row_ptr = this->amp_.ptr<std::uint16_t>(row);
-	  conf_row_ptr = this->conf_.ptr<std::uint8_t>(row);
-	}
+        {
+          row += 1;
+          depth_row_ptr = this->depth_.ptr<std::uint16_t>(row);
+          amp_row_ptr = this->amp_.ptr<std::uint16_t>(row);
+          conf_row_ptr = this->conf_.ptr<std::uint8_t>(row);
+        }
 
       conf_row_ptr[col] = this->bytes_.at(cidx);
       if (conf_row_ptr[col] & 0x1 == 1)
-	{
-	  pt.x = pt.y = pt.z = bad_point;
-	  this->cloud_->is_dense = false;
+        {
+          pt.x = pt.y = pt.z = bad_point;
+          this->cloud_->is_dense = false;
 
-	  depth_row_ptr[col] = amp_row_ptr[col] = bad_pixel;
-	}
+          depth_row_ptr[col] = amp_row_ptr[col] = bad_pixel;
+        }
       else
-	{
-	  // convert units to meters and the coord frame
-	  // to a right-handed frame for the point cloud
-	  pt.x =
-	    o3d3xx::mkval<std::int16_t>(this->bytes_.data()+zidx) / 1000.0f;
-	  pt.y =
-	    -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+xidx) / 1000.0f;
-	  pt.z =
-	    -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+yidx) / 1000.0f;
+        {
+          // convert units to meters and the coord frame
+          // to a right-handed frame for the point cloud
+          pt.x =
+            o3d3xx::mkval<std::int16_t>(this->bytes_.data()+zidx) / 1000.0f;
+          pt.y =
+            -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+xidx) / 1000.0f;
+          pt.z =
+            -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+yidx) / 1000.0f;
 
-	  // keep depth image data as mm
-	  depth_row_ptr[col] =
-	    o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+didx);
-	}
+          // keep depth image data as mm
+          depth_row_ptr[col] =
+            o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+didx);
+        }
 
       amp_row_ptr[col] =
-	o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+aidx);
+        o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+aidx);
 
       pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;
       pt.intensity = amp_row_ptr[col];

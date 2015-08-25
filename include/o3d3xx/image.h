@@ -246,7 +246,7 @@ namespace o3d3xx
    * @throw o3d3xx::error_t If the chunk is not found
    */
   std::size_t get_chunk_index(const std::vector<std::uint8_t>& buff,
-			      o3d3xx::image_chunk chunk_type);
+                              o3d3xx::image_chunk chunk_type);
 
   /**
    * Returns the number of bytes contained in the passed in pixel format.

@@ -20,3 +20,14 @@ add_test(NAME o3d3xx-tests COMMAND o3d3xx-tests)
 add_custom_target(check COMMAND o3d3xx-tests DEPENDS o3d3xx-tests)
 add_custom_target(stress COMMAND o3d3xx-tests --gtest_repeat=100
   DEPENDS o3d3xx-tests)
+
+#
+# NOTE: If you just want to run one test (or a subset of the tests):
+# https://code.google.com/p/googletest/wiki/AdvancedGuide#Running_Test_Programs%3a_Advanced_Options
+#
+# For example, if you only wanted to run the DenseImageTest.ImageSize test you
+# could:
+#
+# $ GTEST_FILTER=DenseImageTest.ImageSize make check
+#
+#
