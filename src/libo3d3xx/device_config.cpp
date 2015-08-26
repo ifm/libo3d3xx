@@ -29,12 +29,15 @@ o3d3xx::DeviceConfig::DeviceConfig()
   : name_("New sensor"),
     description_(""),
     active_application_(0),
+    pcic_eip_enabled_(false),
     pcic_tcp_port_(50010),
     pcic_protocol_version_(3),
     io_logic_type_(1),
     io_debouncing_(true),
     io_extern_application_switch_(0),
     session_timeout_(30),
+    service_report_passed_buffer_(15),
+    service_report_failed_buffer_(15),
     extrinsic_calib_trans_x_(0.0),
     extrinsic_calib_trans_y_(0.0),
     extrinsic_calib_trans_z_(0.0),
@@ -103,6 +106,18 @@ void
 o3d3xx::DeviceConfig::SetActiveApplication(int idx) noexcept
 {
   this->active_application_ = idx;
+}
+
+bool
+o3d3xx::DeviceConfig::PcicEipEnabled() const noexcept
+{
+  return this->pcic_eip_enabled_;
+}
+
+void
+o3d3xx::DeviceConfig::SetPcicEipEnabled(bool on) noexcept
+{
+  this->pcic_eip_enabled_ = on;
 }
 
 int
@@ -175,6 +190,30 @@ void
 o3d3xx::DeviceConfig::SetSessionTimeout(int secs) noexcept
 {
   this->session_timeout_ = secs;
+}
+
+int
+o3d3xx::DeviceConfig::ServiceReportPassedBuffer() const noexcept
+{
+  return this->service_report_passed_buffer_;
+}
+
+void
+o3d3xx::DeviceConfig::SetServiceReportPassedBuffer(int len) noexcept
+{
+  this->service_report_passed_buffer_ = len;
+}
+
+int
+o3d3xx::DeviceConfig::ServiceReportFailedBuffer() const noexcept
+{
+  return this->service_report_failed_buffer_;
+}
+
+void
+o3d3xx::DeviceConfig::SetServiceReportFailedBuffer(int len) noexcept
+{
+  this->service_report_failed_buffer_ = len;
 }
 
 double
@@ -338,6 +377,10 @@ o3d3xx::DeviceConfig::mutator_map =
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetActiveApplication(std::stoi(val)); } },
 
+    {"PcicEipEnabled",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetPcicEipEnabled(o3d3xx::stob(val)); } },
+
     {"PcicTcpPort",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetPcicTCPPort(std::stoi(val)); } },
@@ -361,6 +404,14 @@ o3d3xx::DeviceConfig::mutator_map =
     {"SessionTimeout",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetSessionTimeout(std::stoi(val)); } },
+
+    {"ServiceReportPassedBuffer",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetServiceReportPassedBuffer(std::stoi(val)); } },
+
+    {"ServiceReportFailedBuffer",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetServiceReportFailedBuffer(std::stoi(val)); } },
 
     {"ExtrinsicCalibTransX",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
@@ -395,12 +446,15 @@ o3d3xx::DeviceConfig::ToJSON() const
   pt.put("Name", this->Name());
   pt.put("Description", this->Description());
   pt.put("ActiveApplication", this->ActiveApplication());
+  pt.put("PcicEipEnabled", this->PcicEipEnabled());
   pt.put("PcicTcpPort", this->PcicTCPPort());
   pt.put("PcicProtocolVersion", this->PcicProtocolVersion());
   pt.put("IOLogicType", this->IOLogicType());
   pt.put("IODebouncing", this->IODebouncing());
   pt.put("IOExternApplicationSwitch", this->IOExternApplicationSwitch());
   pt.put("SessionTimeout", this->SessionTimeout());
+  pt.put("ServiceReportPassedBuffer", this->ServiceReportPassedBuffer());
+  pt.put("ServiceReportFailedBuffer", this->ServiceReportFailedBuffer());
   pt.put("ExtrinsicCalibTransX", this->ExtrinsicCalibTransX());
   pt.put("ExtrinsicCalibTransY", this->ExtrinsicCalibTransY());
   pt.put("ExtrinsicCalibTransZ", this->ExtrinsicCalibTransZ());

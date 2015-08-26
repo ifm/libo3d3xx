@@ -85,6 +85,15 @@ namespace o3d3xx
     std::string PcicTcpResultSchema() const noexcept;
     void SetPcicTcpResultSchema(const std::string& schema) noexcept;
 
+    std::string PcicEipResultSchema() const noexcept;
+    void SetPcicEipResultSchema(const std::string& schema) noexcept;
+
+    std::string LogicGraph() const noexcept;
+    void SetLogicGraph(const std::string& graph) noexcept;
+
+    std::string Type() const noexcept;
+    void SetType(const std::string& type) noexcept;
+
   protected:
     /** Name of the application */
     std::string name_;
@@ -108,6 +117,25 @@ namespace o3d3xx
      * `ZImage', `ConfidenceImage', `DiagnosticData'.
      */
     std::string pcic_tcp_result_schema_;
+
+    /**
+     * Same as the `pcic_tcp_result_schema` except this result schema applies
+     * to the data sent over the EtherNet/IP (and industrial ethernet standard)
+     * interface.
+     */
+    std::string pcic_eip_result_schema_;
+
+    /**
+     * @todo document this parameter
+     */
+    std::string logic_graph_;
+
+    /**
+     * READ-ONLY
+     *
+     * @todo document this parameter
+     */
+    std::string type_;
 
   }; // end: class AppConfig
 

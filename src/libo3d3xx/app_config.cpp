@@ -31,7 +31,10 @@ o3d3xx::AppConfig::AppConfig()
     description_(""),
     trigger_mode_(1),
     pcic_tcp_result_output_enabled_(true),
-    pcic_tcp_result_schema_("")
+    pcic_tcp_result_schema_(""),
+    pcic_eip_result_schema_(""),
+    logic_graph_(""),
+    type_("")
 { }
 
 o3d3xx::AppConfig::AppConfig(
@@ -117,6 +120,42 @@ o3d3xx::AppConfig::SetPcicTcpResultSchema(const std::string& schema) noexcept
   this->pcic_tcp_result_schema_ = schema;
 }
 
+std::string
+o3d3xx::AppConfig::PcicEipResultSchema() const noexcept
+{
+  return this->pcic_eip_result_schema_;
+}
+
+void
+o3d3xx::AppConfig::SetPcicEipResultSchema(const std::string& schema) noexcept
+{
+  this->pcic_eip_result_schema_ = schema;
+}
+
+std::string
+o3d3xx::AppConfig::LogicGraph() const noexcept
+{
+  return this->logic_graph_;
+}
+
+void
+o3d3xx::AppConfig::SetLogicGraph(const std::string& graph) noexcept
+{
+  this->logic_graph_ = graph;
+}
+
+std::string
+o3d3xx::AppConfig::Type() const noexcept
+{
+  return this->type_;
+}
+
+void
+o3d3xx::AppConfig::SetType(const std::string& type) noexcept
+{
+  this->type_ = type;
+}
+
 const std::unordered_map<std::string,
                          std::function<void(o3d3xx::AppConfig*,
                                             const std::string&)> >
@@ -141,6 +180,18 @@ o3d3xx::AppConfig::mutator_map =
     {"PcicTcpResultSchema",
      [](o3d3xx::AppConfig* app, const std::string& val)
      { app->SetPcicTcpResultSchema(val); } },
+
+    {"PcicEipResultSchema",
+     [](o3d3xx::AppConfig* app, const std::string& val)
+     { app->SetPcicEipResultSchema(val); } },
+
+    {"LogicGraph",
+     [](o3d3xx::AppConfig* app, const std::string& val)
+     { app->SetLogicGraph(val); } },
+
+    {"Type",
+     [](o3d3xx::AppConfig* app, const std::string& val)
+     { app->SetType(val); } },
   };
 
 std::string
@@ -153,6 +204,9 @@ o3d3xx::AppConfig::ToJSON() const
   pt.put("TriggerMode", this->TriggerMode());
   pt.put("PcicTcpResultOutputEnabled", this->PcicTcpResultOutputEnabled());
   pt.put("PcicTcpResultSchema", this->PcicTcpResultSchema());
+  pt.put("PcicEipResultSchema", this->PcicEipResultSchema());
+  pt.put("LogicGraph", this->LogicGraph());
+  pt.put("Type", this->Type());
 
   std::ostringstream buf;
   boost::property_tree::write_json(buf, pt);

@@ -80,6 +80,9 @@ namespace o3d3xx
     int ActiveApplication() const noexcept;
     void SetActiveApplication(int idx) noexcept;
 
+    bool PcicEipEnabled() const noexcept;
+    void SetPcicEipEnabled(bool on) noexcept;
+
     int PcicTCPPort() const noexcept;
     void SetPcicTCPPort(int port) noexcept;
 
@@ -97,6 +100,12 @@ namespace o3d3xx
 
     int SessionTimeout() const noexcept;
     void SetSessionTimeout(int secs) noexcept;
+
+    int ServiceReportPassedBuffer() const noexcept;
+    void SetServiceReportPassedBuffer(int len) noexcept;
+
+    int ServiceReportFailedBuffer() const noexcept;
+    void SetServiceReportFailedBuffer(int len) noexcept;
 
     double ExtrinsicCalibTransX() const noexcept;
     void SetExtrinsicCalibTransX(double x) noexcept;
@@ -146,6 +155,11 @@ namespace o3d3xx
     int active_application_;
 
     /**
+     * Flag indicating EIP interface enabled status
+     */
+    bool pcic_eip_enabled_;
+
+    /**
      * TCP/IP port for the PCIC connections
      */
     int pcic_tcp_port_;
@@ -175,6 +189,16 @@ namespace o3d3xx
      * needed.
      */
     int session_timeout_;
+
+    /**
+     * @todo fill in meaning of parameter
+     */
+    int service_report_passed_buffer_;
+
+    /**
+     * @todo fill in meaning of parameter
+     */
+    int service_report_failed_buffer_;
 
     /**
      * Extrinsic calibration, translation in x-direction

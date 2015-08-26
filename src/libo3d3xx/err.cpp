@@ -36,6 +36,7 @@ const int O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE = -9014;
 const int O3D3XX_IO_ERROR = -9015;
 const int O3D3XX_VALUE_OUT_OF_RANGE = -9016;
 const int O3D3XX_INVALID_ARGUMENT = -9017;
+const int O3D3XX_XMLRPC_EIP = -9018;
 
 const char *o3d3xx::strerror(int errnum)
 {
@@ -78,6 +79,8 @@ const char *o3d3xx::strerror(int errnum)
     return "Value out of range";
   case O3D3XX_INVALID_ARGUMENT:
     return "Invalid argument(s)";
+  case O3D3XX_XMLRPC_EIP:
+    return "XMLRPC Unable to enable/disable PCIC Ethernet/IP output";
   default:
     return ::strerror(errnum);
   }

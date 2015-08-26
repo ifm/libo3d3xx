@@ -783,6 +783,10 @@ namespace o3d3xx
                   throw o3d3xx::error_t(O3D3XX_XMLRPC_METHOD_NOT_FOUND);
                   break;
 
+                case 100002:
+                  throw o3d3xx::error_t(O3D3XX_XMLRPC_EIP);
+                  break;
+
                 case 101002:
                   throw o3d3xx::error_t(O3D3XX_XMLRPC_VALUE_OUT_OF_RANGE);
                   break;

@@ -186,21 +186,34 @@ TEST(Camera_Tests, GetDeviceConfig)
 
   o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
 
-  // verify that all mutable parameters are correct
   std::unordered_map<std::string, std::string> params =
     cam->GetAllParameters();
+
+  // for (auto& kv : params)
+  //   {
+  //     std::cout << kv.first << "=" << kv.second << std::endl;
+  //   }
+
+  EXPECT_EQ(params.size(), 30);
 
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
   EXPECT_EQ(std::stoi(params.at("ActiveApplication")),
             dev->ActiveApplication());
+  EXPECT_EQ(o3d3xx::stob(params.at("PcicEipEnabled")),
+            dev->PcicEipEnabled());
   EXPECT_EQ(std::stoi(params.at("PcicTcpPort")), dev->PcicTCPPort());
-  EXPECT_EQ(std::stoi(params.at("PcicProtocolVersion")), dev->PcicProtocolVersion());
+  EXPECT_EQ(std::stoi(params.at("PcicProtocolVersion")),
+            dev->PcicProtocolVersion());
   EXPECT_EQ(std::stoi(params.at("IOLogicType")), dev->IOLogicType());
   EXPECT_EQ(o3d3xx::stob(params.at("IODebouncing")), dev->IODebouncing());
   EXPECT_EQ(std::stoi(params.at("IOExternApplicationSwitch")),
             dev->IOExternApplicationSwitch());
   EXPECT_EQ(std::stoi(params.at("SessionTimeout")), dev->SessionTimeout());
+  EXPECT_EQ(std::stoi(params.at("ServiceReportPassedBuffer")),
+            dev->ServiceReportPassedBuffer());
+  EXPECT_EQ(std::stoi(params.at("ServiceReportFailedBuffer")),
+            dev->ServiceReportFailedBuffer());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransX")),
             dev->ExtrinsicCalibTransX());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibTransY")),
@@ -214,6 +227,36 @@ TEST(Camera_Tests, GetDeviceConfig)
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
             dev->ExtrinsicCalibRotY());
 }
+
+//
+// This has to do with enabling and disabling the Ethernet/IP interface on the
+// camera. The sensor frequently fails when doing that. So, for now, I am going
+// to comment out this test.
+//
+// TEST(Camera_Tests, PcicEipEnabled)
+// {
+//   o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+//   o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+
+//   bool orig = dev->PcicEipEnabled();
+
+//   EXPECT_NO_THROW(cam->RequestSession());
+//   EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
+
+//   EXPECT_NO_THROW(dev->SetPcicEipEnabled(! orig));
+//   cam->SetDeviceConfig(dev.get());
+//   cam->SaveDevice();
+
+//   dev = cam->GetDeviceConfig();
+//   EXPECT_NE(orig, dev->PcicEipEnabled());
+
+//   EXPECT_NO_THROW(dev->SetPcicEipEnabled(orig));
+//   cam->SetDeviceConfig(dev.get());
+//   cam->SaveDevice();
+
+//   dev = cam->GetDeviceConfig();
+//   EXPECT_EQ(orig, dev->PcicEipEnabled());
+// }
 
 TEST(Camera_Tests, ActivateDisablePassword)
 {
@@ -275,6 +318,7 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->Name(), dev2->Name());
   EXPECT_EQ(dev->Description(), dev2->Description());
   EXPECT_EQ(dev->ActiveApplication(), dev2->ActiveApplication());
+  EXPECT_EQ(dev->PcicEipEnabled(), dev2->PcicEipEnabled());
   EXPECT_EQ(dev->PcicTCPPort(), dev2->PcicTCPPort());
   EXPECT_EQ(dev->PcicProtocolVersion(), dev2->PcicProtocolVersion());
   EXPECT_EQ(dev->IOLogicType(), dev2->IOLogicType());
@@ -282,6 +326,10 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->IOExternApplicationSwitch(),
             dev2->IOExternApplicationSwitch());
   EXPECT_EQ(dev->SessionTimeout(), dev2->SessionTimeout());
+  EXPECT_EQ(dev->ServiceReportPassedBuffer(),
+            dev2->ServiceReportPassedBuffer());
+  EXPECT_EQ(dev->ServiceReportFailedBuffer(),
+            dev2->ServiceReportFailedBuffer());
   EXPECT_EQ(dev->ExtrinsicCalibTransX(), dev2->ExtrinsicCalibTransX());
   EXPECT_EQ(dev->ExtrinsicCalibTransY(), dev2->ExtrinsicCalibTransY());
   EXPECT_EQ(dev->ExtrinsicCalibTransZ(), dev2->ExtrinsicCalibTransZ());

@@ -311,6 +311,12 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
                          config->ActiveApplication());
     }
 
+  if (dev->PcicEipEnabled() != config->PcicEipEnabled())
+    {
+      this->_XCallDevice("setParameter", "PcicEipEnabled",
+                         config->PcicEipEnabled());
+    }
+
   if (dev->PcicTCPPort() != config->PcicTCPPort())
     {
       this->_XCallDevice("setParameter", "PcicTcpPort",
@@ -340,6 +346,18 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
     {
       this->_XCallDevice("setParameter", "SessionTimeout",
                          config->SessionTimeout());
+    }
+
+  if (dev->ServiceReportPassedBuffer() != config->ServiceReportPassedBuffer())
+    {
+      this->_XCallDevice("setParameter", "ServiceReportPassedBuffer",
+                         config->ServiceReportPassedBuffer());
+    }
+
+  if (dev->ServiceReportFailedBuffer() != config->ServiceReportFailedBuffer())
+    {
+      this->_XCallDevice("setParameter", "ServiceReportFailedBuffer",
+                         config->ServiceReportFailedBuffer());
     }
 
   if (dev->ExtrinsicCalibTransX() != config->ExtrinsicCalibTransX())
@@ -590,6 +608,42 @@ o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
       this->_XCallApp("setParameter",
                       "PcicTcpResultSchema",
                       config->PcicTcpResultSchema());
+    }
+
+  //
+  // re-use above objects for parsing the EIP JSON schema
+  //
+  app_is.str(app->PcicEipResultSchema());
+  config_is.str(config->PcicEipResultSchema());
+  app_is.seekg(0, app_is.beg);
+  config_is.seekg(0, config_is.beg);
+  boost::property_tree::read_json(app_is, app_schema_pt);
+  boost::property_tree::read_json(config_is, config_schema_pt);
+
+  if (app_schema_pt != config_schema_pt)
+    {
+      LOG(WARNING) << "Setting PCIC EIP Result Schema to: "
+                   << config->PcicEipResultSchema();
+
+      this->_XCallApp("setParameter",
+                      "PcicEipResultSchema",
+                      config->PcicEipResultSchema());
+    }
+
+  //
+  // re-use the above objects for parsing the LogicGraph JSON
+  //
+  app_is.str(app->LogicGraph());
+  config_is.str(config->LogicGraph());
+  app_is.seekg(0, app_is.beg);
+  config_is.seekg(0, config_is.beg);
+  boost::property_tree::read_json(app_is, app_schema_pt);
+  boost::property_tree::read_json(config_is, config_schema_pt);
+
+  if (app_schema_pt != config_schema_pt)
+    {
+      LOG(WARNING) << "Setting LogicGraph to: " << config->LogicGraph();
+      this->_XCallApp("setParameter", "LogicGraph", config->LogicGraph());
     }
 }
 

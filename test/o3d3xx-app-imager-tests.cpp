@@ -123,11 +123,22 @@ TEST_F(AppImagerTest, GetAppParameters)
   std::unordered_map<std::string, std::string> params =
     cam_->GetAppParameters();
 
+  // for (auto& kv : params)
+  //   {
+  //     std::cout << kv.first << "=" << kv.second << std::endl;
+  //   }
+
+  ASSERT_EQ(params.size(), 9);
+
   ASSERT_NO_THROW(params.at("Name"));
   ASSERT_NO_THROW(params.at("Description"));
   ASSERT_NO_THROW(params.at("TriggerMode"));
   ASSERT_NO_THROW(params.at("PcicTcpResultOutputEnabled"));
   ASSERT_NO_THROW(params.at("PcicTcpResultSchema"));
+  ASSERT_NO_THROW(params.at("PcicEipResultSchema"));
+  ASSERT_NO_THROW(params.at("TemplateInfo"));
+  ASSERT_NO_THROW(params.at("Type"));
+  ASSERT_NO_THROW(params.at("LogicGraph"));
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);
@@ -177,6 +188,9 @@ TEST_F(AppImagerTest, AppConfig_JSON)
             app2->PcicTcpResultOutputEnabled());
   ASSERT_EQ(app->PcicTcpResultSchema(),
             app2->PcicTcpResultSchema());
+  ASSERT_EQ(app->PcicEipResultSchema(),
+            app2->PcicEipResultSchema());
+  ASSERT_EQ(app->LogicGraph(), app2->LogicGraph());
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);
