@@ -46,6 +46,10 @@ namespace o3d3xx
   {
   public:
     using Ptr = std::shared_ptr<FrameGrabber>;
+
+    using WriteHandler =
+      std::function<void(const boost::system::error_code&, std::size_t)>;
+
     using ReadHandler =
       std::function<void(const boost::system::error_code&, std::size_t)>;
 
@@ -139,6 +143,12 @@ namespace o3d3xx
     std::unique_ptr<std::thread> thread_;
 
     /**
+     * Holds the PCIC command needed to set the result schema
+     * for our open socket connection.
+     */
+    std::vector<std::uint8_t> schema_buffer_;
+
+    /**
      * Holds the raw 'Ticket' bytes received from the sensor.
      *
      * PCIC V3 (16 bytes total):
@@ -174,11 +184,6 @@ namespace o3d3xx
      * Condition variable used to notify clients when image data are ready
      */
     std::condition_variable front_buffer_cv_;
-
-    /**
-     * The application's result schema (queried from the camera at runtime)
-     */
-    std::string result_schema_;
 
   }; // end: class FrameGrabber
 

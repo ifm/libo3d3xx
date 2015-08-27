@@ -36,16 +36,25 @@ Software Compatibility Matrix
     <th>libo3d3xx version</th>
     <th>IFM Firmware Version</th>
     <th>Supported Cameras</th>
+    <th>Notes</th>
   </tr>
   <tr>
     <td>0.1.7</td>
     <td>0.06.13</td>
     <td>O3D303</td>
+    <td>Initial Release</td>
   </tr>
   <tr>
     <td>0.1.8</td>
     <td>0.06.39</td>
     <td>O3D303</td>
+    <td>DEPRECATED, USE 0.1.9</td>
+  </tr>
+  <tr>
+    <td>0.1.9</td>
+    <td>0.06.39</td>
+    <td>O3D303</td>
+    <td>Initial support for 100k pixel images</td>
   </tr>
 </table>
 

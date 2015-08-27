@@ -592,58 +592,103 @@ o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
   //
   boost::property_tree::ptree app_schema_pt;
   boost::property_tree::ptree config_schema_pt;
-  std::istringstream app_is(app->PcicTcpResultSchema());
-  std::istringstream config_is(config->PcicTcpResultSchema());
-  app_is.seekg(0, app_is.beg);
-  config_is.seekg(0, config_is.beg);
-  boost::property_tree::read_json(app_is, app_schema_pt);
-  boost::property_tree::read_json(config_is, config_schema_pt);
+  std::istringstream app_is;
+  std::istringstream config_is;
 
-  //if (app->PcicTcpResultSchema() != config->PcicTcpResultSchema())
-  if (app_schema_pt != config_schema_pt)
+  if (config->PcicTcpResultSchema() != "")
     {
-      LOG(WARNING) << "Setting PCIC TCP Result Schema to: "
-                   << config->PcicTcpResultSchema();
+      try
+        {
+          app_is.str(app->PcicTcpResultSchema());
+          config_is.str(config->PcicTcpResultSchema());
+          app_is.seekg(0, app_is.beg);
+          config_is.seekg(0, config_is.beg);
+          boost::property_tree::read_json(app_is, app_schema_pt);
+          boost::property_tree::read_json(config_is, config_schema_pt);
 
-      this->_XCallApp("setParameter",
-                      "PcicTcpResultSchema",
-                      config->PcicTcpResultSchema());
+          if (app_schema_pt != config_schema_pt)
+            {
+              LOG(WARNING) << "Setting PCIC TCP Result Schema to: "
+                           << config->PcicTcpResultSchema();
+
+              this->_XCallApp("setParameter",
+                              "PcicTcpResultSchema",
+                              config->PcicTcpResultSchema());
+            }
+        }
+      catch (const std::exception& ex)
+        {
+          LOG(WARNING) << "Error parsing TCP result schema JSON: "
+                       << ex.what();
+          LOG(WARNING) << "On-camera JSON: "
+                       << app->PcicTcpResultSchema();
+          LOG(WARNING) << "Desired JSON: "
+                       << config->PcicTcpResultSchema();
+        }
     }
 
   //
   // re-use above objects for parsing the EIP JSON schema
   //
-  app_is.str(app->PcicEipResultSchema());
-  config_is.str(config->PcicEipResultSchema());
-  app_is.seekg(0, app_is.beg);
-  config_is.seekg(0, config_is.beg);
-  boost::property_tree::read_json(app_is, app_schema_pt);
-  boost::property_tree::read_json(config_is, config_schema_pt);
-
-  if (app_schema_pt != config_schema_pt)
+  if (config->PcicEipResultSchema() != "")
     {
-      LOG(WARNING) << "Setting PCIC EIP Result Schema to: "
-                   << config->PcicEipResultSchema();
+      try
+        {
+          app_is.str(app->PcicEipResultSchema());
+          config_is.str(config->PcicEipResultSchema());
+          app_is.seekg(0, app_is.beg);
+          config_is.seekg(0, config_is.beg);
+          boost::property_tree::read_json(app_is, app_schema_pt);
+          boost::property_tree::read_json(config_is, config_schema_pt);
 
-      this->_XCallApp("setParameter",
-                      "PcicEipResultSchema",
-                      config->PcicEipResultSchema());
+          if (app_schema_pt != config_schema_pt)
+            {
+              LOG(WARNING) << "Setting PCIC EIP Result Schema to: "
+                           << config->PcicEipResultSchema();
+
+              this->_XCallApp("setParameter",
+                              "PcicEipResultSchema",
+                              config->PcicEipResultSchema());
+            }
+        }
+      catch (const std::exception& ex)
+        {
+          LOG(WARNING) << "Error parsing EIP result schema JSON: "
+                       << ex.what();
+          LOG(WARNING) << "On-camera JSON: "
+                       << app->PcicEipResultSchema();
+          LOG(WARNING) << "Desired JSON: "
+                       << config->PcicEipResultSchema();
+        }
     }
 
   //
   // re-use the above objects for parsing the LogicGraph JSON
   //
-  app_is.str(app->LogicGraph());
-  config_is.str(config->LogicGraph());
-  app_is.seekg(0, app_is.beg);
-  config_is.seekg(0, config_is.beg);
-  boost::property_tree::read_json(app_is, app_schema_pt);
-  boost::property_tree::read_json(config_is, config_schema_pt);
-
-  if (app_schema_pt != config_schema_pt)
+  if (config->LogicGraph() != "")
     {
-      LOG(WARNING) << "Setting LogicGraph to: " << config->LogicGraph();
-      this->_XCallApp("setParameter", "LogicGraph", config->LogicGraph());
+      try
+        {
+          app_is.str(app->LogicGraph());
+          config_is.str(config->LogicGraph());
+          app_is.seekg(0, app_is.beg);
+          config_is.seekg(0, config_is.beg);
+          boost::property_tree::read_json(app_is, app_schema_pt);
+          boost::property_tree::read_json(config_is, config_schema_pt);
+
+          if (app_schema_pt != config_schema_pt)
+            {
+              LOG(WARNING) << "Setting LogicGraph to: " << config->LogicGraph();
+              this->_XCallApp("setParameter",
+                              "LogicGraph", config->LogicGraph());
+            }
+        }
+      catch (const std::exception& ex)
+        {
+          LOG(WARNING) << "Error parsing logic graph JSON: " << ex.what();
+          LOG(WARNING) << "On-camera JSON: " << app->LogicGraph();
+          LOG(WARNING) << "Desired JSON: " << config->LogicGraph();
+        }
     }
 }
 

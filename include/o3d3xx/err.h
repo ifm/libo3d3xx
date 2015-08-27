@@ -40,6 +40,7 @@ extern const int O3D3XX_IO_ERROR;
 extern const int O3D3XX_VALUE_OUT_OF_RANGE;
 extern const int O3D3XX_INVALID_ARGUMENT;
 extern const int O3D3XX_XMLRPC_EIP;
+extern const int O3D3XX_PCIC_BAD_REPLY;
 
 namespace o3d3xx
 {

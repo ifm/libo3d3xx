@@ -1,3 +1,23 @@
+## Changes between libo3d3xx 0.1.8 and 0.1.9
+
+### Updates to schema-aware FrameGrabber
+
+The 0.1.8 frame grabber had issues when run in connection with the ROS code in
+`o3d3xx-ros`. Retrieving, mutating, and restoring the TCP result schema via the
+XML-RPC interface proved to be fragile. Per suggestion by @graugans (IFM) we
+now use the `c` command on the PCIC interface.
+
+See comments/discussion at the end of [this commit](https://github.com/lovepark/libo3d3xx/commit/ba9407a67adc71d85e53aca3072601dd2bc64385)
+
+### o3d3xx::Camera::FromJSON(..)
+
+The implementation of FromJSON was very fragile due to how 0.1.8 made changes
+to JSON comparisons. This fragility caused problems with heavily used
+command line tools like `o3d3xx-config`. This release has better error trapping
+while maintaining the network efficiency intentions of the 0.1.8 FromJSON(..)
+implementation.
+
+
 ## Changes between libo3d3xx 0.1.7 and 0.1.8
 
 ### Schema-aware FrameGrabber
@@ -31,5 +51,6 @@ now. We have provided an application, `test/data/100k.o3d3xxapp`, that unlocks
 this feature into a new application on your camera. You can import this
 application using `o3d3xx-ifm-import` and then mark it active using
 `o3d3xx-config`.
+
 
 ## The initial release of libo3d3xx was 0.1.7

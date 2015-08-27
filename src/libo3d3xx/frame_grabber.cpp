@@ -20,16 +20,15 @@
 #include <cstdint>
 #include <exception>
 #include <functional>
-#include <memory>
+#include <iomanip>
 #include <mutex>
+#include <sstream>
 #include <string>
 #include <system_error>
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
 #include <glog/logging.h>
 #include "o3d3xx/image.h"
-#include "o3d3xx/app_config.h"
-#include "o3d3xx/device_config.h"
 #include "o3d3xx/camera.hpp"
 #include "o3d3xx/err.h"
 
@@ -48,22 +47,28 @@ o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam)
   : cam_(cam),
     io_service_()
 {
-  // Set the result schema to a known byte stream
-  // saving the original schema
-  this->cam_->RequestSession();
-  this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-  o3d3xx::DeviceConfig::Ptr dev = this->cam_->GetDeviceConfig();
-  this->cam_->EditApplication(dev->ActiveApplication());
-  o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
-  this->result_schema_ = app->PcicTcpResultSchema();
-  LOG(WARNING) << "Temporarily applying the default result schema";
-  app->SetPcicTcpResultSchema(o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA);
-  this->cam_->SetAppConfig(app.get());
-  this->cam_->SaveApp();
-  this->cam_->StopEditingApplication();
-  this->cam_->CancelSession();
+  //
+  // pre-compute the PCIC command used to set the schema to a known layout
+  //
+  int c_len =
+    4 + 1 + 9 + o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA.size() + 2;
+  std::ostringstream str;
+  str << "1000"
+      << 'L' << std::setfill('0') << std::setw(9) << c_len
+      << '\r' << '\n'
+      << "1000" << 'c'
+      << std::setfill('0') << std::setw(9)
+      << o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA.size()
+      << o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA
+      << '\r' << '\n';
 
-  // start the frame grabbing thread
+  std::string c_command = str.str();
+  this->schema_buffer_.assign(c_command.begin(), c_command.end());
+  DLOG(INFO) << "c_command: " << c_command;
+
+  //
+  // start the frame grabber thread
+  //
   this->thread_ =
     std::unique_ptr<std::thread>(
       new std::thread(std::bind(&o3d3xx::FrameGrabber::Run, this)));
@@ -80,27 +85,6 @@ o3d3xx::FrameGrabber::~FrameGrabber()
       // will never get emitted.
       this->Stop();
       this->thread_->join();
-    }
-
-  // restore the original result schema
-  try
-    {
-      this->cam_->RequestSession();
-      this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-      o3d3xx::DeviceConfig::Ptr dev = this->cam_->GetDeviceConfig();
-      this->cam_->EditApplication(dev->ActiveApplication());
-      o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
-      LOG(WARNING) << "Restoring PCIC TCP Result Schema";
-      app->SetPcicTcpResultSchema(this->result_schema_);
-      this->cam_->SetAppConfig(app.get());
-      this->cam_->SaveApp();
-      this->cam_->StopEditingApplication();
-      this->cam_->CancelSession();
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "Could not restore original result schema!"
-                 << ex.what();
     }
 
   DLOG(INFO) << "FrameGrabber done.";
@@ -185,7 +169,7 @@ o3d3xx::FrameGrabber::Run()
   try
     {
       this->cam_->RequestSession();
-       this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
+      this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
       this->cam_->CancelSession();
     }
   catch (const o3d3xx::error_t& ex)
@@ -203,9 +187,10 @@ o3d3xx::FrameGrabber::Run()
     boost::asio::ip::address::from_string(cam_ip), cam_port);
 
   //
-  // Forward declare our two read handlers (because they need to call
+  // Forward declare our read handlers (because they need to call
   // eachother).
   //
+  o3d3xx::FrameGrabber::WriteHandler result_schema_write_handler;
   o3d3xx::FrameGrabber::ReadHandler ticket_handler;
   o3d3xx::FrameGrabber::ReadHandler image_handler;
 
@@ -311,6 +296,41 @@ o3d3xx::FrameGrabber::Run()
     };
 
   //
+  // Check that our request to set the result schema was successful
+  //
+  result_schema_write_handler =
+    [&, this]
+    (const boost::system::error_code& ec, std::size_t bytes_transferred)
+    {
+      if (ec) { throw o3d3xx::error_t(ec.value()); }
+      DLOG(INFO) << "Wrote: " << bytes_transferred << " bytes to camera";
+
+      std::size_t c_buff_sz = 16 + 7;
+      std::uint8_t resp_buff[c_buff_sz];
+      std::size_t resp_bytes_read =
+        boost::asio::read(sock, boost::asio::buffer(resp_buff, c_buff_sz));
+
+      if (resp_bytes_read < c_buff_sz)
+        {
+          LOG(ERROR) << "Error getting c_command response!";
+          throw o3d3xx::error_t(O3D3XX_IO_ERROR);
+        }
+
+      if (resp_buff[20] != '*')
+        {
+          LOG(ERROR) << "Got back bad response from camera: '"
+                     << resp_buff[20] << "'";
+          throw o3d3xx::error_t(O3D3XX_PCIC_BAD_REPLY);
+        }
+
+      sock.async_read_some(
+        boost::asio::buffer(
+          this->ticket_buffer_.data(), ticket_buff_sz),
+        ticket_handler);
+     };
+
+
+  //
   // connect to the sensor and start streaming in image data
   //
   try
@@ -321,10 +341,11 @@ o3d3xx::FrameGrabber::Run()
                          {
                            if (ec) { throw o3d3xx::error_t(ec.value()); }
 
-                           sock.async_read_some(
-                             boost::asio::buffer(
-                               this->ticket_buffer_.data(), ticket_buff_sz),
-                             ticket_handler);
+                           boost::asio::async_write(
+                             sock,
+                             boost::asio::buffer(this->schema_buffer_.data(),
+                                                 this->schema_buffer_.size()),
+                             result_schema_write_handler);
                          });
 
       this->io_service_.run();
