@@ -35,6 +35,7 @@ configure_file(
   )
 
 # bring dependent projects
+find_package(XMLRPC REQUIRED c++)
 find_package(PCL 1.7.1 REQUIRED COMPONENTS common visualization filters)
 find_package(OpenCV REQUIRED)
 
@@ -42,11 +43,13 @@ find_package(OpenCV REQUIRED)
 include_directories(
   ${O3D3XX_BINARY_DIR}/include
   ${PCL_INCLUDE_DIRS}
+  ${XMLRPC_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   )
 link_directories(
   ${O3D3XX_BINARY_DIR}/lib
   ${PCL_LIBRARY_DIRS}
+  ${XMLRPC_LIBRARIES}
   ${OpenCV_LIBRARY_DIRS}
   )
 add_definitions(
