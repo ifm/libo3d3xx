@@ -14,14 +14,15 @@ hardware to the open-source computer vision packages:
 
 At its core, libo3d3xx provides a way to stream images from an O3D3xx camera in
 real-time and access the 2D data as OpenCV images (applies to the Amplitude,
-Depth, and Confidence images) and the 3D data as PCL point clouds (i.e., the
-`CARTESIAN_X`, `CARTESIAN_Y`, and `CARTESIAN_Z` are fused to create a point
-cloud). We note that the PCL point cloud constructed by this library has point
-type `pcl::PointXYZI` (referred to as `o3d3xx::PointT`). For the intensity
-channel, we use the Amplitude image data registered to each point. We do this
-because, unlike in earlier PMD-based IFM cameras, the Intensity image is not
-currently available. We expect the Amplitude image can act as a proxy for the
-Intensity image as it relates to PCL algorithms that may rely on that data.
+Depth, and Confidence images) and the 3D data as both an OpenCV image and a PCL
+point cloud (i.e., the `CARTESIAN_X`, `CARTESIAN_Y`, and `CARTESIAN_Z` are
+fused to create a point cloud). We note that the PCL point cloud constructed by
+this library has point type `pcl::PointXYZI` (referred to as
+`o3d3xx::PointT`). For the intensity channel, we use the Amplitude image data
+registered to each point. We do this because, unlike in earlier PMD-based IFM
+cameras, the Intensity image is not currently available. We expect the
+Amplitude image can act as a proxy for the Intensity image as it relates to PCL
+algorithms that may rely on that data.
 
 The code has been developed on 64-bit Ubuntu Linux 14.04 LTS. This is currently
 the only platform that the software has been tested on. It is expected that
@@ -55,6 +56,12 @@ Software Compatibility Matrix
     <td>0.06.39</td>
     <td>O3D303</td>
     <td>Initial support for 100k pixel images</td>
+  </tr>
+  <tr>
+    <td>0.1.10</td>
+    <td>0.06.39</td>
+    <td>O3D303</td>
+    <td></td>
   </tr>
 </table>
 

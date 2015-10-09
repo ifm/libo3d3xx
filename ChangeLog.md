@@ -1,3 +1,22 @@
+## Changes between libo3d3xx 0.1.9 and 0.1.10
+
+### ImageBuffer now makes point cloud data available as cv::Mat
+
+A new `XYZImage` is avialable on the `ImageBuffer` class via the `XYZImage()`
+accessor. This image is a 3-channel OpenCV image encoding of the point cloud
+where the three channels are spatial planes (x, y, z). It should be noted that
+while this encoding of the point cloud contains the same data as the PCL encoded
+point cloud the data are kept in mm (as opposed to meters) and the data
+type is int16\_t as opposed to float. This was motivated by efficiency needs on
+embedded systems. However, the coord frame for this point cloud data is
+consistent with the coord frame on the PCL point cloud.
+
+See also:
+
+* https://github.com/lovepark/libo3d3xx/issues/17
+* https://github.com/lovepark/libo3d3xx/issues/14#issuecomment-144391800
+* https://github.com/lovepark/libo3d3xx/issues/14#issuecomment-144548199
+
 ## Changes between libo3d3xx 0.1.8 and 0.1.9
 
 ### Updates to schema-aware FrameGrabber

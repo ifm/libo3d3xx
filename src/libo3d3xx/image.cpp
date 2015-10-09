@@ -110,6 +110,12 @@ o3d3xx::get_num_bytes_in_pixel_format(o3d3xx::pixel_format f)
     case o3d3xx::pixel_format::FORMAT_64F:
       return 8;
 
+    case o3d3xx::pixel_format::FORMAT_16U2:
+      return 2 * 2;
+
+    case o3d3xx::pixel_format::FORMAT_32F3:
+      return 4 * 3;
+
     default:
       return 0;
     }
@@ -199,6 +205,13 @@ o3d3xx::ImageBuffer::ConfidenceImage()
   return this->conf_;
 }
 
+cv::Mat
+o3d3xx::ImageBuffer::XYZImage()
+{
+  this->Organize();
+  return this->xyz_image_;
+}
+
 pcl::PointCloud<o3d3xx::PointT>::Ptr
 o3d3xx::ImageBuffer::Cloud()
 {
@@ -275,18 +288,26 @@ o3d3xx::ImageBuffer::Organize()
   this->depth_.create(height, width, CV_16UC1);
   this->amp_.create(height, width, CV_16UC1);
   this->conf_.create(height, width, CV_8UC1);
+  this->xyz_image_.create(height, width, CV_16SC4);
 
   float bad_point = std::numeric_limits<float>::quiet_NaN();
   std::uint16_t bad_pixel = std::numeric_limits<std::uint16_t>::quiet_NaN();
+  std::int16_t bad_pixel_s = std::numeric_limits<std::int16_t>::quiet_NaN();
 
   // move all index pointers to where the pixel data starts
   xidx += 36; yidx += 36; zidx += 36; aidx += 36; cidx += 36; didx += 36;
 
   int col = 0;
   int row = -1;
+  int xyz_col = 0;
+
   std::uint16_t* depth_row_ptr;
   std::uint16_t* amp_row_ptr;
   std::uint8_t* conf_row_ptr;
+  std::int16_t* xyz_row_ptr;
+
+  std::int16_t x_, y_, z_;
+
   for (std::size_t i = 0; i < num_points;
        ++i, xidx += xincr, yidx += yincr, zidx += zincr,
          cidx += cincr, aidx += aincr, didx += dincr)
@@ -294,12 +315,14 @@ o3d3xx::ImageBuffer::Organize()
       o3d3xx::PointT& pt = this->cloud_->points[i];
 
       col = i % width;
+      xyz_col = col * 3; // 3 channels: xyz
       if (col == 0)
         {
           row += 1;
           depth_row_ptr = this->depth_.ptr<std::uint16_t>(row);
           amp_row_ptr = this->amp_.ptr<std::uint16_t>(row);
           conf_row_ptr = this->conf_.ptr<std::uint8_t>(row);
+          xyz_row_ptr = this->xyz_image_.ptr<std::int16_t>(row);
         }
 
       conf_row_ptr[col] = this->bytes_.at(cidx);
@@ -309,25 +332,36 @@ o3d3xx::ImageBuffer::Organize()
           this->cloud_->is_dense = false;
 
           depth_row_ptr[col] = amp_row_ptr[col] = bad_pixel;
+
+          xyz_row_ptr[xyz_col] = bad_pixel_s;
+          xyz_row_ptr[xyz_col + 1] = bad_pixel_s;
+          xyz_row_ptr[xyz_col + 2] = bad_pixel_s;
         }
       else
         {
-          // convert units to meters and the coord frame
-          // to a right-handed frame for the point cloud
-          pt.x =
-            o3d3xx::mkval<std::int16_t>(this->bytes_.data()+zidx) / 1000.0f;
-          pt.y =
-            -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+xidx) / 1000.0f;
-          pt.z =
-            -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+yidx) / 1000.0f;
+          // convert the coord frame  to a right-handed frame for the point
+          // cloud
+          x_ = o3d3xx::mkval<std::int16_t>(this->bytes_.data()+zidx);
+          y_ = -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+xidx);
+          z_ = -o3d3xx::mkval<std::int16_t>(this->bytes_.data()+yidx);
+
+          // convert units to meters for the point cloud
+          pt.x = x_ / 1000.0f;
+          pt.y = y_ / 1000.0f;
+          pt.z = z_ / 1000.0f;
 
           // keep depth image data as mm
           depth_row_ptr[col] =
             o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+didx);
+
+          // keep xyz image data as mm but same coord frame as point cloud
+          xyz_row_ptr[xyz_col] = x_;
+          xyz_row_ptr[xyz_col + 1] = y_;
+          xyz_row_ptr[xyz_col + 2] = z_;
         }
 
       amp_row_ptr[col] =
-        o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+aidx);
+            o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+aidx);
 
       pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;
       pt.intensity = amp_row_ptr[col];

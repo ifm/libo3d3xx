@@ -1,5 +1,8 @@
 #include "o3d3xx.h"
+#include <cmath>
 #include <cstdint>
+#include <limits>
+#include <memory>
 #include <vector>
 #include <opencv2/core/core.hpp>
 #include <pcl/point_cloud.h>
@@ -46,6 +49,61 @@ TEST(ImageBuffers_Tests, Cloud)
   EXPECT_TRUE(cloud.use_count() == 1);
   EXPECT_TRUE(cloud->width == width);
   EXPECT_TRUE(cloud->height == height);
+}
+
+TEST(ImageBuffers_Tests, XYZImage)
+{
+  o3d3xx::Camera::Ptr cam =
+    std::make_shared<o3d3xx::Camera>();
+
+  o3d3xx::FrameGrabber::Ptr fg =
+    std::make_shared<o3d3xx::FrameGrabber>(cam);
+
+  o3d3xx::ImageBuffer::Ptr buff =
+    std::make_shared<o3d3xx::ImageBuffer>();
+
+  EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
+
+  pcl::PointCloud<o3d3xx::PointT>::Ptr cloud = buff->Cloud();
+  cv::Mat img = buff->XYZImage();
+
+  int num_points = cloud->height * cloud->width;
+  int col = 0;
+  int matrix_col = 0;
+  int row = -1;
+  std::int16_t* row_ptr;
+
+  for (std::size_t i = 0; i < num_points; ++i)
+    {
+      o3d3xx::PointT& pt = cloud->points[i];
+
+      col = i % cloud->width;
+      matrix_col = col * 3;
+      if (col == 0)
+        {
+          row += 1;
+          row_ptr = img.ptr<std::int16_t>(row);
+        }
+
+      if (std::isnan(pt.x))
+        {
+          ASSERT_TRUE(std::isnan(pt.y));
+          ASSERT_TRUE(std::isnan(pt.z));
+
+          ASSERT_EQ(row_ptr[matrix_col],
+                    std::numeric_limits<std::int16_t>::quiet_NaN());
+          ASSERT_EQ(row_ptr[matrix_col + 1],
+                    std::numeric_limits<std::int16_t>::quiet_NaN());
+          ASSERT_EQ(row_ptr[matrix_col + 2],
+                    std::numeric_limits<std::int16_t>::quiet_NaN());
+        }
+      else
+        {
+          ASSERT_FLOAT_EQ(pt.x * 1000.0, (float) row_ptr[matrix_col]);
+          ASSERT_FLOAT_EQ(pt.y * 1000.0, (float) row_ptr[matrix_col + 1]);
+          ASSERT_FLOAT_EQ(pt.z * 1000.0, (float) row_ptr[matrix_col + 2]);
+        }
+    }
 }
 
 TEST(ImageBuffers_Tests, DepthImage)

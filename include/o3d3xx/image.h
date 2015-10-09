@@ -40,23 +40,30 @@ namespace o3d3xx
     FORMAT_32S = 5,
     FORMAT_32F = 6,
     FORMAT_64U = 7,
-    FORMAT_64F = 8
+    FORMAT_64F = 8,
+    FORMAT_16U2 = 9,
+    FORMAT_32F3 = 10
   };
 
   enum class image_chunk : std::uint32_t
   {
     USERDATA = 0,
     RADIAL_DISTANCE = 100,
-    AMPLITUDE = 101,
+    AMPLITUDE = 101, // normalized amplitude
+    RAW_AMPLITUDE = 103,
     CARTESIAN_X = 200,
     CARTESIAN_Y = 201,
     CARTESIAN_Z = 202,
-    UNIT_VECTOR_X = 220,
-    UNIT_VECTOR_Y = 221,
-    UNIT_VECTOR_Z = 222,
+    CARTESIAN_ALL = 203,
+    UNIT_VECTOR_E1 = 220,
+    UNIT_VECTOR_E2 = 221,
+    UNIT_VECTOR_E3 = 222,
+    UNIT_VECTOR_ALL = 223,
     CONFIDENCE = 300,
     DIAGNOSTIC_DATA = 302,
-    MIRA_RAW_DATA = 303
+    EXTRINSIC_CALIBRATION = 400,
+    JSON_MODEL = 500,
+    SNAPSHOT_IMAGE = 600
   };
 
   /**
@@ -117,6 +124,19 @@ namespace o3d3xx
      * reference counting.
      */
     cv::Mat ConfidenceImage();
+
+    /**
+     * Returns the wrapped xyz_image.
+     *
+     * The xyz_image is a 3-channel OpenCV image encoding of the point cloud
+     * where the three channels are spatial planes (x, y, z) as opposed to
+     * color planes. It should be noted that while this encoding of the point
+     * cloud contains the same data as the PCL encoded point cloud (for the
+     * cartesian components) the data are kept in mm (as opposed to meters) and
+     * the data types are int16_t as opposed to float. However, the coord frame
+     * for this point cloud data is consistent with the PCL point cloud.
+     */
+    cv::Mat XYZImage();
 
     /**
      * Returns the shared pointer to the wrapped point cloud
@@ -197,6 +217,11 @@ namespace o3d3xx
      * OpenCV image encoding of the confidence data
      */
     cv::Mat conf_;
+
+    /**
+     * OpenCV image encoding of the point cloud
+     */
+    cv::Mat xyz_image_;
 
     /**
      * Mutates the `dirty' flag
