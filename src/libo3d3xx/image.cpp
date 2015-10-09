@@ -288,7 +288,7 @@ o3d3xx::ImageBuffer::Organize()
   this->depth_.create(height, width, CV_16UC1);
   this->amp_.create(height, width, CV_16UC1);
   this->conf_.create(height, width, CV_8UC1);
-  this->xyz_image_.create(height, width, CV_16SC4);
+  this->xyz_image_.create(height, width, CV_16SC3);
 
   float bad_point = std::numeric_limits<float>::quiet_NaN();
   std::uint16_t bad_pixel = std::numeric_limits<std::uint16_t>::quiet_NaN();

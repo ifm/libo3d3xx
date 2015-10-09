@@ -61,6 +61,12 @@ Software Compatibility Matrix
     <td>0.1.10</td>
     <td>0.06.39</td>
     <td>O3D303</td>
+    <td>DEPRECATED, USE 0.1.11</td>
+  </tr>
+  <tr>
+    <td>0.1.11</td>
+    <td>0.06.39</td>
+    <td>O3D303</td>
     <td></td>
   </tr>
 </table>

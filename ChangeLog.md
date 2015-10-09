@@ -1,3 +1,9 @@
+## Changes between libo3d3xx 0.1.10 and 0.1.11
+
+### ImageBuffer
+
+Fixed a bug in how the OpenCV image encoding was specified for the `XYZImage`.
+
 ## Changes between libo3d3xx 0.1.9 and 0.1.10
 
 ### ImageBuffer now makes point cloud data available as cv::Mat
