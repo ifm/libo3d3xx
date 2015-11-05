@@ -1,27 +1,66 @@
 project(O3D3XX)
 cmake_minimum_required(VERSION 2.8.11)
 set(GIT_PROJECT_NAME "libo3d3xx")
-set(CMAKE_INSTALL_PREFIX /opt/${GIT_PROJECT_NAME})
-set(GTEST_CMAKE_DIR "/usr/src/gtest")
 
-# force an out-of-source build of the code
+################################################
+##
+## User-tunable build parameters
+## -----------------------------
+##
+## Before editing this file directly, realize
+## that you can set these on the command line.
+## E.g.,
+##
+## $ cmake -DBUILD_EXE_VIEWER=OFF ..
+## $ make
+##
+################################################
+set(CMAKE_INSTALL_PREFIX /opt/${GIT_PROJECT_NAME})
+set(CMAKE_BUILD_TYPE Release) # Release or Debug
+
+option(BUILD_TESTS "Build unit tests" ON)
+option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(BUILD_STATIC_LIBS "Build static libraries" ON)
+
+# Fine granularity over which cmd line tools get built
+option(BUILD_EXE_VIEWER "Build o3d3xx-viewer" ON)
+option(BUILD_EXE_VERSION "Build o3d3xx-version" ON)
+option(BUILD_EXE_RESET "Build o3d3xx-reset" ON)
+option(BUILD_EXE_LS "Build o3d3xx-ls" ON)
+option(BUILD_EXE_DUMP "Build o3d3xx-dump" ON)
+option(BUILD_EXE_CONFIG "Build o3d3xx-config" ON)
+option(BUILD_EXE_RM "Build o3d3xx-config" ON)
+option(BUILD_EXE_REBOOT "Build o3d3xx-reboot" ON)
+option(BUILD_EXE_HZ "Build o3d3xx-hz" ON)
+option(BUILD_EXE_IMAGER_TYPES "Build o3d3xx-imager-types" ON)
+option(BUILD_EXE_IFM_IMPORT "Build o3d3xx-ifm-import" ON)
+option(BUILD_EXE_IFM_EXPORT "Build o3d3xx-ifm-export" ON)
+
+################################################
+################################################
+## Most users should have no concern about what
+## is beyond this line. Edit at your own risk.
+################################################
+################################################
+if(NOT (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
+  message(FATAL_ERROR
+    "One of `BUILD_STATIC_LIBS' or `BUILD_SHARED_LIBS' must be `ON'")
+endif(NOT (BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS))
+
 set(CMAKE_MODULE_PATH
     ${O3D3XX_SOURCE_DIR}/cmake/modules
     ${CMAKE_MODULE_PATH}
     )
+
+# force an out-of-source build of the code
 include(MacroOutOfSourceBuild)
-macro_ensure_out_of_source_build("Please build ${PROJECT_NAME} out-of-source")
+macro_ensure_out_of_source_build(
+  "Please build ${PROJECT_NAME} out-of-source")
 
-# settings for controlling debug vs. release builds
-set(CMAKE_BUILD_TYPE Release)
-#set(CMAKE_BUILD_TYPE Debug)
-
-# if you want to customize the compiler flags based on build type, do that here
-set(CMAKE_CXX_FLAGS "-std=c++11") # turn on C++11 for g++
-# CMAKE_CXX_FLAGS_RELEASE
-# CMAKE_CXX_FLAGS_DEBUG
-
-# This is the single place to manage API version numbers
+################################################
+## This is the single place to manage API
+## version numbers
+################################################
 set(O3D3XX_VERSION_MAJOR 0)
 set(O3D3XX_VERSION_MINOR 2)
 set(O3D3XX_VERSION_PATCH 0)
@@ -34,22 +73,34 @@ configure_file(
   @ONLY
   )
 
-# bring dependent projects
-find_package(XMLRPC REQUIRED c++)
-find_package(PCL 1.7.1 REQUIRED COMPONENTS common visualization filters)
+################################################
+## Bring in dependent projects
+################################################
+find_package(XMLRPC REQUIRED c++ client)
+find_package(Boost REQUIRED COMPONENTS
+             program_options system)
+find_package(PCL 1.7.1 REQUIRED COMPONENTS common)
+if (BUILD_EXE_VIEWER)
+  find_package(PCL 1.7.1 REQUIRED COMPONENTS visualization)
+endif(BUILD_EXE_VIEWER)
 find_package(OpenCV REQUIRED)
 
-# Manage compiler/linker flags
+################################################
+## Manage our compiler and linker flags
+################################################
+set(CMAKE_CXX_FLAGS "-std=c++11")
+
 include_directories(
   ${O3D3XX_BINARY_DIR}/include
   ${PCL_INCLUDE_DIRS}
   ${XMLRPC_INCLUDE_DIRS}
+  ${Boost_INCLUDE_DIRS}
   ${OpenCV_INCLUDE_DIRS}
   )
 link_directories(
   ${O3D3XX_BINARY_DIR}/lib
   ${PCL_LIBRARY_DIRS}
-  ${XMLRPC_LIBRARIES}
+  ${Boost_LIBRARY_DIRS}
   ${OpenCV_LIBRARY_DIRS}
   )
 add_definitions(
@@ -57,17 +108,24 @@ add_definitions(
   ${OpenCV_DEFINITIONS}
   )
 
-# turn on ctest (unit testing gives us `make test' in top-level)
-enable_testing()
-
-# process child CMakeLists.txt files
+################################################
+## Process child CMakeLists.txt files
+################################################
 add_subdirectory(src)
-add_subdirectory(test)
-install(
-  EXPORT o3d3xx-targets DESTINATION lib/o3d3xx
-  )
+if(BUILD_TESTS)
+  add_subdirectory(test)
+else()
+  message(WARNING "Skipping unit tests")
+endif(BUILD_TESTS)
 
-# `make install`
+################################################
+## Manage installation process
+################################################
+if(BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS)
+  install(
+    EXPORT o3d3xx-targets DESTINATION lib/o3d3xx)
+endif(BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS)
+
 file(COPY ${O3D3XX_SOURCE_DIR}/etc
   DESTINATION ${O3D3XX_BINARY_DIR}
   )
@@ -88,11 +146,6 @@ install(DIRECTORY ${O3D3XX_BINARY_DIR}/include
   PATTERN ".git" EXCLUDE
   PATTERN "*~" EXCLUDE
   )
-# uncomment if you have documentation in `docs` to install
-# install(DIRECTORY ${O3D3XX_SOURCE_DIR}/doc
-#   DESTINATION ${CMAKE_INSTALL_PREFIX}
-#   PATTERN ".git" EXCLUDE
-#   )
 
 # `make package`
 configure_file(
@@ -111,8 +164,7 @@ set(CPACK_PACKAGE_DESCRIPTION
   "Driver and utilities for usage with o3d3xx cameras built and sold
 by IFM Efector. The o3d3xx cameras are 3D cameras based on the PMD
 Tech Photonic Mixer Device time-of-flight imager. This toolbox bridges the IFM
-hardware to the state-of-the-art open source computer vision packages: OpenCV
-and PCL.")
+hardware to the open source computer vision packages: OpenCV and PCL.")
 set(CPACK_PACKAGE_VENDOR "Love Park Robotics, LLC")
 set(CPACK_PACKAGE_CONTACT "Tom Panzarella <tom@loveparkrobotics.com>")
 set(CPACK_PACKAGE_VERSION_MAJOR
@@ -139,13 +191,38 @@ endif(NOT DPKG_CMD)
 set(CPACK_PACKAGE_FILE_NAME
   "${GIT_PROJECT_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
-set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libboost-dev (>= 1.54),
-   libgoogle-glog-dev,
-   libxmlrpc-c++8,
-   libxmlrpc-c++8-dev,
-   libopencv-core2.4,
-   libopencv-core-dev,
-   libpcl-1.7-all,
-   libpcl-1.7-all-dev")
+if(BUILD_EXE_VIEWER)
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "libgoogle-glog0,
+     libboost-system1.54.0,
+     libboost-program-options1.54.0,
+     libvtk5.8,
+     libpcl-visualization-1.7,
+     libpcl-common-1.7,
+     libxmlrpc-c++8,
+     libopencv-highgui2.4,
+     libopencv-core2.4,
+     libopencv-imgproc2.4,
+     libopencv-contrib2.4,
+     libstdc++6,
+     libc6,
+     libgcc1")
+else()
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS
+    "libgoogle-glog0,
+     libboost-system1.54.0,
+     libboost-program-options1.54.0,
+     libxmlrpc-c++8,
+     libopencv-core2.4,
+     libopencv-imgproc2.4,
+     libstdc++6,
+     libc6,
+     libgcc1")
+endif(BUILD_EXE_VIEWER)
 include(CPack)
+
+# XXX: TP - Debugging
+# get_cmake_property(_variableNames VARIABLES)
+# foreach (_variableName ${_variableNames})
+#     message(STATUS "${_variableName}=${${_variableName}}")
+# endforeach()

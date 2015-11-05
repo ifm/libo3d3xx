@@ -1,3 +1,33 @@
+## Changes between libo3d3xx 0.1.11 and 0.2.0
+
+### Refactored and Modularized Build Process
+
+Options to conditionally build parts of the code have been added:
+
+* BUILD_TESTS
+* BUILD_VIEWER
+* BUILD\_SHARED\_LIBS
+* BUILD\_STATIC\_LIBS
+* BUILD\_EXE\_VIEWER
+* BUILD\_EXE\_VERSION
+* BUILD\_EXE\_RESET
+* BUILD\_EXE\_LS
+* BUILD\_EXE\_DUMP
+* BUILD\_EXE\_CONFIG
+* BUILD\_EXE\_RM
+* BUILD\_EXE\_REBOOT
+* BUILD\_EXE\_HZ
+* BUILD\_EXE\_IMAGER\_TYPES
+* BUILD\_EXE\_IFM\_IMPORT
+* BUILD\_EXE\_IFM\_EXPORT
+
+These are all turned ON by default but can be switched off on the cmake command
+line. For example: `$ cmake -DBUILD_TESTS=OFF ..`
+
+See also:
+
+* https://github.com/lovepark/libo3d3xx/issues/13
+
 ## Changes between libo3d3xx 0.1.10 and 0.1.11
 
 ### ImageBuffer

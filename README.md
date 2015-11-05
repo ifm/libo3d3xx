@@ -69,6 +69,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Adds the XYZ OpenCV image</td>
   </tr>
+  <tr>
+    <td>0.2.0</td>
+    <td>Not sure yet</td>
+    <td>O3D303</td>
+    <td>This is a pre-release version of the software - UNSUPPORTED</td>
+  </tr>
 </table>
 
 Features
