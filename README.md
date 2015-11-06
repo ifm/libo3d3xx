@@ -71,9 +71,9 @@ Software Compatibility Matrix
   </tr>
   <tr>
     <td>0.2.0</td>
-    <td>Not sure yet</td>
+    <td>1.1.288</td>
     <td>O3D303</td>
-    <td>This is a pre-release version of the software - UNSUPPORTED</td>
+    <td>UNSUPPORTED - WORK IN PROGRESS</td>
   </tr>
 </table>
 

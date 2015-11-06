@@ -1,5 +1,12 @@
 ## Changes between libo3d3xx 0.1.11 and 0.2.0
 
+### Device config default values changed
+
+Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
+default values from 15 to 5. For reasoning, please see:
+
+https://github.com/lovepark/libo3d3xx/issues/20
+
 ### Refactored and Modularized Build Process
 
 Options to conditionally build parts of the code have been added:
