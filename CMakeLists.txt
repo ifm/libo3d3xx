@@ -60,6 +60,10 @@ add_definitions(
 # turn on ctest (unit testing gives us `make test' in top-level)
 enable_testing()
 
+# Allow install to find the shared library for libo3d3xx.
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 # process child CMakeLists.txt files
 add_subdirectory(src)
 add_subdirectory(test)
