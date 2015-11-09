@@ -1,3 +1,10 @@
+# To cross-compile, either uncomment the following line
+# or, set it on the command line. E.g.,
+#
+# $ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm-linux-gnueabihf.cmake ..
+#
+#set(CMAKE_TOOLCHAIN_FILE cmake/toolchains/arm-linux-gnueabihf.cmake)
+
 project(O3D3XX)
 cmake_minimum_required(VERSION 2.8.11)
 set(GIT_PROJECT_NAME "libo3d3xx")
@@ -23,7 +30,11 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" ON)
 
 # Fine granularity over which cmd line tools get built
-option(BUILD_EXE_VIEWER "Build o3d3xx-viewer" ON)
+if(NOT CMAKE_CROSSCOMPILING)
+  option(BUILD_EXE_VIEWER "Build o3d3xx-viewer" ON)
+else()
+  option(BUILD_EXE_VIEWER "Build o3d3xx-viewer" OFF)
+endif(NOT CMAKE_CROSSCOMPILING)
 option(BUILD_EXE_VERSION "Build o3d3xx-version" ON)
 option(BUILD_EXE_RESET "Build o3d3xx-reset" ON)
 option(BUILD_EXE_LS "Build o3d3xx-ls" ON)
@@ -35,6 +46,12 @@ option(BUILD_EXE_HZ "Build o3d3xx-hz" ON)
 option(BUILD_EXE_IMAGER_TYPES "Build o3d3xx-imager-types" ON)
 option(BUILD_EXE_IFM_IMPORT "Build o3d3xx-ifm-import" ON)
 option(BUILD_EXE_IFM_EXPORT "Build o3d3xx-ifm-export" ON)
+
+# If you are cross-compiling, the scp-deploy target
+# below (see bottom of this file) uses these
+set(TARGET_IP "192.168.0.68")
+set(TARGET_USER "lovepark")
+set(TARGET_DIR "/home/lovepark/debs/")
 
 ################################################
 ################################################
@@ -221,8 +238,15 @@ else()
 endif(BUILD_EXE_VIEWER)
 include(CPack)
 
-# XXX: TP - Debugging
-# get_cmake_property(_variableNames VARIABLES)
-# foreach (_variableName ${_variableNames})
-#     message(STATUS "${_variableName}=${${_variableName}}")
-# endforeach()
+set(DEB_FILE "${CPACK_PACKAGE_FILE_NAME}.deb")
+
+if(CMAKE_CROSSCOMPILING)
+  find_program(SCP_EXE scp)
+  if(SCP_EXE)
+    add_custom_target(deploy
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package --config Release
+      COMMAND ${SCP_EXE} ${DEB_FILE} ${TARGET_USER}@${TARGET_IP}:${TARGET_DIR})
+  else()
+    message("Could not create deploy target: 'scp' not found.")
+  endif(SCP_EXE)
+endif(CMAKE_CROSSCOMPILING)

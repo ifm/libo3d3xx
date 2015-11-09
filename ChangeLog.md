@@ -1,5 +1,15 @@
 ## Changes between libo3d3xx 0.1.11 and 0.2.0
 
+### Added cross-compilation support
+
+A new directory called `cmake/toolchains` has been added to allow for
+setting up a cross-compilation toolchain. Additonally, a convenience `deploy`
+target has been added that assumes, you are deploying the deb files created
+from the `package` target and that you will deploy via `scp`. These deployment
+assumptions will likely need to be revisited to make them more generally
+useful, however, in the near-term, lets consider them a proof-of-concept for
+automating the deployment of cross-compiled code.
+
 ### Device config default values changed
 
 Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
