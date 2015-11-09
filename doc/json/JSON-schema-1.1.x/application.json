@@ -1,0 +1,90 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "O3D3xx application configuration",
+	"type": "object",
+	"properties": {
+		"Name": {
+			"type": "string",
+			"maxLength": 64
+		},
+		"Description": {
+			"type": "string",
+			"maxLength": 500
+		},
+		"TriggerMode": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 5,
+			"default": 1
+		},
+		"PcicTcpResultSchema": {
+			"type": "string",
+			"default": "{\n    \"layouter\": \"flexible\",\n    \"format\": { \"dataencoding\": \"ascii\" },\n    \"elements\": [\n        { \"type\": \"string\", \"value\": \"star\", \"id\": \"start_string\" },\n        { \"type\": \"blob\", \"id\": \"normalized_amplitude_image\" },\n        { \"type\": \"blob\", \"id\": \"distance_image\" },\n        { \"type\": \"blob\", \"id\": \"x_image\" },\n        { \"type\": \"blob\", \"id\": \"y_image\" },\n        { \"type\": \"blob\", \"id\": \"z_image\" },\n        { \"type\": \"blob\", \"id\": \"confidence_image\" },\n        { \"type\": \"blob\", \"id\": \"diagnostic_data\" },\n        { \"type\": \"string\", \"value\": \"stop\", \"id\": \"end_string\" }\n    ]\n}"
+		},
+		"PcicEipResultSchema": {
+			"type": "string",
+			"default": "{\"layouter\" : \"flexible\", \"format\": { \"dataencoding\": \"binary\", \"order\": \"little\" }, \"elements\" : [ { \"type\": \"string\", \"value\": \"star\", \"id\": \"start_string\" }, { \"type\": \"records\", \"id\": \"models\", \"elements\": [ { \"type\": \"int16\", \"id\": \"boxFound\" }, { \"type\": \"int16\", \"id\": \"width\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"height\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"length\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"xMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"zMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yawAngle\" }, { \"type\": \"int16\", \"id\": \"qualityLength\" }, { \"type\": \"int16\", \"id\": \"qualityWidth\" }, { \"type\": \"int16\", \"id\": \"qualityHeight\" } ] }, { \"type\": \"string\", \"value\": \"stop\", \"id\": \"end_string\" } ] }"
+		},
+		"PcicTcpResultOutputEnabled": {
+			"type": "boolean",
+			"default": true
+		},
+		"ImagerConfiguration": {
+			"type": "array",
+			"items": {
+				"$ref": "imager_config.json"
+			},
+			"minItems": 1,
+			"maxItems": 1
+		},
+		"ModelList": {
+			"type": "string",
+			"attributes": [ "private", "noexport" ]
+		},
+		"Models": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"Id": {
+						"type": "integer",
+						"minimum": 1,
+						"maximum": 999
+					},
+					"Model": {
+						"$ref": "model.json"
+					}
+				},
+				"required": [ "Id", "Model" ]
+			}
+		},
+		"NextModelId": {
+			"type": "integer",
+			"minimum": 1,
+			"maximum": 999,
+			"default": 1,
+			"attributes": [ "private" ]
+		},
+		"LogicGraph": {
+			"type": "string"
+		},
+		"Type": {
+			"type": "string",
+			"attributes": [ "readonly" ]
+		},
+		"PrivateType": {
+			"type": "string",
+			"default": "Camera",
+			"attributes": [ "private", "noexport" ]
+		},
+		"TemplateInfo": {
+			"type": "string"
+		},
+		"IOTeachLight": {
+			"type": "boolean",
+			"default": false,
+			"attributes": [ "private", "noexport" ]
+		}
+	},
+	"required": [ "Name", "Description", "TriggerMode", "PcicTcpResultSchema","PcicEipResultSchema", "ImagerConfiguration", "Type" ]
+}

@@ -1,0 +1,11 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "O3D3xx Model configuration",
+	"type": "object",
+
+	"oneOf": [
+		{ "$ref": "model_distance.json" },
+		{ "$ref": "model_level.json" },
+		{ "$ref": "model_dimensioning.json" }
+	]	
+}
