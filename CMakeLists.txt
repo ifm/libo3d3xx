@@ -1,10 +1,3 @@
-# To cross-compile, either uncomment the following line
-# or, set it on the command line. E.g.,
-#
-# $ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/arm-linux-gnueabihf.cmake ..
-#
-#set(CMAKE_TOOLCHAIN_FILE cmake/toolchains/arm-linux-gnueabihf.cmake)
-
 project(O3D3XX)
 cmake_minimum_required(VERSION 2.8.11)
 set(GIT_PROJECT_NAME "libo3d3xx")
@@ -93,6 +86,7 @@ configure_file(
 ################################################
 ## Bring in dependent projects
 ################################################
+find_package(Threads REQUIRED)
 find_package(XMLRPC REQUIRED c++ client)
 find_package(Boost REQUIRED COMPONENTS
              program_options system)
@@ -105,7 +99,7 @@ find_package(OpenCV REQUIRED)
 ################################################
 ## Manage our compiler and linker flags
 ################################################
-set(CMAKE_CXX_FLAGS "-std=c++11")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 include_directories(
   ${O3D3XX_BINARY_DIR}/include
@@ -195,56 +189,53 @@ set(CPACK_PACKAGE_VERSION_PATCH
   )
 set(O3D3XX_VERSION_STRING
     "${O3D3XX_VERSION_MAJOR}.${O3D3XX_VERSION_MINOR}.${O3D3XX_VERSION_PATCH}")
+
 find_program(DPKG_CMD dpkg)
 if(NOT DPKG_CMD)
-  message(STATUS "Can not find dpkg in your path, default to ${CMAKE_SYSTEM_PROCESSOR}.")
-  set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+  if(NOT CMAKE_CROSSCOMPILING)
+    message(STATUS "Can not find dpkg in your path, default to ${CMAKE_SYSTEM_PROCESSOR}.")
+    set(CPACK_DEBIAN_PACKAGE_ARCHITECTURE "${CMAKE_SYSTEM_PROCESSOR}")
+  endif(NOT CMAKE_CROSSCOMPILING)
 else()
-  execute_process(COMMAND "${DPKG_CMD}" --print-architecture
-    OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
+  if(NOT CMAKE_CROSSCOMPILING)
+    execute_process(COMMAND "${DPKG_CMD}" --print-architecture
+      OUTPUT_VARIABLE CPACK_DEBIAN_PACKAGE_ARCHITECTURE
+      OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+  endif(NOT CMAKE_CROSSCOMPILING)
 endif(NOT DPKG_CMD)
 set(CPACK_PACKAGE_FILE_NAME
   "${GIT_PROJECT_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
+set(CPACK_DEBIAN_PACKAGE_DEPENDS
+  "libgoogle-glog0,
+   libboost-system1.54.0,
+   libboost-program-options1.54.0,
+   libxmlrpc-c++8,
+   libopencv-core2.4,
+   libopencv-imgproc2.4,
+   libstdc++6,
+   libc6,
+   libgcc1")
 if(BUILD_EXE_VIEWER)
   set(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "libgoogle-glog0,
-     libboost-system1.54.0,
-     libboost-program-options1.54.0,
+    "${CPACK_DEBIAN_PACKAGE_DEPENDS},
      libvtk5.8,
      libpcl-visualization-1.7,
      libpcl-common-1.7,
-     libxmlrpc-c++8,
      libopencv-highgui2.4,
-     libopencv-core2.4,
-     libopencv-imgproc2.4,
-     libopencv-contrib2.4,
-     libstdc++6,
-     libc6,
-     libgcc1")
-else()
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "libgoogle-glog0,
-     libboost-system1.54.0,
-     libboost-program-options1.54.0,
-     libxmlrpc-c++8,
-     libopencv-core2.4,
-     libopencv-imgproc2.4,
-     libstdc++6,
-     libc6,
-     libgcc1")
+     libopencv-contrib2.4")
 endif(BUILD_EXE_VIEWER)
 include(CPack)
 
-set(DEB_FILE "${CPACK_PACKAGE_FILE_NAME}.deb")
+set(DEB_FILE
+    "${GIT_PROJECT_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
 
 if(CMAKE_CROSSCOMPILING)
   find_program(SCP_EXE scp)
   if(SCP_EXE)
     add_custom_target(deploy
-      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package --config Release
+      COMMAND ${CMAKE_COMMAND} --build ${CMAKE_BINARY_DIR} --target package --config ${CMAKE_BUILD_TYPE}
       COMMAND ${SCP_EXE} ${DEB_FILE} ${TARGET_USER}@${TARGET_IP}:${TARGET_DIR})
   else()
     message("Could not create deploy target: 'scp' not found.")

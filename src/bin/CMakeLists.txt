@@ -7,6 +7,9 @@
 ##
 ################################################
 
+# Empty list
+set(O3D3XX_EXE_TARGETS)
+
 #-----------------------------------------------
 # o3d3xx-version
 #-----------------------------------------------
@@ -20,6 +23,8 @@ if(BUILD_EXE_VERSION)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-version DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-version)
 else()
   message(STATUS "Skipping o3d3xx-version")
 endif(BUILD_EXE_VERSION)
@@ -37,6 +42,8 @@ if(BUILD_EXE_RESET)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-reset DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-reset)
 else()
   message(STATUS "Skipping o3d3xx-reset")
 endif(BUILD_EXE_RESET)
@@ -54,6 +61,8 @@ if(BUILD_EXE_LS)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-ls DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-ls)
 else()
   message(STATUS "Skipping o3d3xx-ls")
 endif(BUILD_EXE_LS)
@@ -84,6 +93,8 @@ if(BUILD_EXE_VIEWER)
     )
 
   install(TARGETS o3d3xx-viewer DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-viewer)
 else()
   message(STATUS "Skipping o3d3xx-viewer")
 endif(BUILD_EXE_VIEWER)
@@ -101,6 +112,8 @@ if(BUILD_EXE_DUMP)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-dump DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-dump)
 else()
   message(STATUS "Skipping o3d3xx-dump")
 endif(BUILD_EXE_DUMP)
@@ -118,6 +131,8 @@ if(BUILD_EXE_CONFIG)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-config DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-config)
 else()
   message(STATUS "Skipping o3d3xx-config")
 endif(BUILD_EXE_CONFIG)
@@ -135,6 +150,8 @@ if(BUILD_EXE_RM)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-rm DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-rm)
 else()
   message(STATUS "Skipping o3d3xx-rm")
 endif(BUILD_EXE_RM)
@@ -152,6 +169,8 @@ if(BUILD_EXE_REBOOT)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-reboot DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-reboot)
 else()
   message(STATUS "Skipping o3d3xx-reboot")
 endif(BUILD_EXE_REBOOT)
@@ -169,6 +188,8 @@ if(BUILD_EXE_HZ)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-hz DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-hz)
 else()
   message(STATUS "Skipping o3d3xx-hz")
 endif(BUILD_EXE_HZ)
@@ -186,6 +207,8 @@ if(BUILD_EXE_IMAGER_TYPES)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-imager-types DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-imager-types)
 else()
   message(STATUS "Skipping o3d3xx-imager-types")
 endif(BUILD_EXE_IMAGER_TYPES)
@@ -203,6 +226,8 @@ if(BUILD_EXE_IFM_IMPORT)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-ifm-import DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-ifm-import)
 else()
   message(STATUS "Skipping o3d3xx-ifm-import")
 endif(BUILD_EXE_IFM_IMPORT)
@@ -220,6 +245,18 @@ if(BUILD_EXE_IFM_EXPORT)
   endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-ifm-export DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-ifm-export)
 else()
   message(STATUS "Skipping o3d3xx-ifm-export")
 endif(BUILD_EXE_IFM_EXPORT)
+
+#-----------------------------------------------
+#-----------------------------------------------
+#-----------------------------------------------
+if(CMAKE_CROSSCOMPILING)
+  foreach(exe_target ${O3D3XX_EXE_TARGETS})
+    set_target_properties(${exe_target} PROPERTIES
+                          LINK_FLAGS "${CROSSTOOL_EXE_LINKER_FLAGS}")
+  endforeach(exe_target)
+endif(CMAKE_CROSSCOMPILING)

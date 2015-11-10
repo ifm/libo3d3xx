@@ -8,14 +8,20 @@ target has been added that assumes, you are deploying the deb files created
 from the `package` target and that you will deploy via `scp`. These deployment
 assumptions will likely need to be revisited to make them more generally
 useful, however, in the near-term, lets consider them a proof-of-concept for
-automating the deployment of cross-compiled code.
+automating the deployment of cross-compiled code. The following cmake
+variables can be set on the command line to control how the deploy occurs:
 
-### Device config default values changed
+* TARGET\_IP    (ip address of your embedded system)
+* TARGET\_USER  (user to login to the embedded system as)
+* TARGET\_DIR   (directory on the embedded system to copy the debs to)
 
-Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
-default values from 15 to 5. For reasoning, please see:
+Currently cross compiling makes the assumption you are deploying to an embedded
+system (i.e., not cross compiling for Windows or Mac) and to that end, turns
+off the building of `o3d3xx-viewer`.
 
-https://github.com/lovepark/libo3d3xx/issues/20
+It should also be noted that when cross compiling, unit tests are still built
+(by default) but you cannot run `make check`. You can deploy the code and run
+the unit tests as an executeable on the embedded system.
 
 ### Refactored and Modularized Build Process
 
@@ -41,9 +47,21 @@ Options to conditionally build parts of the code have been added:
 These are all turned ON by default but can be switched off on the cmake command
 line. For example: `$ cmake -DBUILD_TESTS=OFF ..`
 
+Static libraries (in addition to the shared libraries) are being built by
+default. Provisions have been made to compile the library code once then link
+twice (shared and static).
+
 See also:
 
 * https://github.com/lovepark/libo3d3xx/issues/13
+
+### Device config default values changed
+
+Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
+default values from 15 to 5. For reasoning, please see:
+
+https://github.com/lovepark/libo3d3xx/issues/20
+
 
 ## Changes between libo3d3xx 0.1.10 and 0.1.11
 

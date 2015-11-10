@@ -1,0 +1,8 @@
+--- libpthread.so.BAK	2015-11-09 13:43:40.073909127 -0500
++++ libpthread.so	2015-11-09 13:44:32.022335036 -0500
+@@ -2,4 +2,4 @@
+    Use the shared library, but some functions are only in
+    the static library, so try that secondarily.  */
+ OUTPUT_FORMAT(elf32-littlearm)
+-GROUP ( /lib/arm-linux-gnueabihf/libpthread.so.0 /usr/lib/arm-linux-gnueabihf/libpthread_nonshared.a )
++GROUP ( libpthread.so.0 libpthread_nonshared.a )

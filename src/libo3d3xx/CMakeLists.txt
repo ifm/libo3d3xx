@@ -31,16 +31,17 @@ set_property(TARGET o3d3xx PROPERTY POSITION_INDEPENDENT_CODE 1)
 ################################################
 if(BUILD_SHARED_LIBS)
   add_library(o3d3xx_shared SHARED $<TARGET_OBJECTS:o3d3xx>)
-  target_link_libraries(
-    o3d3xx_shared
-    ${LIB_glog}
-    ${LIB_boost_system}
-    ${LIB_boost_program_options}
-    ${LIB_xmlrpcxx}
-    ${LIB_xmlrpc_clientxx}
-    ${LIB_opencv_core}
-    ${LIB_opencv_imgproc}
-    )
+    target_link_libraries(
+      o3d3xx_shared
+      ${LIB_glog}
+      ${LIB_boost_system}
+      ${LIB_boost_program_options}
+      ${LIB_xmlrpcxx}
+      ${LIB_xmlrpc_clientxx}
+      ${LIB_opencv_core}
+      ${LIB_opencv_imgproc}
+      ${CMAKE_THREAD_LIBS_INIT}
+      )
 
   set_target_properties(o3d3xx_shared PROPERTIES
     VERSION
