@@ -257,6 +257,7 @@ endif(BUILD_EXE_IFM_EXPORT)
 if(CMAKE_CROSSCOMPILING)
   foreach(exe_target ${O3D3XX_EXE_TARGETS})
     set_target_properties(${exe_target} PROPERTIES
-                          LINK_FLAGS "${CROSSTOOL_EXE_LINKER_FLAGS}")
+                          LINK_FLAGS "${CROSSTOOL_EXE_LINKER_FLAGS}"
+                          COMPILE_FLAGS "${CROSSTOOL_COMPILE_FLAGS}")
   endforeach(exe_target)
 endif(CMAKE_CROSSCOMPILING)

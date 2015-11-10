@@ -16,12 +16,14 @@ variables can be set on the command line to control how the deploy occurs:
 * TARGET\_DIR   (directory on the embedded system to copy the debs to)
 
 Currently cross compiling makes the assumption you are deploying to an embedded
-system (i.e., not cross compiling for Windows or Mac) and to that end, turns
-off the building of `o3d3xx-viewer`.
+Linux system (i.e., not cross compiling for Windows or Mac) and to that end,
+turns off the building of `o3d3xx-viewer`.
 
 It should also be noted that when cross compiling, unit tests are still built
 (by default) but you cannot run `make check`. You can deploy the code and run
 the unit tests as an executeable on the embedded system.
+
+Initial cross-compilers tested include Linaro and ELDK from Denx.
 
 ### Refactored and Modularized Build Process
 

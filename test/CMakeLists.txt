@@ -11,6 +11,7 @@ endif(BUILD_SHARED_LIBS)
 
 if(CMAKE_CROSSCOMPILING)
   set_target_properties(o3d3xx-tests PROPERTIES
+                        COMPILE_FLAGS "${CROSSTOOL_COMPILE_FLAGS}"
                         LINK_FLAGS "${CROSSTOOL_EXE_LINKER_FLAGS}")
 endif(CMAKE_CROSSCOMPILING)
 

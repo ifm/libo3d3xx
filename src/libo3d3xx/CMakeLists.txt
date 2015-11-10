@@ -13,6 +13,10 @@ file(GLOB O3D3XX_SOURCES *.cpp)
 ################################################
 add_library(o3d3xx OBJECT ${O3D3XX_SOURCES})
 set_property(TARGET o3d3xx PROPERTY POSITION_INDEPENDENT_CODE 1)
+if(CMAKE_CROSSCOMPILING)
+  set_target_properties(o3d3xx PROPERTIES
+                        COMPILE_FLAGS "${CROSSTOOL_COMPILE_FLAGS}")
+endif(CMAKE_CROSSCOMPILING)
 
 ################################################
 ##
