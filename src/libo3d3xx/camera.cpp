@@ -412,15 +412,41 @@ o3d3xx::Camera::GetNetParameters()
 void
 o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config)
 {
+  bool has_changed = false;
+  this->SetNetConfig(config, &has_changed);
+}
+
+void
+o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config,
+                             bool* has_changed)
+{
+  *has_changed = false;
+
   // only set mutable parameters and only if they are different than current
   // settings.
   o3d3xx::NetConfig::Ptr net = this->GetNetConfig();
+
+  if ((net->UseDHCP() == true) &&
+      (config->UseDHCP() == true))
+    {
+      // We short circuit everything here b/c if the camera
+      // is already set to DHCP and the request is to set it
+      // to DHCP, regardless of what the other network params
+      // are set to, the camera is going to come up as DHCP.
+      //
+      // This can be useful to avoid an unnecessary reboot of the camera,
+      // for example, in `FromJSON(...)'
+      //
+      return;
+    }
 
   if (net->StaticIPv4Address() != config->StaticIPv4Address())
     {
       this->_XCallNet("setParameter",
                       "StaticIPv4Address",
                       config->StaticIPv4Address().c_str());
+
+      *has_changed = true;
     }
 
   if (net->StaticIPv4Gateway() != config->StaticIPv4Gateway())
@@ -428,6 +454,8 @@ o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config)
       this->_XCallNet("setParameter",
                       "StaticIPv4Gateway",
                       config->StaticIPv4Gateway().c_str());
+
+      *has_changed = true;
     }
 
   if (net->StaticIPv4SubNetMask() != config->StaticIPv4SubNetMask())
@@ -435,12 +463,16 @@ o3d3xx::Camera::SetNetConfig(const o3d3xx::NetConfig* config)
       this->_XCallNet("setParameter",
                       "StaticIPv4SubNetMask",
                       config->StaticIPv4SubNetMask().c_str());
+
+      *has_changed = true;
     }
 
   if (net->UseDHCP() != config->UseDHCP())
     {
       this->_XCallNet("setParameter",
                       "UseDHCP", config->UseDHCP() ? "true" : "false");
+
+      *has_changed = true;
     }
 }
 
@@ -1432,8 +1464,12 @@ o3d3xx::Camera::FromJSON(const std::string& json)
           boost::property_tree::write_json(net_buf, net_pt);
           o3d3xx::NetConfig::Ptr net =
             o3d3xx::NetConfig::FromJSON(net_buf.str());
-          this->SetNetConfig(net.get());
-          this->SaveNet();
+          bool has_changed = false;
+          this->SetNetConfig(net.get(), &has_changed);
+          if (has_changed)
+            {
+              this->SaveNet();
+            }
         }
       catch (const boost::property_tree::ptree_bad_path& ex)
         {

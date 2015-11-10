@@ -660,6 +660,22 @@ namespace o3d3xx
     void SetNetConfig(const o3d3xx::NetConfig* config);
 
     /**
+     * Overloaded version of SetNetConfig that allows for providing
+     * an indicator back to the caller to determine if something in
+     * the network configuration has changed.
+     *
+     * @param[in] config A `NetConfig' pointer whose settings should be
+     * sent to the hardware.
+     *
+     * @param[out] A pointer to bool that will be filled in by
+     *             this function. It will be filled with `true'
+     *             if something has changed, `false' otherwise.
+     *
+     * @throw o3d3xx::error_t
+     */
+    void SetNetConfig(const o3d3xx::NetConfig* config, bool* has_changed);
+
+    /**
      * Persists any network settings that were set on the hardware.
      *
      * @throw o3d3xx::error_t

@@ -62,8 +62,14 @@ See also:
 Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
 default values from 15 to 5. For reasoning, please see:
 
-https://github.com/lovepark/libo3d3xx/issues/20
+* https://github.com/lovepark/libo3d3xx/issues/20
 
+### Setting NetConfig tries to avoid unnecessary reboots
+
+The handling of setting the camera's network configuration has been modified to
+try to avoid reboots where possible. For example, please see:
+
+* https://github.com/lovepark/libo3d3xx/issues/23
 
 ## Changes between libo3d3xx 0.1.10 and 0.1.11
 

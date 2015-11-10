@@ -357,6 +357,18 @@ TEST(Camera_Tests, GetNetParameters)
   EXPECT_NO_THROW(params.at("UseDHCP"));
 }
 
+TEST(Camera_Tests, NetConfig)
+{
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+  cam->RequestSession();
+  cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+  o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
+  bool has_changed = true;
+  cam->SetNetConfig(net.get(), &has_changed);
+  EXPECT_FALSE(has_changed);
+}
+
 // TEST(Camera_Tests, NetConfig)
 // {
 //   o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
