@@ -38,9 +38,16 @@ namespace o3d3xx
      * from a JSON string.
      *
      * @param[in] json A string of json encoding the filter config parameters.
+     *
+     * @param[in] filt_ptr A shared pointer to a TemporalFilterConfig to
+     *                     bootstrap the default values from.
+     *
+     * @return A shared pointer to a TemporalFilterConfig reflecting the passed
+     *         in JSON encoding.
      */
     static o3d3xx::TemporalFilterConfig::Ptr
-    FromJSON(const std::string& json);
+    FromJSON(const std::string& json,
+             o3d3xx::TemporalFilterConfig::Ptr filt_ptr = nullptr);
 
     /**
      * Serializes the current state of the filter confgi to JSON

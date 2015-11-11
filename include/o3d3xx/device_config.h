@@ -49,8 +49,16 @@ namespace o3d3xx
      * string.
      *
      * @param[in] json A string of JSON encoding device config parameters.
+     *
+     * @param[in] devp A shared pointer to a DeviceConfig to boot strap the
+     *                 default values from.
+     *
+     * @return A shared pointer to a device config instance based on
+     *         the passed in JSON encoding.
      */
-    static o3d3xx::DeviceConfig::Ptr FromJSON(const std::string& json);
+    static o3d3xx::DeviceConfig::Ptr
+    FromJSON(const std::string& json,
+             o3d3xx::DeviceConfig::Ptr devp = nullptr);
 
     /**
      * Initializes a device configuration utilizing default values (per the

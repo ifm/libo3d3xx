@@ -480,10 +480,11 @@ o3d3xx::DeviceConfig::ToJSON() const
 }
 
 o3d3xx::DeviceConfig::Ptr
-o3d3xx::DeviceConfig::FromJSON(const std::string& json)
+o3d3xx::DeviceConfig::FromJSON(const std::string& json,
+                               o3d3xx::DeviceConfig::Ptr devp)
 {
   o3d3xx::DeviceConfig::Ptr dev =
-    o3d3xx::DeviceConfig::Ptr(new o3d3xx::DeviceConfig());
+    devp ? devp : std::make_shared<o3d3xx::DeviceConfig>();
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);

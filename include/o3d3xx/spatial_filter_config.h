@@ -43,8 +43,16 @@ namespace o3d3xx
      * from a JSON string.
      *
      * @param[in] json A string of json encoding the filter config parameters.
+     *
+     * @param[in] filt_ptr A shared pointer to a SpatialFilterConfig to
+     *                     bootstrap the default values from.
+     *
+     * @return A shared pointer to a SpatialFilterConfig reflecting the
+     *         passed in JSON encoding.
      */
-    static o3d3xx::SpatialFilterConfig::Ptr FromJSON(const std::string& json);
+    static o3d3xx::SpatialFilterConfig::Ptr
+    FromJSON(const std::string& json,
+             o3d3xx::SpatialFilterConfig::Ptr filt_ptr = nullptr);
 
     /**
      * Serializes the current state of the filter config to JSON

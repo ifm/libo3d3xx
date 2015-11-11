@@ -48,8 +48,16 @@ namespace o3d3xx
      * string.
      *
      * @param[in] json A string of JSON encoding network config parameters.
+     *
+     * @param[in] net_ptr A NetConfig shared pointer to bootstrap the default
+     *                    values from.
+     *
+     * @return A NetConfig shared pointer holding the values encoded by the
+     *         JSON.
      */
-    static o3d3xx::NetConfig::Ptr FromJSON(const std::string& json);
+    static o3d3xx::NetConfig::Ptr
+    FromJSON(const std::string& json,
+             o3d3xx::NetConfig::Ptr net_ptr = nullptr);
 
     /**
      * Initializes a network configuration utilizing default values (per the

@@ -158,10 +158,11 @@ o3d3xx::NetConfig::ToJSON() const
 }
 
 o3d3xx::NetConfig::Ptr
-o3d3xx::NetConfig::FromJSON(const std::string& json)
+o3d3xx::NetConfig::FromJSON(const std::string& json,
+                            o3d3xx::NetConfig::Ptr net_ptr)
 {
   o3d3xx::NetConfig::Ptr net =
-    o3d3xx::NetConfig::Ptr(new o3d3xx::NetConfig());
+    net_ptr ? net_ptr : std::make_shared<o3d3xx::NetConfig>();
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);

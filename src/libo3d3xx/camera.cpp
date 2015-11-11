@@ -1310,7 +1310,8 @@ o3d3xx::Camera::FromJSON(const std::string& json)
           std::ostringstream dev_buf;
           boost::property_tree::write_json(dev_buf, dev_pt);
           o3d3xx::DeviceConfig::Ptr dev =
-            o3d3xx::DeviceConfig::FromJSON(dev_buf.str());
+            o3d3xx::DeviceConfig::FromJSON(dev_buf.str(),
+                                           this->GetDeviceConfig());
           this->SetDeviceConfig(dev.get());
           this->SaveDevice();
 
@@ -1347,8 +1348,6 @@ o3d3xx::Camera::FromJSON(const std::string& json)
               boost::property_tree::ptree app_pt = kv.second;
               std::ostringstream app_buff;
               boost::property_tree::write_json(app_buff, app_pt);
-              o3d3xx::AppConfig::Ptr app =
-                o3d3xx::AppConfig::FromJSON(app_buff.str());
 
               int index = -1;
 
@@ -1367,6 +1366,10 @@ o3d3xx::Camera::FromJSON(const std::string& json)
                 }
 
               this->EditApplication(index);
+              o3d3xx::AppConfig::Ptr app =
+                o3d3xx::AppConfig::FromJSON(app_buff.str(),
+                                            this->GetAppConfig());
+
               this->SetAppConfig(app.get());
               this->SaveApp();
 
@@ -1377,7 +1380,8 @@ o3d3xx::Camera::FromJSON(const std::string& json)
                   std::ostringstream im_buff;
                   boost::property_tree::write_json(im_buff, im_pt);
                   o3d3xx::ImagerConfig::Ptr im =
-                    o3d3xx::ImagerConfig::FromJSON(im_buff.str());
+                    o3d3xx::ImagerConfig::FromJSON(im_buff.str(),
+                                                   this->GetImagerConfig());
 
                   o3d3xx::ImagerConfig::Ptr current_im =
                     this->GetImagerConfig();
@@ -1397,7 +1401,8 @@ o3d3xx::Camera::FromJSON(const std::string& json)
                       std::ostringstream sf_buff;
                       boost::property_tree::write_json(sf_buff, sf_pt);
                       o3d3xx::SpatialFilterConfig::Ptr sf_filt =
-                        o3d3xx::SpatialFilterConfig::FromJSON(sf_buff.str());
+                        o3d3xx::SpatialFilterConfig::FromJSON(
+                          sf_buff.str(), this->GetSpatialFilterConfig());
 
                       this->SetSpatialFilterConfig(sf_filt.get());
                     }
@@ -1416,7 +1421,8 @@ o3d3xx::Camera::FromJSON(const std::string& json)
                       std::ostringstream tf_buff;
                       boost::property_tree::write_json(tf_buff, tf_pt);
                       o3d3xx::TemporalFilterConfig::Ptr tf_filt =
-                        o3d3xx::TemporalFilterConfig::FromJSON(tf_buff.str());
+                        o3d3xx::TemporalFilterConfig::FromJSON(
+                          tf_buff.str(), this->GetTemporalFilterConfig());
 
                       this->SetTemporalFilterConfig(tf_filt.get());
                     }
@@ -1463,7 +1469,7 @@ o3d3xx::Camera::FromJSON(const std::string& json)
           std::ostringstream net_buf;
           boost::property_tree::write_json(net_buf, net_pt);
           o3d3xx::NetConfig::Ptr net =
-            o3d3xx::NetConfig::FromJSON(net_buf.str());
+            o3d3xx::NetConfig::FromJSON(net_buf.str(), this->GetNetConfig());
           bool has_changed = false;
           this->SetNetConfig(net.get(), &has_changed);
           if (has_changed)

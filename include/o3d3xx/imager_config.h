@@ -48,8 +48,16 @@ namespace o3d3xx
      * string.
      *
      * @param[in] json A string of JSON encoding imager config parameters.
+     *
+     * @param[in] im_ptr A shared pointer to an ImagerConfig to bootstrap
+     *                   the default values from.
+     *
+     * @return A shared pointer to an ImagerConfig instance based on
+     *         the passed in JSON encoding.
      */
-    static o3d3xx::ImagerConfig::Ptr FromJSON(const std::string& json);
+    static o3d3xx::ImagerConfig::Ptr
+    FromJSON(const std::string& json,
+             o3d3xx::ImagerConfig::Ptr im_ptr = nullptr);
 
     /**
      * Initializes an imager configuration utilizing default values (per the

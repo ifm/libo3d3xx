@@ -214,10 +214,11 @@ o3d3xx::AppConfig::ToJSON() const
 }
 
 o3d3xx::AppConfig::Ptr
-o3d3xx::AppConfig::FromJSON(const std::string& json)
+o3d3xx::AppConfig::FromJSON(const std::string& json,
+                            o3d3xx::AppConfig::Ptr app_ptr)
 {
   o3d3xx::AppConfig::Ptr app =
-    o3d3xx::AppConfig::Ptr(new o3d3xx::AppConfig());
+    app_ptr ? app_ptr : std::make_shared<o3d3xx::AppConfig>();
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);

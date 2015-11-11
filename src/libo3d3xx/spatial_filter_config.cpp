@@ -106,33 +106,55 @@ o3d3xx::SpatialFilterConfig::MaskSizeStr() const
 }
 
 o3d3xx::SpatialFilterConfig::Ptr
-o3d3xx::SpatialFilterConfig::FromJSON(const std::string& json)
+o3d3xx::SpatialFilterConfig::FromJSON(
+  const std::string& json, o3d3xx::SpatialFilterConfig::Ptr filt_ptr)
 {
-  o3d3xx::SpatialFilterConfig::Ptr filt;
+  // NOTE: `filt_ptr' may be `nullptr'
+  o3d3xx::SpatialFilterConfig::Ptr filt = filt_ptr;
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);
   boost::property_tree::read_json(is, pt);
 
-  int type = pt.get<int>("Type");
-
-  switch (type)
+  int type;
+  try
     {
-    case static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER):
-      filt = std::make_shared<o3d3xx::SpatialMedianFilterConfig>();
-      break;
+      type = pt.get<int>("Type");
+      if (! (filt && (type == filt->Type())))
+        {
+          switch (type)
+            {
+            case static_cast<int>(
+              o3d3xx::Camera::spatial_filter::MEDIAN_FILTER):
+                filt = std::make_shared<o3d3xx::SpatialMedianFilterConfig>();
+                break;
 
-    case static_cast<int>(o3d3xx::Camera::spatial_filter::MEAN_FILTER):
-      filt = std::make_shared<o3d3xx::SpatialMeanFilterConfig>();
-      break;
+            case static_cast<int>(
+              o3d3xx::Camera::spatial_filter::MEAN_FILTER):
+                filt = std::make_shared<o3d3xx::SpatialMeanFilterConfig>();
+                break;
 
-    case static_cast<int>(o3d3xx::Camera::spatial_filter::BILATERAL_FILTER):
-      filt = std::make_shared<o3d3xx::SpatialBilateralFilterConfig>();
-      break;
+            case static_cast<int>(
+              o3d3xx::Camera::spatial_filter::BILATERAL_FILTER):
+                filt = std::make_shared<o3d3xx::SpatialBilateralFilterConfig>();
+                break;
 
-    default:
-      filt = std::make_shared<o3d3xx::SpatialFilterConfig>();
-      break;
+            default:
+              filt = std::make_shared<o3d3xx::SpatialFilterConfig>();
+              break;
+            }
+        }
+    }
+  catch (const boost::property_tree::ptree_bad_path& path_ex)
+    {
+      if (filt)
+        {
+          type = filt->Type();
+        }
+      else
+        {
+          throw;
+        }
     }
 
   //! @todo May want to use the more dynamic "mutator_map" approach

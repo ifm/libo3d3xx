@@ -57,6 +57,18 @@ See also:
 
 * https://github.com/lovepark/libo3d3xx/issues/13
 
+### FromJSON()
+
+The `o3d3xx::Camera::FromJSON(...)` function is fundamental to how tools like
+`o3d3xx-config` work. This function, including the ones on which it depends
+(namely the `FromJSON()` calls on the `XXXConfig` value objects), has been
+overhauled in this release. The idea was to allow for better "one-liners"
+(i.e., partial JSON configurations) to be specified on the command line.
+
+See also:
+
+* https://github.com/lovepark/libo3d3xx/issues/22#issuecomment-155788906
+
 ### Device config default values changed
 
 Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer

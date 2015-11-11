@@ -531,9 +531,11 @@ o3d3xx::ImagerConfig::ToJSON() const
 }
 
 o3d3xx::ImagerConfig::Ptr
-o3d3xx::ImagerConfig::FromJSON(const std::string& json)
+o3d3xx::ImagerConfig::FromJSON(const std::string& json,
+                               o3d3xx::ImagerConfig::Ptr im_ptr)
 {
-  o3d3xx::ImagerConfig::Ptr im = std::make_shared<o3d3xx::ImagerConfig>();
+  o3d3xx::ImagerConfig::Ptr im =
+    im_ptr ? im_ptr : std::make_shared<o3d3xx::ImagerConfig>();
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);

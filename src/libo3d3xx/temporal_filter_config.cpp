@@ -79,32 +79,52 @@ o3d3xx::TemporalFilterConfig::SetNumberOfImages(int n_imgs)
 }
 
 o3d3xx::TemporalFilterConfig::Ptr
-o3d3xx::TemporalFilterConfig::FromJSON(const std::string& json)
+o3d3xx::TemporalFilterConfig::FromJSON(
+  const std::string& json, o3d3xx::TemporalFilterConfig::Ptr filt_ptr)
 {
-  o3d3xx::TemporalFilterConfig::Ptr filt;
+  // NOTE: `filt_ptr' may be `nullptr'
+  o3d3xx::TemporalFilterConfig::Ptr filt = filt_ptr;
 
   boost::property_tree::ptree pt;
   std::istringstream is(json);
   boost::property_tree::read_json(is, pt);
 
-  int type = pt.get<int>("Type");
-
-  switch (type)
+  int type;
+  try
     {
-    case static_cast<int>(
-      o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
-      filt = std::make_shared<o3d3xx::TemporalMeanFilterConfig>();
-      break;
+      type = pt.get<int>("Type");
+      if (! (filt && (type == filt->Type())))
+        {
+          switch (type)
+            {
+            case static_cast<int>(
+             o3d3xx::Camera::temporal_filter::TEMPORAL_MEAN_FILTER):
+              filt = std::make_shared<o3d3xx::TemporalMeanFilterConfig>();
+              break;
 
-    case static_cast<int>(
-      o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
-      filt =
-        std::make_shared<o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
-      break;
+            case static_cast<int>(
+             o3d3xx::Camera::temporal_filter::ADAPTIVE_EXPONENTIAL_FILTER):
+              filt =
+                std::make_shared<
+                  o3d3xx::TemporalAdaptiveExponentialFilterConfig>();
+              break;
 
-    default:
-      filt = std::make_shared<o3d3xx::TemporalFilterConfig>();
-      break;
+            default:
+              filt = std::make_shared<o3d3xx::TemporalFilterConfig>();
+              break;
+            }
+        }
+    }
+  catch (const boost::property_tree::ptree_bad_path& path_ex)
+    {
+      if (filt)
+        {
+          type = filt->Type();
+        }
+      else
+        {
+          throw;
+        }
     }
 
   if (type ==

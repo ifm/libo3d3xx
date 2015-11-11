@@ -49,8 +49,16 @@ namespace o3d3xx
      *
      * @param[in] json A string of JSON encoding application config
      * parameters.
+     *
+     * @parma[in] app_ptr A shared pointer to an AppConfig to bootstrap
+     *                    the default values from.
+     *
+     * @return A shared pointer to an AppConfig instance based on the
+     *         JSON encoding.
      */
-    static o3d3xx::AppConfig::Ptr FromJSON(const std::string& json);
+    static o3d3xx::AppConfig::Ptr
+    FromJSON(const std::string& json,
+             o3d3xx::AppConfig::Ptr app_ptr = nullptr);
 
     /**
      * Initializes an application configuration utilizing default values (per
