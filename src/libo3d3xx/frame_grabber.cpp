@@ -37,6 +37,7 @@ const std::string o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA =
   \"elements\": [ { \"type\": \"string\", \"value\": \"star\", \"id\": \
   \"start_string\" }, { \"type\": \"blob\", \"id\": \
   \"normalized_amplitude_image\" }, { \"type\": \"blob\", \"id\": \
+  \"amplitude_image\" }, { \"type\": \"blob\", \"id\": \
   \"distance_image\" }, { \"type\": \"blob\", \"id\": \"x_image\" }, { \
   \"type\": \"blob\", \"id\": \"y_image\" }, { \"type\": \"blob\", \"id\": \
   \"z_image\" }, { \"type\": \"blob\", \"id\": \"confidence_image\" }, { \

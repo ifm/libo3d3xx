@@ -175,6 +175,40 @@ TEST(ImageBuffers_Tests, AmplitudeImage)
   EXPECT_EQ(aimg.size().width, aimg2.size().width);
 }
 
+TEST(ImageBuffers_Tests, RawAmplitudeImage)
+{
+  o3d3xx::Camera::Ptr cam =
+    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+
+  o3d3xx::FrameGrabber::Ptr fg =
+    o3d3xx::FrameGrabber::Ptr(new o3d3xx::FrameGrabber(cam));
+
+  o3d3xx::ImageBuffer::Ptr img =
+    o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+
+  cv::Mat aimg = img->RawAmplitudeImage();
+  cv::Mat aimg2 = img->RawAmplitudeImage();
+  EXPECT_TRUE(imgs_eq(aimg, aimg2));
+
+  {
+    o3d3xx::ImageBuffer::Ptr img2 =
+      o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+
+    EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
+
+    aimg2 = img2->RawAmplitudeImage();
+    EXPECT_FALSE(imgs_eq(aimg, aimg2));
+  }
+
+  // make sure aimg2 is still valid even though img2 is now out-of-scope
+
+  EXPECT_FALSE(imgs_eq(aimg, aimg2));
+  EXPECT_EQ(aimg.size().height, aimg2.size().height);
+  EXPECT_EQ(aimg.size().width, aimg2.size().width);
+}
+
 TEST(ImageBuffers_Tests, ConfidenceImage)
 {
   o3d3xx::Camera::Ptr cam =

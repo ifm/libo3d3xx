@@ -109,11 +109,30 @@ namespace o3d3xx
      * Returns the wrapped amplitude image. This does NOT make a copy of the
      * data.
      *
+     * It should be noted that this is the normalized (wrt, exposure time)
+     * amplitude image.
+     *
      * NOTE: Since the amplitude image is a cv::Mat the correct thing to do
      * here is to return by value as cv::Mat does it's own memory management /
      * reference counting.
      */
     cv::Mat AmplitudeImage();
+
+    /**
+     * Returns the wrapped (raw) amplitude image. This does NOT make a copy of
+     * the data.
+     *
+     * It should be noted that this is the raw amplitude image. Per the IFM
+     * docs: "In double exposure mode, the lack of normalization my lead
+     * (depending on the chosen exposure times) to inhomogeneous amplitude
+     * impression, if a certain pixel is taken from the short exposure time and
+     * some of its neighbors are not."
+     *
+     * NOTE: Since the amplitude image is a cv::Mat the correct thing to do
+     * here is to return by value as cv::Mat does it's own memory management /
+     * reference counting.
+     */
+    cv::Mat RawAmplitudeImage();
 
     /**
      * Returns the wrapped confidence image. This does NOT make a copy of the
@@ -209,9 +228,14 @@ namespace o3d3xx
     cv::Mat depth_;
 
     /**
-     * OpenCV image encoding of the amplitude data
+     * OpenCV image encoding of the normalized amplitude data
      */
     cv::Mat amp_;
+
+    /**
+     * OpenCV image encoding of the raw amplitude data
+     */
+    cv::Mat raw_amp_;
 
     /**
      * OpenCV image encoding of the confidence data

@@ -47,9 +47,8 @@ The second window displays four images:
 The top-left image is a rendering of the radial depth map. The top-right image
 is an interpretation of the confidence image. In this binary image
 rendering, "good" pixels are shown in green and "bad" pixels are shown in
-yellow. The bottom-left image shows the amplitude image and the bottom-right is
-a histogram showing the gray value distribution of the amplitude image -- a
-nice check to quickly visualize the current configuration's dynamic range.
+yellow. The bottom-left image shows the normalized amplitude image and the
+bottom-right is the raw amplitude image.
 
 
 o3d3xx-config

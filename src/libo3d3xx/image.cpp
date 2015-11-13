@@ -199,6 +199,13 @@ o3d3xx::ImageBuffer::AmplitudeImage()
 }
 
 cv::Mat
+o3d3xx::ImageBuffer::RawAmplitudeImage()
+{
+  this->Organize();
+  return this->raw_amp_;
+}
+
+cv::Mat
 o3d3xx::ImageBuffer::ConfidenceImage()
 {
   this->Organize();
@@ -243,6 +250,8 @@ o3d3xx::ImageBuffer::Organize()
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::CARTESIAN_Z);
   std::size_t aidx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::AMPLITUDE);
+  std::size_t raw_aidx =
+    o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::RAW_AMPLITUDE);
   std::size_t cidx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::CONFIDENCE);
   std::size_t didx =
@@ -252,6 +261,7 @@ o3d3xx::ImageBuffer::Organize()
              << ", yidx=" << yidx
              << ", zidx=" << zidx
              << ", aidx=" << aidx
+             << ", raw_aidx=" << raw_aidx
              << ", cidx=" << cidx
              << ", didx=" << didx;
 
@@ -262,6 +272,7 @@ o3d3xx::ImageBuffer::Organize()
   std::size_t yincr = 2; // int16_t
   std::size_t zincr = 2; // int16_t
   std::size_t aincr = 2; // uint16_t
+  std::size_t raw_aincr = 2; // uint16_t
   std::size_t cincr = 1; // uint8_t
   std::size_t dincr = 2; // uint16_t
 
@@ -287,6 +298,7 @@ o3d3xx::ImageBuffer::Organize()
   // the current array are different from the specified ones.
   this->depth_.create(height, width, CV_16UC1);
   this->amp_.create(height, width, CV_16UC1);
+  this->raw_amp_.create(height, width, CV_16UC1);
   this->conf_.create(height, width, CV_8UC1);
   this->xyz_image_.create(height, width, CV_16SC3);
 
@@ -296,6 +308,7 @@ o3d3xx::ImageBuffer::Organize()
 
   // move all index pointers to where the pixel data starts
   xidx += 36; yidx += 36; zidx += 36; aidx += 36; cidx += 36; didx += 36;
+  raw_aidx += 36;
 
   int col = 0;
   int row = -1;
@@ -303,6 +316,7 @@ o3d3xx::ImageBuffer::Organize()
 
   std::uint16_t* depth_row_ptr;
   std::uint16_t* amp_row_ptr;
+  std::uint16_t* raw_amp_row_ptr;
   std::uint8_t* conf_row_ptr;
   std::int16_t* xyz_row_ptr;
 
@@ -310,7 +324,8 @@ o3d3xx::ImageBuffer::Organize()
 
   for (std::size_t i = 0; i < num_points;
        ++i, xidx += xincr, yidx += yincr, zidx += zincr,
-         cidx += cincr, aidx += aincr, didx += dincr)
+         cidx += cincr, aidx += aincr, didx += dincr,
+         raw_aidx += raw_aincr)
     {
       o3d3xx::PointT& pt = this->cloud_->points[i];
 
@@ -321,6 +336,7 @@ o3d3xx::ImageBuffer::Organize()
           row += 1;
           depth_row_ptr = this->depth_.ptr<std::uint16_t>(row);
           amp_row_ptr = this->amp_.ptr<std::uint16_t>(row);
+          raw_amp_row_ptr = this->raw_amp_.ptr<std::uint16_t>(row);
           conf_row_ptr = this->conf_.ptr<std::uint8_t>(row);
           xyz_row_ptr = this->xyz_image_.ptr<std::int16_t>(row);
         }
@@ -331,7 +347,7 @@ o3d3xx::ImageBuffer::Organize()
           pt.x = pt.y = pt.z = bad_point;
           this->cloud_->is_dense = false;
 
-          depth_row_ptr[col] = amp_row_ptr[col] = bad_pixel;
+          depth_row_ptr[col] = bad_pixel;
 
           xyz_row_ptr[xyz_col] = bad_pixel_s;
           xyz_row_ptr[xyz_col + 1] = bad_pixel_s;
@@ -361,7 +377,10 @@ o3d3xx::ImageBuffer::Organize()
         }
 
       amp_row_ptr[col] =
-            o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+aidx);
+        o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+aidx);
+
+      raw_amp_row_ptr[col] =
+        o3d3xx::mkval<std::uint16_t>(this->bytes_.data()+raw_aidx);
 
       pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;
       pt.intensity = amp_row_ptr[col];

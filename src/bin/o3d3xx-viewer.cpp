@@ -96,7 +96,7 @@ public:
 
     // amplitude
     cv::Mat amp_colormap_img;
-    cv::Mat hist_img;
+    cv::Mat raw_amp_colormap_img;
 
     bool is_first = true;
     while (! pclvis_->wasStopped())
@@ -146,16 +146,18 @@ public:
         cv::applyColorMap(conf_colormap_img, conf_colormap_img,
                           cv::COLORMAP_SUMMER);
 
-        // amplitude and amplitude histogram images
+        // amplitude
         cv::minMaxIdx(buff->AmplitudeImage(), &min, &max);
         cv::convertScaleAbs(buff->AmplitudeImage(),
                             amp_colormap_img, 255 / max);
         cv::applyColorMap(amp_colormap_img, amp_colormap_img,
                           cv::COLORMAP_BONE);
 
-        hist_img = o3d3xx::hist1(buff->AmplitudeImage());
-        cv::minMaxIdx(hist_img, &min, &max);
-        cv::convertScaleAbs(hist_img, hist_img, 255 / max);
+        cv::minMaxIdx(buff->RawAmplitudeImage(), &min, &max);
+        cv::convertScaleAbs(buff->RawAmplitudeImage(),
+                            raw_amp_colormap_img, 255 / max);
+        cv::applyColorMap(raw_amp_colormap_img, raw_amp_colormap_img,
+                          cv::COLORMAP_BONE);
 
         // stich 2d images together and display
         display_img.create(depth_colormap_img.rows*2,
@@ -179,8 +181,9 @@ public:
 
         roi = cv::Rect(depth_colormap_img.cols,
                        depth_colormap_img.rows,
-                       hist_img.cols, hist_img.rows);
-        hist_img.copyTo(display_img(roi));
+                       raw_amp_colormap_img.cols,
+                       raw_amp_colormap_img.rows);
+        raw_amp_colormap_img.copyTo(display_img(roi));
 
         cv::imshow(this->description_, display_img);
 

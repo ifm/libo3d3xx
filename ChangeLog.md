@@ -57,6 +57,17 @@ See also:
 
 * https://github.com/lovepark/libo3d3xx/issues/13
 
+### Raw Amplitude
+
+The raw amplitude data is now available on the `ImageBuffer` object via the
+`RawAmplitudeImage()` accessor. This is the non-normalized (wrt the exposure
+time) amplitude data.
+
+### o3d3xx-viewer
+
+The bottom right image on the 2D image window has the raw amplitude image
+replace what was historically the amplitude histogram.
+
 ### FromJSON()
 
 The `o3d3xx::Camera::FromJSON(...)` function is fundamental to how tools like
