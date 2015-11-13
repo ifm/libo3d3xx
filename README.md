@@ -73,7 +73,7 @@ Software Compatibility Matrix
     <td>0.2.0</td>
     <td>1.1.288</td>
     <td>O3D303</td>
-    <td>UNSUPPORTED - WORK IN PROGRESS</td>
+    <td>Cross-compilation support and exposing raw amplitude image</td>
   </tr>
 </table>
 
