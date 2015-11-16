@@ -157,6 +157,7 @@ link above, download the file
 `gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.bz2`. Then:
 
     $ sudo cp gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.bz2 /opt/
+    $ cd /opt
     $ sudo tar xvjf gcc-linaro-arm-linux-gnueabihf-4.8-2014.04_linux.tar.bz2
 
 Thats it. Now you have your cross-compiler installed at:
