@@ -83,20 +83,6 @@ Standard Build Options
   </tr>
 
   <tr>
-       <td>BUILD_EXE_VIEWER</td>
-
-       <td>ON</td>
-
-       <td>
-       Builds the o3d3xx-viewer application. It should be noted that in the
-       case of cross-compiling, this option is implicitly turned OFF because
-       the current cross-compiliation support assumes the target is an embedded
-       linkux system as opposed to something like Mac OS X or Windows. This may
-       be changed in the future, however, for now, this is the behavior.
-       </td>
-  </tr>
-
-  <tr>
        <td>BUILD_EXE_VERSION</td>
 
        <td>ON</td>
