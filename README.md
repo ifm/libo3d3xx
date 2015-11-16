@@ -135,7 +135,23 @@ back up your camera prior to running the unit tests.
 
 There is also a `make package` target that will build the binary debian
 package. You can then install this with the usual Debian/Ubuntu `dpkg`
-tool.
+tool. From the beginning the process would look like:
+
+	$ mkdir build
+	$ cd build
+	$ cmake ..
+	$ make
+	$ make check
+    $ make package
+    $ sudo dpkg -i libo3d3xx_0.2.0_amd64.deb
+
+**NOTE:** The version string in the deb file may be different based upon the
+  version of libo3d3xx that you are building.
+
+Installing the debian file is the preferred method of installation, albeit
+assumes you are on a system such as Debian or Ubuntu. It is preferred because
+it has runtime dependency checking built in as well as a clean way to uninstall
+the software (i.e., `sudo dpkg --purge libo3d3xx`).
 
 After installation, you may find it useful to add the following to your
 `~/.bash_profile`:
@@ -146,6 +162,11 @@ After installation, you may find it useful to add the following to your
 
 This will modify your `LD_LIBRARY_PATH` and `PATH` to ensure the library is
 available to your environment.
+
+More detail on the build process can be found at:
+
+* [Custom builds](doc/custom_builds.md)
+* [Cross compiling](doc/cross_compiling.md)
 
 Running
 -------
