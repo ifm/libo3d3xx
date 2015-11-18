@@ -108,7 +108,10 @@ as active. The number in square brackets indicates the application index.
 o3d3xx-reboot
 -------------
 
-This program performs a soft boot of the camera.
+This program performs a soft boot of the camera. If you specify the `-r`
+flag, this will request the sensor to reboot into _recovery_ mode. This will
+allow you to do things like update the firmware (for example) by going to
+`http://<sensor_ip>:8080/`.
 
 
 o3d3xx-reset
