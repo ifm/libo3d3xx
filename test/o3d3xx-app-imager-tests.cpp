@@ -249,6 +249,12 @@ TEST_F(AppImagerTest, GetImagerParameters)
       std::unordered_map<std::string, std::string> params =
         cam_->GetImagerParameters();
 
+      // std::cout << type << ":" << std::endl;
+      // for (auto& kv : params)
+      //   {
+      //     std::cout << kv.first << " --> " << kv.second << std::endl;
+      //   }
+
       ASSERT_NO_THROW(params.at("Channel"));
       ASSERT_NO_THROW(params.at("ClippingBottom"));
       ASSERT_NO_THROW(params.at("ClippingLeft"));
@@ -256,6 +262,7 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("ClippingTop"));
       ASSERT_NO_THROW(params.at("ContinuousAutoExposure"));
       ASSERT_NO_THROW(params.at("EnableAmplitudeCorrection"));
+      ASSERT_NO_THROW(params.at("EnableFastFrequency"));
       ASSERT_NO_THROW(params.at("EnableFilterAmplitudeImage"));
       ASSERT_NO_THROW(params.at("EnableFilterDistanceImage"));
       ASSERT_NO_THROW(params.at("EnableRectificationAmplitudeImage"));
@@ -263,6 +270,7 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("ExposureTimeList"));
       ASSERT_NO_THROW(params.at("FrameRate"));
       ASSERT_NO_THROW(params.at("MinimumAmplitude"));
+      ASSERT_NO_THROW(params.at("Output100K"));
       ASSERT_NO_THROW(params.at("ReduceMotionArtifacts"));
       ASSERT_NO_THROW(params.at("SpatialFilterType"));
       ASSERT_NO_THROW(params.at("SymmetryThreshold"));
@@ -277,21 +285,21 @@ TEST_F(AppImagerTest, GetImagerParameters)
           ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 22);
+          ASSERT_EQ(params.size(), 24);
         }
       else if (boost::algorithm::ends_with(type, "low"))
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 23);
+          ASSERT_EQ(params.size(), 25);
         }
       else
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
 
-          ASSERT_EQ(params.size(), 24);
+          ASSERT_EQ(params.size(), 26);
         }
     }
 
@@ -374,6 +382,7 @@ TEST_F(AppImagerTest, ImagerConfig)
 
       ASSERT_NO_THROW(im->SetContinuousAutoExposure(true));
       ASSERT_NO_THROW(im->SetEnableAmplitudeCorrection(false));
+      ASSERT_NO_THROW(im->SetEnableFastFrequency(true));
       ASSERT_NO_THROW(im->SetEnableFilterAmplitudeImage(false));
       ASSERT_NO_THROW(im->SetEnableFilterDistanceImage(false));
       ASSERT_NO_THROW(im->SetEnableRectificationAmplitudeImage(true));
@@ -396,6 +405,7 @@ TEST_F(AppImagerTest, ImagerConfig)
 
       ASSERT_NO_THROW(im->SetFrameRate(10));
       ASSERT_NO_THROW(im->SetMinimumAmplitude(5));
+      ASSERT_NO_THROW(im->SetOutput100K(false));
       ASSERT_NO_THROW(im->SetReduceMotionArtifacts(true));
       ASSERT_NO_THROW(im->SetSpatialFilterType(
         static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER)));
@@ -495,6 +505,7 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
   ASSERT_EQ(im->ClippingTop(), im2->ClippingTop());
   ASSERT_EQ(im->ContinuousAutoExposure() , im2->ContinuousAutoExposure());
   ASSERT_EQ(im->EnableAmplitudeCorrection(), im2->EnableAmplitudeCorrection());
+  ASSERT_EQ(im->EnableFastFrequency(), im2->EnableFastFrequency());
   ASSERT_EQ(im->EnableFilterAmplitudeImage(),
             im2->EnableFilterAmplitudeImage());
   ASSERT_EQ(im->EnableFilterDistanceImage(), im2->EnableFilterDistanceImage());
@@ -521,6 +532,7 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
 
   ASSERT_EQ(im->FrameRate(), im2->FrameRate());
   ASSERT_EQ(im->MinimumAmplitude(), im2->MinimumAmplitude());
+  ASSERT_EQ(im->Output100K(), im2->Output100K());
   ASSERT_EQ(im->ReduceMotionArtifacts(), im2->ReduceMotionArtifacts());
   ASSERT_EQ(im->SpatialFilterType(), im2->SpatialFilterType());
   ASSERT_EQ(im->SymmetryThreshold(), im2->SymmetryThreshold());

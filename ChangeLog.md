@@ -1,3 +1,22 @@
+## Changes between libo3d3xx 0.2.0 and 0.3.0
+
+### ImagerConfig
+
+* Support for `EnableFastFrequency` and `Output100K` parameters
+
+### DeviceConfig
+
+* Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
+  default values from 5 to 15. This is an un-doing of the change from 0.1.11
+  to 0.2.0 (see below), but the new 1.2.x firmware restores these old defaults
+  so we will do the same here.
+
+### 100K Imager
+
+As of the 1.2.x firmware, 100K images are officially supported by IFM. So, we
+have implemented that support into this library and have removed the backdoor
+methods for doing it.
+
 ## Changes between libo3d3xx 0.1.11 and 0.2.0
 
 ### Added cross-compilation support

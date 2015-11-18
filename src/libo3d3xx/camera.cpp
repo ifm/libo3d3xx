@@ -839,6 +839,16 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
                          config->EnableAmplitudeCorrection());
     }
 
+  if (im->EnableFastFrequency() != config->EnableFastFrequency())
+    {
+      DLOG(INFO) << "Setting EnableFastFrequency="
+                 << config->EnableFastFrequency();
+
+      this->_XCallImager("setParameter",
+                         "EnableFastFrequency",
+                         config->EnableFastFrequency());
+    }
+
   if (im->EnableFilterAmplitudeImage() != config->EnableFilterAmplitudeImage())
     {
       DLOG(INFO) << "Setting EnableFilterAmplitudeImage="
@@ -934,6 +944,14 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 
       this->_XCallImager("setParameter",
                          "MinimumAmplitude", config->MinimumAmplitude());
+    }
+
+  if (im->Output100K() != config->Output100K())
+    {
+      DLOG(INFO) << "Setting Output100K=" << config->Output100K();
+
+      this->_XCallImager("setParameter",
+                         "Output100K", config->Output100K());
     }
 
   if (im->ReduceMotionArtifacts() != config->ReduceMotionArtifacts())

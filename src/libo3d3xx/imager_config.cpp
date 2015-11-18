@@ -36,6 +36,7 @@ o3d3xx::ImagerConfig::ImagerConfig()
     clipping_top_(0),
     continuous_auto_exposure_(false),
     enable_amplitude_correction_(true),
+    enable_fast_frequency_(false),
     enable_filter_amplitude_image_(true),
     enable_filter_distance_image_(true),
     enable_rectification_amplitude_image_(true),
@@ -45,6 +46,7 @@ o3d3xx::ImagerConfig::ImagerConfig()
     exposure_time_ratio_(40),
     frame_rate_(5.0),
     minimum_amplitude_(0),
+    output_100k_(false),
     reduce_motion_artifacts_(false),
     spatial_filter_type_(
       static_cast<int>(o3d3xx::Camera::spatial_filter::OFF)),
@@ -167,6 +169,18 @@ o3d3xx::ImagerConfig::SetEnableAmplitudeCorrection(bool enable) noexcept
 }
 
 bool
+o3d3xx::ImagerConfig::EnableFastFrequency() const noexcept
+{
+  return this->enable_fast_frequency_;
+}
+
+void
+o3d3xx::ImagerConfig::SetEnableFastFrequency(bool enable) noexcept
+{
+  this->enable_fast_frequency_ = enable;
+}
+
+bool
 o3d3xx::ImagerConfig::EnableFilterAmplitudeImage() const noexcept
 {
   return this->enable_filter_amplitude_image_;
@@ -274,6 +288,18 @@ void
 o3d3xx::ImagerConfig::SetMinimumAmplitude(int min) noexcept
 {
   this->minimum_amplitude_ = min;
+}
+
+bool
+o3d3xx::ImagerConfig::Output100K() const noexcept
+{
+  return this->output_100k_;
+}
+
+void
+o3d3xx::ImagerConfig::SetOutput100K(bool on) noexcept
+{
+  this->output_100k_ = on;
 }
 
 bool
@@ -407,6 +433,10 @@ o3d3xx::ImagerConfig::mutator_map =
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetEnableAmplitudeCorrection(o3d3xx::stob(val)); }},
 
+    {"EnableFastFrequency",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetEnableFastFrequency(o3d3xx::stob(val)); }},
+
     {"EnableFilterAmplitudeImage",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetEnableFilterAmplitudeImage(o3d3xx::stob(val)); }},
@@ -442,6 +472,10 @@ o3d3xx::ImagerConfig::mutator_map =
     {"MinimumAmplitude",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetMinimumAmplitude(std::stoi(val)); }},
+
+    {"Output100K",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetOutput100K(o3d3xx::stob(val)); }},
 
     {"ReduceMotionArtifacts",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
@@ -488,6 +522,7 @@ o3d3xx::ImagerConfig::ToJSON() const
   pt.put("ClippingTop", this->ClippingTop());
   pt.put("ContinuousAutoExposure", this->ContinuousAutoExposure());
   pt.put("EnableAmplitudeCorrection", this->EnableAmplitudeCorrection());
+  pt.put("EnableFastFrequency", this->EnableFastFrequency());
   pt.put("EnableFilterAmplitudeImage", this->EnableFilterAmplitudeImage());
   pt.put("EnableFilterDistanceImage", this->EnableFilterDistanceImage());
   pt.put("EnableRectificationAmplitudeImage",
@@ -513,6 +548,7 @@ o3d3xx::ImagerConfig::ToJSON() const
 
   pt.put("FrameRate", this->FrameRate());
   pt.put("MinimumAmplitude", this->MinimumAmplitude());
+  pt.put("Output100K", this->Output100K());
   pt.put("ReduceMotionArtifacts", this->ReduceMotionArtifacts());
   pt.put("SpatialFilterType", this->SpatialFilterType());
   pt.put("SymmetryThreshold", this->SymmetryThreshold());

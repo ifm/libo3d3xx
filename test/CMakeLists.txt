@@ -60,7 +60,4 @@ else()
                       WORLD_EXECUTE
                       WORLD_READ)
 
-  install(DIRECTORY ${O3D3XX_SOURCE_DIR}/test/data
-          DESTINATION test)
-
 endif(NOT CMAKE_CROSSCOMPILING)

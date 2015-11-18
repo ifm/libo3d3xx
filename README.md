@@ -75,6 +75,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Cross-compilation support and exposing raw amplitude image</td>
   </tr>
+  <tr>
+    <td>0.3.0</td>
+    <td>1.2.533</td>
+    <td>O3D303</td>
+    <td>Official 100k pixel support and EnableFastFrequency support</td>
+  </tr>
 </table>
 
 Features
@@ -173,7 +179,6 @@ Running
 
 * [Using the library](doc/using.md)
 * [Command-line utilities](doc/utils.md)
-* [Unlocking the 100k Pixel Imager](doc/100k.md)
 
 TODO
 ----
