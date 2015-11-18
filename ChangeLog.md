@@ -1,5 +1,11 @@
 ## Changes between libo3d3xx 0.2.0 and 0.3.0
 
+### o3d3xx-reboot
+
+* Added the `-r` flag to allow for rebooting the sensor into recovery
+  mode. This is useful for updating the sensor firmware w/o having to boot
+  Windows and using Vision Assistant.
+
 ### ImagerConfig
 
 * Support for `EnableFastFrequency` and `Output100K` parameters

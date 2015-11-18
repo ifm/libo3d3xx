@@ -30,19 +30,33 @@ int main(int argc, const char** argv)
   std::string camera_ip;
   uint32_t xmlrpc_port;
   std::string password;
+  o3d3xx::Camera::boot_mode mode = o3d3xx::Camera::boot_mode::PRODUCTIVE;
 
   try
     {
       o3d3xx::CmdLineOpts opts("o3d3xx Reboot");
+
+      po::options_description reboot_opts("Reboot Information");
+      reboot_opts.add_options()
+        ("recovery,r",
+         "If specified, the sensor will reboot into recovery mode");
+
+      opts.visible.add(reboot_opts);
+
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
         {
           return 0;
         }
 
+      if (opts.vm.count("recovery"))
+        {
+          mode = o3d3xx::Camera::boot_mode::RECOVERY;
+        }
+
       o3d3xx::Camera::Ptr cam =
         std::make_shared<o3d3xx::Camera>(camera_ip, xmlrpc_port, password);
 
-      cam->Reboot();
+      cam->Reboot(mode);
     }
   catch (const std::exception& e)
     {
