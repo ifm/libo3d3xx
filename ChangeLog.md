@@ -4,7 +4,7 @@
 
 * Added the `-r` flag to allow for rebooting the sensor into recovery
   mode. This is useful for updating the sensor firmware w/o having to boot
-  Windows and using Vision Assistant.
+  Windows.
 
 ### ImagerConfig
 
