@@ -72,7 +72,7 @@ macro_ensure_out_of_source_build(
 ## version numbers
 ################################################
 set(O3D3XX_VERSION_MAJOR 0)
-set(O3D3XX_VERSION_MINOR 2)
+set(O3D3XX_VERSION_MINOR 3)
 set(O3D3XX_VERSION_PATCH 0)
 file(COPY ${O3D3XX_SOURCE_DIR}/include
   DESTINATION ${O3D3XX_BINARY_DIR}

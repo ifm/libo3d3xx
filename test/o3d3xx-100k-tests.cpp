@@ -1,10 +1,4 @@
 #include "o3d3xx.h"
-#include <cstdint>
-#include <fstream>
-#include <memory>
-#include <sstream>
-#include <string>
-#include <vector>
 #include "gtest/gtest.h"
 
 class DenseImageTest : public ::testing::Test
@@ -19,25 +13,14 @@ protected:
     dev_ = cam_->GetDeviceConfig();
     old_active_idx_ = dev_->ActiveApplication();
 
-    std::string test_dir(__FILE__);
-    test_dir.erase(test_dir.find_last_of("/") + 1);
-    std::string in = test_dir + infile_;
+    // create a new application w/ the 100K imager turned on
+    idx_ = cam_->CopyApplication(old_active_idx_);
+    cam_->EditApplication(idx_);
+    o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
+    im->SetOutput100K(true);
+    cam_->SetImagerConfig(im.get());
+    cam_->SaveApp();
 
-    std::ifstream ifs(in, std::ios::in|std::ios::binary);
-    ifs.unsetf(std::ios::skipws);
-    std::streampos file_size;
-    ifs.seekg(0, std::ios::end);
-    file_size = ifs.tellg();
-    ifs.seekg(0, std::ios::beg);
-
-    std::vector<std::uint8_t> bytes;
-    bytes.reserve(file_size);
-
-    bytes.insert(bytes.begin(),
-                 std::istream_iterator<std::uint8_t>(ifs),
-                 std::istream_iterator<std::uint8_t>());
-
-    idx_ = cam_->ImportIFMApp(bytes);
     dev_->SetActiveApplication(idx_);
     cam_->SetDeviceConfig(dev_.get());
     cam_->SaveDevice();
@@ -56,7 +39,6 @@ protected:
 
   o3d3xx::Camera::Ptr cam_;
   o3d3xx::DeviceConfig::Ptr dev_;
-  std::string infile_ = "data/100k.o3d3xxapp";
   int idx_ = -1;
   int old_active_idx_ = -1;
 };

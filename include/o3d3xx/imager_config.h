@@ -98,6 +98,9 @@ namespace o3d3xx
     bool EnableAmplitudeCorrection() const noexcept;
     void SetEnableAmplitudeCorrection(bool enable) noexcept;
 
+    bool EnableFastFrequency() const noexcept;
+    void SetEnableFastFrequency(bool enable) noexcept;
+
     bool EnableFilterAmplitudeImage() const noexcept;
     void SetEnableFilterAmplitudeImage(bool enable) noexcept;
 
@@ -124,6 +127,9 @@ namespace o3d3xx
 
     int MinimumAmplitude() const noexcept;
     void SetMinimumAmplitude(int min) noexcept;
+
+    bool Output100K() const noexcept;
+    void SetOutput100K(bool on) noexcept;
 
     bool ReduceMotionArtifacts() const noexcept;
     void SetReduceMotionArtifacts(bool on) noexcept;
@@ -175,6 +181,9 @@ namespace o3d3xx
     /** Undocumented: Flag to turn on/off amplitude correction */
     bool enable_amplitude_correction_;
 
+    /** Gets higher framerates for longer range (>5m) imagers */
+    bool enable_fast_frequency_;
+
     /** Undocumented: Flag to turn on/off aplitude image filter */
     bool enable_filter_amplitude_image_;
 
@@ -217,6 +226,9 @@ namespace o3d3xx
 
     /** Minimum amplitude return required for a good pixel */
     int minimum_amplitude_;
+
+    /** Enables the 100K imager **/
+    bool output_100k_;
 
     /** Enables filtering for motion artifacts */
     bool reduce_motion_artifacts_;
