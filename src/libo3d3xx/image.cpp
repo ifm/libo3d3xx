@@ -29,6 +29,7 @@
 #include "o3d3xx/err.h"
 
 const std::size_t o3d3xx::IMG_TICKET_SZ = 16;
+const std::size_t o3d3xx::IMG_CHUNK_HEADER_SZ = 36;
 
 bool
 o3d3xx::verify_ticket_buffer(const std::vector<std::uint8_t>& buff)
@@ -278,9 +279,9 @@ o3d3xx::ImageBuffer::Organize()
 
   // NOTE: These could get optimized by using apriori values if necessary
   std::uint32_t width =
-    o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+xidx+16);
+    o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+cidx+16);
   std::uint32_t height =
-    o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+xidx+20);
+    o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+cidx+20);
 
   std::uint32_t num_points = width * height;
 
@@ -307,8 +308,13 @@ o3d3xx::ImageBuffer::Organize()
   std::int16_t bad_pixel_s = std::numeric_limits<std::int16_t>::quiet_NaN();
 
   // move all index pointers to where the pixel data starts
-  xidx += 36; yidx += 36; zidx += 36; aidx += 36; cidx += 36; didx += 36;
-  raw_aidx += 36;
+  xidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+  yidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+  zidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+  aidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+  cidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+  didx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+  raw_aidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
 
   int col = 0;
   int row = -1;

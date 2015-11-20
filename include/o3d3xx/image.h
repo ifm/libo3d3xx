@@ -29,6 +29,7 @@ namespace o3d3xx
 {
   using PointT = pcl::PointXYZI;
   extern const std::size_t IMG_TICKET_SZ; // bytes
+  extern const std::size_t IMG_CHUNK_HEADER_SZ; // bytes
 
   enum class pixel_format : std::uint8_t
   {
@@ -47,7 +48,6 @@ namespace o3d3xx
 
   enum class image_chunk : std::uint32_t
   {
-    USERDATA = 0,
     RADIAL_DISTANCE = 100,
     AMPLITUDE = 101, // normalized amplitude
     RAW_AMPLITUDE = 103,
@@ -55,9 +55,6 @@ namespace o3d3xx
     CARTESIAN_Y = 201,
     CARTESIAN_Z = 202,
     CARTESIAN_ALL = 203,
-    UNIT_VECTOR_E1 = 220,
-    UNIT_VECTOR_E2 = 221,
-    UNIT_VECTOR_E3 = 222,
     UNIT_VECTOR_ALL = 223,
     CONFIDENCE = 300,
     DIAGNOSTIC_DATA = 302,
