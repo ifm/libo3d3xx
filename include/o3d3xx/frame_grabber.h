@@ -36,6 +36,7 @@
 namespace o3d3xx
 {
   extern const std::string DEFAULT_PCIC_TCP_RESULT_SCHEMA;
+  extern const std::uint16_t DEFAULT_SCHEMA_MASK;
 
   /**
    * The FrameGrabber is a class that, when given access to an
@@ -57,8 +58,10 @@ namespace o3d3xx
      * Stores reference to the passed in camera and starts the worker thread
      *
      * @param[in] cam The camera instance to grab frames from
+     * @param[in] mask A bitmask encoding the PCIC schema to use
      */
-    FrameGrabber(o3d3xx::Camera::Ptr cam);
+    FrameGrabber(o3d3xx::Camera::Ptr cam,
+                 std::uint16_t mask = o3d3xx::DEFAULT_SCHEMA_MASK);
 
     /**
      * Cleans up any resources held by the frame grabbing thread object and

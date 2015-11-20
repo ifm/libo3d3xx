@@ -192,6 +192,16 @@ Standard Build Options
        Builds the o3d3xx-ifm-export application.
        </td>
   </tr>
+
+  <tr>
+       <td>BUILD_EXE_SCHEMA</td>
+
+       <td>ON</td>
+
+       <td>
+       Builds the o3d3xx-schema application.
+       </td>
+  </tr>
 </table>
 
 

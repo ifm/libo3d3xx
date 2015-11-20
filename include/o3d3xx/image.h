@@ -31,6 +31,13 @@ namespace o3d3xx
   extern const std::size_t IMG_TICKET_SZ; // bytes
   extern const std::size_t IMG_CHUNK_HEADER_SZ; // bytes
 
+  // Constants used to create "pluggable schema masks"
+  extern const std::uint16_t IMG_RDIS; // radial distance
+  extern const std::uint16_t IMG_AMP;  // normalized amplitude
+  extern const std::uint16_t IMG_RAMP; // raw amplitude
+  extern const std::uint16_t IMG_CART; // cartesian
+  extern const std::uint16_t IMG_UVEC; // unit vectors
+
   enum class pixel_format : std::uint8_t
   {
     FORMAT_8U = 0,

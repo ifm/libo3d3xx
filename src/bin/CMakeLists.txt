@@ -252,6 +252,25 @@ else()
 endif(BUILD_EXE_IFM_EXPORT)
 
 #-----------------------------------------------
+# o3d3xx-schema
+#-----------------------------------------------
+if(BUILD_EXE_SCHEMA)
+  add_executable(o3d3xx-schema o3d3xx-schema.cpp)
+
+  if(BUILD_SHARED_LIBS)
+    target_link_libraries(o3d3xx-schema o3d3xx_shared)
+  else()
+    target_link_libraries(o3d3xx-schema o3d3xx_static)
+  endif(BUILD_SHARED_LIBS)
+
+  install(TARGETS o3d3xx-schema DESTINATION bin)
+
+  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-schema)
+else()
+  message(STATUS "Skipping o3d3xx-schema")
+endif(BUILD_EXE_SCHEMA)
+
+#-----------------------------------------------
 #-----------------------------------------------
 #-----------------------------------------------
 if(CMAKE_CROSSCOMPILING)
