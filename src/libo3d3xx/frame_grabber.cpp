@@ -31,37 +31,49 @@
 #include "o3d3xx/image.h"
 #include "o3d3xx/camera.hpp"
 #include "o3d3xx/err.h"
+#include "o3d3xx/util.hpp"
 
 const std::string o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA =
-  "{ \"layouter\": \"flexible\", \"format\": { \"dataencoding\": \"ascii\" }, \
-  \"elements\": [ { \"type\": \"string\", \"value\": \"star\", \"id\": \
-  \"start_string\" }, { \"type\": \"blob\", \"id\": \
-  \"normalized_amplitude_image\" }, { \"type\": \"blob\", \"id\": \
-  \"amplitude_image\" }, { \"type\": \"blob\", \"id\": \
-  \"distance_image\" }, { \"type\": \"blob\", \"id\": \"x_image\" }, { \
-  \"type\": \"blob\", \"id\": \"y_image\" }, { \"type\": \"blob\", \"id\": \
-  \"z_image\" }, { \"type\": \"blob\", \"id\": \"confidence_image\" }, { \
-  \"type\": \"blob\", \"id\": \"diagnostic_data\" }, { \"type\": \"string\", \
-  \"value\": \"stop\", \"id\": \"end_string\" } ] }";
+  R"(
+      {
+        "layouter": "flexible",
+        "format"  : {"dataencoding":"ascii"},
+        "elements":
+         [
+           {"type":"string", "value":"star", "id":"start_string"},
+           {"type":"blob", "id":"normalized_amplitude_image"},
+           {"type":"blob", "id":"amplitude_image"},
+           {"type":"blob", "id":"distance_image"},
+           {"type":"blob", "id":"x_image"},
+           {"type":"blob", "id":"y_image"},
+           {"type":"blob", "id":"z_image"},
+           {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"string", "value":"stop", "id":"end_string"}
+         ]
+      }
+   )";
 
-o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam)
+const std::uint16_t o3d3xx::DEFAULT_SCHEMA_MASK =
+  o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_RAMP|o3d3xx::IMG_CART;
+
+o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam, std::uint16_t mask)
   : cam_(cam),
     io_service_()
 {
-  //
-  // pre-compute the PCIC command used to set the schema to a known layout
-  //
-  int c_len =
-    4 + 1 + 9 + o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA.size() + 2;
+  std::string schema = o3d3xx::make_pcic_schema(mask);
+  int c_len = 4 + 1 + 9 + schema.size() + 2;
   std::ostringstream str;
   str << "1000"
       << 'L' << std::setfill('0') << std::setw(9) << c_len
       << '\r' << '\n'
       << "1000" << 'c'
       << std::setfill('0') << std::setw(9)
-      << o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA.size()
-      << o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA
+      << schema.size()
+      << schema
       << '\r' << '\n';
+
+  DLOG(INFO) << "'c' command: " << str.str();
 
   std::string c_command = str.str();
   this->schema_buffer_.assign(c_command.begin(), c_command.end());

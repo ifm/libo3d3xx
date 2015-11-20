@@ -17,6 +17,7 @@
 #include "o3d3xx/util.hpp"
 #include <cassert>
 #include <cmath>
+#include <cstdint>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -26,6 +27,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <xmlrpc-c/base.hpp>
+#include "o3d3xx/image.h"
+#include "o3d3xx/frame_grabber.h"
 #include "o3d3xx/version.h"
 
 //--------------------------------------------------
@@ -149,6 +152,110 @@ o3d3xx::hist1(const cv::Mat& img, int histsize)
     }
 
   return histimg;
+}
+
+//--------------------------------------------------
+// Framegrabber helpers
+//--------------------------------------------------
+
+std::string
+o3d3xx::make_pcic_schema(std::uint16_t mask)
+{
+  if (mask == o3d3xx::DEFAULT_SCHEMA_MASK)
+    {
+      return o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA;
+    }
+
+  std::string schema =
+  R"(
+      {
+        "layouter": "flexible",
+        "format"  : {"dataencoding":"ascii"},
+        "elements":
+         [
+           {"type":"string", "value":"star", "id":"start_string"})";
+
+  if((mask & o3d3xx::IMG_RDIS) == o3d3xx::IMG_RDIS)
+    {
+      schema +=
+      R"(,
+           {"type":"blob", "id":"distance_image"})";
+    }
+
+  if((mask & o3d3xx::IMG_AMP) == o3d3xx::IMG_AMP)
+    {
+      schema +=
+      R"(,
+           {"type":"blob", "id":"normalized_amplitude_image"})";
+    }
+
+  if((mask & o3d3xx::IMG_RAMP) == o3d3xx::IMG_RAMP)
+    {
+      schema +=
+      R"(,
+           {"type":"blob", "id":"amplitude_image"})";
+    }
+
+  if((mask & o3d3xx::IMG_CART) == o3d3xx::IMG_CART)
+    {
+      schema +=
+      R"(,
+           {"type":"blob", "id":"x_image"},
+           {"type":"blob", "id":"y_image"},
+           {"type":"blob", "id":"z_image"})";
+    }
+
+  if((mask & o3d3xx::IMG_UVEC) == o3d3xx::IMG_UVEC)
+    {
+      schema +=
+      R"(,
+           {"type":"blob", "id":"all_unit_vector_matrices"})";
+    }
+
+  schema +=
+  R"(,
+           {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"string", "value":"stop", "id":"end_string"}
+         ]
+      }
+   )";
+
+  return schema;
+}
+
+std::uint16_t
+o3d3xx::schema_mask_from_string(const std::string& in)
+{
+  std::uint16_t mask = 0;
+  std::vector<std::string> mask_parts;
+  boost::split(mask_parts, in, boost::is_any_of("|"));
+  for (auto part : mask_parts)
+    {
+      boost::algorithm::trim(part);
+      if (part == "IMG_RDIS")
+        {
+          mask |= o3d3xx::IMG_RDIS;
+        }
+      else if (part == "IMG_AMP")
+        {
+          mask |= o3d3xx::IMG_AMP;
+        }
+      else if (part == "IMG_RAMP")
+        {
+          mask |= o3d3xx::IMG_RAMP;
+        }
+      else if (part == "IMG_CART")
+        {
+          mask |= o3d3xx::IMG_CART;
+        }
+      else if (part == "IMG_UVEC")
+        {
+          mask |= o3d3xx::IMG_UVEC;
+        }
+    }
+
+  return mask;
 }
 
 //--------------------------------------------------

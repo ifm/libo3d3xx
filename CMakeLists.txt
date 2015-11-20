@@ -39,6 +39,7 @@ option(BUILD_EXE_HZ "Build o3d3xx-hz" ON)
 option(BUILD_EXE_IMAGER_TYPES "Build o3d3xx-imager-types" ON)
 option(BUILD_EXE_IFM_IMPORT "Build o3d3xx-ifm-import" ON)
 option(BUILD_EXE_IFM_EXPORT "Build o3d3xx-ifm-export" ON)
+option(BUILD_EXE_SCHEMA "Build o3d3xx-schema" ON)
 
 # If you are cross-compiling, the scp-deploy target
 # below (see bottom of this file) uses these

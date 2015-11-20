@@ -31,6 +31,12 @@
 const std::size_t o3d3xx::IMG_TICKET_SZ = 16;
 const std::size_t o3d3xx::IMG_CHUNK_HEADER_SZ = 36;
 
+const std::uint16_t o3d3xx::IMG_RDIS = 1;  // 2^0
+const std::uint16_t o3d3xx::IMG_AMP  = 2;  // 2^1
+const std::uint16_t o3d3xx::IMG_RAMP = 4;  // 2^2
+const std::uint16_t o3d3xx::IMG_CART = 8;  // 2^3
+const std::uint16_t o3d3xx::IMG_UVEC = 16; // 2^4
+
 bool
 o3d3xx::verify_ticket_buffer(const std::vector<std::uint8_t>& buff)
 {

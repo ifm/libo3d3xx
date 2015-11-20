@@ -19,6 +19,7 @@
 #define __O3D3XX_UTIL_H__
 
 #include <algorithm>
+#include <cstdint>
 #include <mutex>
 #include <string>
 #include <unordered_map>
@@ -130,6 +131,25 @@ namespace o3d3xx
    * @return A histogram image.
    */
   cv::Mat hist1(const cv::Mat& img, int histsize = 256);
+
+  /**
+   * Utility function to build a PCIC schema from a mask
+   *
+   * @param[in] mask The mask to use to build the schema
+   * @return The PCIC schema as a string
+   */
+  std::string make_pcic_schema(std::uint16_t mask);
+
+  /**
+   * Utility function to create a schema mask from a string.
+   *
+   * The passed in string should contain valid symbolic constants `OR'd`
+   * together. For example: IMG_RDIS|IMG_AMP|IMG_RAMP|IMG_CART|IMG_UVEC
+   *
+   * @param[in] in The string to parse to generate the mask
+   * @return The PCIC schema encoed by the `in` string.
+   */
+  std::uint16_t schema_mask_from_string(const std::string& in);
 
 } // end: namespace o3d3xx
 

@@ -14,6 +14,7 @@ The following command-line utilities are provided with `libo3d3xx`:
 8. [o3d3xx-hz](#o3d3xx-hz)
 9. [o3d3xx-ifm-import](#o3d3xx-ifm-import)
 10. [o3d3xx-ifm-export](#o3d3xx-ifm-export)
+11. [o3d3xx-schema](#o3d3xx-schema)
 
 All of the command-line utilities accept the `--help` and the `--version`
 flags. `--help` will list the arguments accepted by the program and `--version`
@@ -156,3 +157,90 @@ o3d3xx-ifm-export
 
 This program can be used to export data (e.g., applications) from the camera
 into a format that is compatible with IFM Vision Assistant.
+
+o3d3xx-schema
+-------------
+
+This program is used to inspect the PCIC schema the framegrabber will send to
+the camera based on a specific mask. To see the default PCIC schema, you can
+run the program with no arguments:
+
+    $ o3d3xx-schema
+    mask=15, str=-
+    ---
+      {
+        "layouter": "flexible",
+        "format"  : {"dataencoding":"ascii"},
+        "elements":
+         [
+           {"type":"string", "value":"star", "id":"start_string"},
+           {"type":"blob", "id":"normalized_amplitude_image"},
+           {"type":"blob", "id":"amplitude_image"},
+           {"type":"blob", "id":"distance_image"},
+           {"type":"blob", "id":"x_image"},
+           {"type":"blob", "id":"y_image"},
+           {"type":"blob", "id":"z_image"},
+           {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"string", "value":"stop", "id":"end_string"}
+         ]
+      }
+
+
+You can see the schema that would be generated from a specific mask. For
+example, if you specified a mask of `1`:
+
+    $ o3d3xx-schema -m 1
+    mask=1, str=-
+    ---
+
+      {
+        "layouter": "flexible",
+        "format"  : {"dataencoding":"ascii"},
+        "elements":
+         [
+           {"type":"string", "value":"star", "id":"start_string"},
+           {"type":"blob", "id":"distance_image"},
+           {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"string", "value":"stop", "id":"end_string"}
+         ]
+      }
+
+In the example above, we see that beyond the _invariants_ we will ask the
+camera to only stream the distance image.
+
+You can also construct schemas via symbolic constants. The constants that are
+available to you can be viewed with:
+
+    $ o3d3xx-schema -d
+    Masking options:
+	    IMG_RDIS: 1
+	    IMG_AMP:  2
+	    IMG_RAMP: 4
+	    IMG_CART: 8
+	    IMG_UVEC: 16
+
+So, to generate a schema (and its associated mask) you can:
+
+    $ o3d3xx-schema -s "IMG_RDIS|IMG_AMP|IMG_UVEC"
+    mask=19, str=IMG_RDIS|IMG_AMP|IMG_UVEC
+    ---
+
+      {
+        "layouter": "flexible",
+        "format"  : {"dataencoding":"ascii"},
+        "elements":
+         [
+           {"type":"string", "value":"star", "id":"start_string"},
+           {"type":"blob", "id":"distance_image"},
+           {"type":"blob", "id":"normalized_amplitude_image"},
+           {"type":"blob", "id":"all_unit_vector_matrices"},
+           {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"string", "value":"stop", "id":"end_string"}
+         ]
+      }
+
+This shows that if this is the schema you wanted the camera to stream back, you
+can pass a mask of `19` to the `o3d3xx::FrameGrabber` ctor.
