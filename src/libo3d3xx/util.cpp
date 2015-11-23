@@ -215,7 +215,6 @@ o3d3xx::make_pcic_schema(std::uint16_t mask)
   schema +=
   R"(,
            {"type":"blob", "id":"confidence_image"},
-           {"type":"blob", "id":"diagnostic_data" },
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }

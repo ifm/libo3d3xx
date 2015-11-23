@@ -295,8 +295,9 @@ namespace o3d3xx
    * @param[in] buff The image buffer to search
    * @param[in] chunk_type The type of chunk to look for
    *
-   * @return The index into the buffer of where the chunk begins.
-   * @throw o3d3xx::error_t If the chunk is not found
+   * @return The index into the buffer of where the chunk begins or
+   *         std::numeric_limits<std::size_t>::max() if the chunk was not
+   *         found.
    */
   std::size_t get_chunk_index(const std::vector<std::uint8_t>& buff,
                               o3d3xx::image_chunk chunk_type);

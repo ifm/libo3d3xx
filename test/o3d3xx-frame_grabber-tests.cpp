@@ -187,3 +187,17 @@ TEST_F(FrameGrabberTest, ResultSchema)
       elem_idx++;
     }
 }
+
+TEST_F(FrameGrabberTest, CustomSchemas)
+{
+  std::uint16_t mask = o3d3xx::DEFAULT_SCHEMA_MASK;
+
+  mask &= ~o3d3xx::IMG_RDIS;
+
+  o3d3xx::FrameGrabber::Ptr fg =
+    std::make_shared<o3d3xx::FrameGrabber>(cam_, mask);
+
+  o3d3xx::ImageBuffer::Ptr img = std::make_shared<o3d3xx::ImageBuffer>();
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+}

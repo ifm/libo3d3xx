@@ -42,20 +42,18 @@ const std::string o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA =
          [
            {"type":"string", "value":"star", "id":"start_string"},
            {"type":"blob", "id":"normalized_amplitude_image"},
-           {"type":"blob", "id":"amplitude_image"},
            {"type":"blob", "id":"distance_image"},
            {"type":"blob", "id":"x_image"},
            {"type":"blob", "id":"y_image"},
            {"type":"blob", "id":"z_image"},
            {"type":"blob", "id":"confidence_image"},
-           {"type":"blob", "id":"diagnostic_data" },
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }
    )";
 
 const std::uint16_t o3d3xx::DEFAULT_SCHEMA_MASK =
-  o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_RAMP|o3d3xx::IMG_CART;
+  o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_CART;
 
 o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam, std::uint16_t mask)
   : cam_(cam),
