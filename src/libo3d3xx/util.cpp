@@ -161,11 +161,6 @@ o3d3xx::hist1(const cv::Mat& img, int histsize)
 std::string
 o3d3xx::make_pcic_schema(std::uint16_t mask)
 {
-  if (mask == o3d3xx::DEFAULT_SCHEMA_MASK)
-    {
-      return o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA;
-    }
-
   std::string schema =
   R"(
       {
