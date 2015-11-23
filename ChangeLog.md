@@ -1,5 +1,29 @@
 ## Changes between libo3d3xx 0.2.0 and 0.3.0
 
+**IMPORTANT:** This release breaks both API and ABI compatibility with 0.2.0.
+
+### Custom/Pluggable PCIC Schemas
+
+The `FrameGrabber` now supports parsing return data from custom schemas based
+on a _mask_. This (currently experimental) feature has been implemented so that
+user of low bandwidth or noisy (e.g., WiFi) networks can configure the camera
+to return only the data they need and to not consume unnecessary bandwith. As
+of this writing, the aforementioned goal is only partially achieved with the
+current code. This feature is still under active development.
+
+### Raw Amplitude
+
+Now with the support of pluggable schemas, the raw amplitude is no longer part
+of the default schema. This can be turned on by users on a case-by-case basis.
+
+### o3d3xx-viewer
+
+DOCUMENT THE CHANGES HERE
+
+### o3d3xx-schema
+
+* New tool used for testing and building custom PCIC schemas
+
 ### o3d3xx-reboot
 
 * Added the `-r` flag to allow for rebooting the sensor into recovery

@@ -177,14 +177,16 @@ TEST(ImageBuffers_Tests, AmplitudeImage)
 
 TEST(ImageBuffers_Tests, RawAmplitudeImage)
 {
-  o3d3xx::Camera::Ptr cam =
-    o3d3xx::Camera::Ptr(new o3d3xx::Camera());
+  std::uint16_t mask = o3d3xx::DEFAULT_SCHEMA_MASK;
+  mask |= o3d3xx::IMG_RAMP;
+
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
 
   o3d3xx::FrameGrabber::Ptr fg =
-    o3d3xx::FrameGrabber::Ptr(new o3d3xx::FrameGrabber(cam));
+    std::make_shared<o3d3xx::FrameGrabber>(cam, mask);
 
   o3d3xx::ImageBuffer::Ptr img =
-    o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+    std::make_shared<o3d3xx::ImageBuffer>();
 
   EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
 
@@ -194,7 +196,7 @@ TEST(ImageBuffers_Tests, RawAmplitudeImage)
 
   {
     o3d3xx::ImageBuffer::Ptr img2 =
-      o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
+      std::make_shared<o3d3xx::ImageBuffer>();
 
     EXPECT_TRUE(fg->WaitForFrame(img2.get(), 1000));
 
