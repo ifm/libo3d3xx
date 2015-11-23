@@ -79,7 +79,7 @@ Software Compatibility Matrix
     <td>0.3.0</td>
     <td>1.2.533</td>
     <td>O3D303</td>
-    <td>Official 100k pixel support and EnableFastFrequency support</td>
+    <td>100k pixel support, EnableFastFrequency support, and pluggable pcic schemas</td>
   </tr>
 </table>
 
