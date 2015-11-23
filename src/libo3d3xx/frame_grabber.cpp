@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdint>
+#include <cstdlib>
 #include <exception>
 #include <functional>
 #include <iomanip>
@@ -33,27 +34,21 @@
 #include "o3d3xx/err.h"
 #include "o3d3xx/util.hpp"
 
-const std::string o3d3xx::DEFAULT_PCIC_TCP_RESULT_SCHEMA =
-  R"(
+auto __o3d3xx_schema_mask__ = []()->std::uint16_t
+  {
+    try
       {
-        "layouter": "flexible",
-        "format"  : {"dataencoding":"ascii"},
-        "elements":
-         [
-           {"type":"string", "value":"star", "id":"start_string"},
-           {"type":"blob", "id":"normalized_amplitude_image"},
-           {"type":"blob", "id":"distance_image"},
-           {"type":"blob", "id":"x_image"},
-           {"type":"blob", "id":"y_image"},
-           {"type":"blob", "id":"z_image"},
-           {"type":"blob", "id":"confidence_image"},
-           {"type":"string", "value":"stop", "id":"end_string"}
-         ]
+        return std::getenv("O3D3XX_MASK") == nullptr ?
+                 o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_CART :
+                 std::stoul(std::string(std::getenv("O3D3XX_MASK"))) & 0xFFFF;
       }
-   )";
+    catch (const std::exception& ex)
+      {
+        return o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_CART;
+      }
+  };
 
-const std::uint16_t o3d3xx::DEFAULT_SCHEMA_MASK =
-  o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_CART;
+const std::uint16_t o3d3xx::DEFAULT_SCHEMA_MASK = __o3d3xx_schema_mask__();
 
 o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam, std::uint16_t mask)
   : cam_(cam),

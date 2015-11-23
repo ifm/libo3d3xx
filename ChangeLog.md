@@ -11,6 +11,13 @@ to return only the data they need and to not consume unnecessary bandwith. As
 of this writing, the aforementioned goal is only partially achieved with the
 current code. This feature is still under active development.
 
+The introduction of this feature also brought about the introduction of a new
+environment variable called `O3D3XX_MASK` which can be used to set the schema
+mask manually. For example: `$ O3D3XX_MASK=15 o3d3xx-viewer` The value of the
+variable is interrpeted as a `uint16_t`. If the passed in value causes an error
+during conversion, the default mask is used -- i.e., the mask returned by
+running `o3d3xx-schema` with no arguments.
+
 ### Raw Amplitude
 
 Now with the support of pluggable schemas, the raw amplitude is no longer part

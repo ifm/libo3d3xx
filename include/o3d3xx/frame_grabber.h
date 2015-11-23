@@ -35,7 +35,6 @@
 
 namespace o3d3xx
 {
-  extern const std::string DEFAULT_PCIC_TCP_RESULT_SCHEMA;
   extern const std::uint16_t DEFAULT_SCHEMA_MASK;
 
   /**
