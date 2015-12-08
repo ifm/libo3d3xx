@@ -342,7 +342,7 @@ o3d3xx::ImageBuffer::Organize()
         }
 
       conf_row_ptr[col] = this->bytes_.at(cidx);
-      if (conf_row_ptr[col] & 0x1 == 1)
+      if ((conf_row_ptr[col] & 0x1) == 1)
         {
           pt.x = pt.y = pt.z = bad_point;
           this->cloud_->is_dense = false;
