@@ -20,6 +20,7 @@
 #include <string>
 #include <opencv2/opencv.hpp>
 #include <pcl/visualization/cloud_viewer.h>
+#include <pcl/io/pcd_io.h>
 #include "o3d3xx.h"
 
 //-------------------------------------------------------------
@@ -35,10 +36,53 @@ public:
       description_(descr)
   {}
 
+  void Toggle100kMode()
+  {
+	o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+    cam->RequestSession();
+    cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+
+    o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+    int idx = dev->ActiveApplication();
+
+    // toggle the 100K output support
+    cam->EditApplication(idx);
+    o3d3xx::ImagerConfig::Ptr im = cam->GetImagerConfig();
+    im->SetOutput100K(!im->Output100K());
+    cam->SetImagerConfig(im.get());
+    cam->SaveApp();
+    cam->CancelSession();
+  }
+
+  void SaveDepthImage(o3d3xx::ImageBuffer::Ptr buff)
+  {
+	  cv::imwrite("./Image_Depth.png", buff->DepthImage());
+  }
+
+  void SaveRawAmplitudeImage(o3d3xx::ImageBuffer::Ptr buff)
+  {
+	  cv::imwrite("./Image_RawAmplitude.png", buff->RawAmplitudeImage());
+  }
+
+  void SaveNormalizedAmplitudeImage(o3d3xx::ImageBuffer::Ptr buff)
+  {
+	  cv::imwrite("./Image_NormalizedAmplitude.png", buff->AmplitudeImage());
+  }
+
+  void SaveConfidenceImage(o3d3xx::ImageBuffer::Ptr buff)
+  {
+	  cv::imwrite("./Image_Confidence.png", buff->ConfidenceImage());
+  }
+
+  void SavePointCloud(o3d3xx::ImageBuffer::Ptr buff)
+  {
+	  pcl::io::savePCDFile("./Image_PointCloud.pcd", *buff->Cloud());
+  }
+
   void Run()
   {
-    int win_w = 800;
-    int win_h = 600;
+    int win_w = 4*352;
+    int win_h = 4*264;
 
     o3d3xx::FrameGrabber::Ptr fg =
       std::make_shared<o3d3xx::FrameGrabber>(this->cam_);
@@ -159,7 +203,7 @@ public:
         cv::applyColorMap(raw_amp_colormap_img, raw_amp_colormap_img,
                           cv::COLORMAP_BONE);
 
-        // stich 2d images together and display
+        // stitch 2d images together and display
         display_img.create(depth_colormap_img.rows*2,
                            depth_colormap_img.cols*2,
                            depth_colormap_img.type());
@@ -188,11 +232,46 @@ public:
         cv::imshow(this->description_, display_img);
 
         // `ESC', `q', or `Q' to exit
-        retval = cv::waitKey(33);
-        if ((retval == 27) || (retval == 113) || (retval == 81))
+        retval = cv::waitKey(33) & 0xff;
+        if ((retval == 'q') || (retval == 'Q') || (retval == 27))
           {
+        	printf( "Quit\n" );
             break;
           }
+        else if (retval == '1')
+          {
+        	Toggle100kMode();
+          }
+        else if (retval == 'd')
+          {
+        	SaveDepthImage(buff);
+          }
+        else if (retval == 'r')
+          {
+        	SaveRawAmplitudeImage(buff);
+          }
+        else if (retval == 'n')
+          {
+        	SaveNormalizedAmplitudeImage(buff);
+          }
+        else if (retval == 'c')
+          {
+        	SaveConfidenceImage(buff);
+          }
+        else if (retval == 'p')
+          {
+        	SavePointCloud(buff);
+          }
+        else if (retval == 's')
+          {
+        	cout << "Save all image types" << endl;
+        	SaveDepthImage(buff);
+        	SaveRawAmplitudeImage(buff);
+        	SaveNormalizedAmplitudeImage(buff);
+        	SaveConfidenceImage(buff);
+        	SavePointCloud(buff);
+          }
+
       } // end: while (...)
   }
 
