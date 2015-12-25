@@ -39,8 +39,13 @@ int main(int argc, const char** argv)
 
       po::options_description reset_opts("Reset Information");
       reset_opts.add_options()
-        ("reboot", "Reboot the sensor after reset");
+        ("reboot", "Reboot the device after reset (ATTENTION: The network configuration may change)");
       opts.visible.add(reset_opts);
+
+      po::options_description sensor_opts("Sensor Information");
+      sensor_opts.add_options()
+        ("sensor", "Create a new default \"camera\" application for a \"sensor\" device");
+      opts.visible.add(sensor_opts);
 
       if (! opts.Parse(argc, argv, &camera_ip, &xmlrpc_port, &password))
         {
@@ -55,7 +60,37 @@ int main(int argc, const char** argv)
 
       cam->RequestSession();
       cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-      cam->FactoryReset();
+      if (opts.vm.count("sensor"))
+        {
+          // create a new application
+          int app_idx = cam->CreateApplication();
+          cam->EditApplication(app_idx);
+          o3d3xx::ImagerConfig::Ptr imager = cam->GetImagerConfig();
+
+          // Set values which comply with the default "camera" application
+          imager->SetType("upto30m_low");
+          imager->SetEnableRectificationAmplitudeImage(false);
+          imager->SetEnableRectificationDistanceImage(false);
+          imager->SetExposureTime(5000);
+          imager->SetExposureTimeList("5000");
+          imager->SetFrameRate(10.0);
+          cam->SetImagerConfig(imager.get());
+          cam->SaveApp();
+          cam->StopEditingApplication();
+
+          // activate the created application
+          o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
+          dev->SetActiveApplication(app_idx);
+          cam->SetDeviceConfig(dev.get());
+          cam->SaveDevice();
+          cam->CancelSession();
+        }
+      else
+        {
+          cam->FactoryReset();
+        }
+
+      cam->CancelSession();
 
       if (opts.vm.count("reboot"))
         {
