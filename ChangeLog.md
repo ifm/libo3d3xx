@@ -1,25 +1,29 @@
 ## Changes between libo3d3xx 0.2.0 and 0.3.0
 
+### XML-RPC Protocol
+
+* Compatible to the 1.3.x IFM firmware release.
+
 ### CMAKE_INSTALL_PREFIX
 
-The default install location is now `/usr`. This removes the need for setting
-`LD_LIBRARY_PATH` and having a `setup.bash` file.
+* The default install location is now `/usr`. This removes the need for setting
+  `LD_LIBRARY_PATH` and having a `setup.bash` file.
 
 ### Custom/Pluggable PCIC Schemas
 
-The `FrameGrabber` now supports parsing return data from custom schemas based
-on a _mask_. This (currently experimental) feature has been implemented so that
-user of low bandwidth or noisy (e.g., WiFi) networks can configure the camera
-to return only the data they need and to not consume unnecessary bandwith. As
-of this writing, the aforementioned goal is only partially achieved with the
-current code. This feature is still under active development.
+* The `FrameGrabber` now supports parsing return data from custom schemas based
+  on a _mask_. This feature has been implemented so that user of low bandwidth
+  or noisy (e.g., WiFi) networks can configure the camera to return only the
+  data they need and to not consume unnecessary bandwith. As of this writing,
+  the aforementioned goal is only partially achieved with the current
+  code. This feature is still under active development.
 
-The introduction of this feature also brought about the introduction of a new
-environment variable called `O3D3XX_MASK` which can be used to set the schema
-mask manually. For example: `$ O3D3XX_MASK=15 o3d3xx-viewer` The value of the
-variable is interrpeted as a `uint16_t`. If the passed in value causes an error
-during conversion, the default mask is used -- i.e., the mask returned by
-running `o3d3xx-schema` with no arguments.
+* The introduction of this feature also brought about the introduction of a new
+  environment variable called `O3D3XX_MASK` which can be used to set the schema
+  mask manually. For example: `$ O3D3XX_MASK=15 o3d3xx-viewer` The value of the
+  variable is interrpeted as a `uint16_t`. If the passed in value causes an error
+  during conversion, the default mask is used -- i.e., the mask returned by
+  running `o3d3xx-schema` with no arguments.
 
 ### ImageBuffer
 
@@ -46,7 +50,8 @@ running `o3d3xx-schema` with no arguments.
 
 ### ImagerConfig
 
-* Support for `EnableFastFrequency` and `Output100K` parameters
+* Support for `EnableFastFrequency`, `Resolution`, and `ClippingCuboid`
+  parameters
 
 ### DeviceConfig
 
@@ -54,6 +59,9 @@ running `o3d3xx-schema` with no arguments.
   ServiceReportPassedBuffer default values from 5 to 15. This is an un-doing of
   the change from 0.1.11 to 0.2.0 (see below), but the new 1.2.x firmware
   restores these old defaults so we will do the same here.
+
+* Support for `EvaluationFinishedMinHoldTime` and
+  `SaveRestoreStatsOnApplSwitch` parameters.
 
 ### 100K Imager
 

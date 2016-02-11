@@ -133,6 +133,12 @@ namespace o3d3xx
     double ExtrinsicCalibRotZ() const noexcept;
     void SetExtrinsicCalibRotZ(double z) noexcept;
 
+    int EvaluationFinishedMinHoldTime() const noexcept;
+    void SetEvaluationFinishedMinHoldTime(int t) noexcept;
+
+    bool SaveRestoreStatsOnApplSwitch() const noexcept;
+    void SetSaveRestoreStatsOnApplSwitch(bool on) noexcept;
+
     int IPAddressConfig() const noexcept;
     bool PasswordActivated() const noexcept;
     int OperatingMode() const noexcept;
@@ -237,6 +243,16 @@ namespace o3d3xx
      * Extrinsic calibration, rotation around z-axis
      */
     double extrinsic_calib_rot_z_;
+
+    /**
+     * @todo fill in meaning
+     */
+    int evaluation_finished_min_hold_time_;
+
+    /**
+     * @todo fill in meaning
+     */
+    bool save_restore_stats_on_appl_switch_;
 
     /**
      * READONLY: How the sensor obtained its IP address

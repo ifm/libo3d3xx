@@ -61,6 +61,9 @@ const std::string o3d3xx::XMLRPC_IMAGER = "imager_001/";
 const std::string o3d3xx::XMLRPC_SPATIALFILTER = "spatialfilter";
 const std::string o3d3xx::XMLRPC_TEMPORALFILTER = "temporalfilter";
 
+const int o3d3xx::RES_23K = 0;
+const int o3d3xx::RES_100K = 1;
+
 o3d3xx::Camera::Camera(const std::string& ip,
                        const std::uint32_t xmlrpc_port,
                        const std::string& password)
@@ -394,6 +397,20 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
     {
       this->_XCallDevice("setParameter", "ExtrinsicCalibRotZ",
                          config->ExtrinsicCalibRotZ());
+    }
+
+  if (dev->EvaluationFinishedMinHoldTime() !=
+      config->EvaluationFinishedMinHoldTime())
+    {
+      this->_XCallDevice("setParameter", "EvaluationFinishedMinHoldTime",
+                         config->EvaluationFinishedMinHoldTime());
+    }
+
+  if (dev->SaveRestoreStatsOnApplSwitch() !=
+      config->SaveRestoreStatsOnApplSwitch())
+    {
+      this->_XCallDevice("setParameter", "SaveRestoreStatsOnApplSwitch",
+                         config->SaveRestoreStatsOnApplSwitch());
     }
 }
 
@@ -946,12 +963,12 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
                          "MinimumAmplitude", config->MinimumAmplitude());
     }
 
-  if (im->Output100K() != config->Output100K())
+  if (im->Resolution() != config->Resolution())
     {
-      DLOG(INFO) << "Setting Output100K=" << config->Output100K();
+      DLOG(INFO) << "Setting Resolution=" << config->Resolution();
 
       this->_XCallImager("setParameter",
-                         "Output100K", config->Output100K());
+                         "Resolution", config->Resolution());
     }
 
   if (im->ReduceMotionArtifacts() != config->ReduceMotionArtifacts())
@@ -1026,6 +1043,47 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
       this->_XCallImager("setParameter",
                          "TwoFreqMaxLineDistPercentage",
                          config->TwoFreqMaxLineDistPercentage());
+    }
+
+  //
+  // To avoid making extraneous network calls, we compare the
+  // parsed JSON and not the JSON strings for the cuboid string
+  //
+  boost::property_tree::ptree img_schema_pt;
+  boost::property_tree::ptree config_schema_pt;
+  std::istringstream img_is;
+  std::istringstream config_is;
+
+  if (config->ClippingCuboid() != "")
+    {
+      try
+        {
+          img_is.str(im->ClippingCuboid());
+          config_is.str(config->ClippingCuboid());
+          img_is.seekg(0, img_is.beg);
+          config_is.seekg(0, config_is.beg);
+          boost::property_tree::read_json(img_is, img_schema_pt);
+          boost::property_tree::read_json(config_is, config_schema_pt);
+
+          if (img_schema_pt != config_schema_pt)
+            {
+              LOG(WARNING) << "Setting Clipping Cuboid Schema to: "
+                           << config->ClippingCuboid();
+
+              this->_XCallImager("setParameter",
+                                 "ClippingCuboid",
+                                 config->ClippingCuboid());
+            }
+        }
+      catch (const std::exception& ex)
+        {
+          LOG(WARNING) << "Error parsing Clipping Cuboid JSON: "
+                       << ex.what();
+          LOG(WARNING) << "On-camera JSON: "
+                       << im->ClippingCuboid();
+          LOG(WARNING) << "Desired JSON: "
+                       << config->ClippingCuboid();
+        }
     }
 }
 

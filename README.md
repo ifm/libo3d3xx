@@ -77,9 +77,12 @@ Software Compatibility Matrix
   </tr>
   <tr>
     <td>0.3.0</td>
-    <td>1.2.533</td>
+    <td>1.3.1001</td>
     <td>O3D303</td>
-    <td>100k pixel support, EnableFastFrequency support, and pluggable pcic schemas</td>
+    <td>
+    100k pixel support, pluggable pcic schemas, exposing extrinsics and unit
+    vectors, installing to /usr, and more.
+    </td>
   </tr>
 </table>
 

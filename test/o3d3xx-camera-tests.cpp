@@ -164,21 +164,6 @@ TEST(Camera_Tests, SetOperatingMode)
   // into RUN mode.
 }
 
-//---------------------------------------
-// Uncomment to test rebooting the camera
-//
-// Leaving it here sort of messes up running our unit tests
-// @todo Provide a guarntee this will run last.
-//---------------------------------------
-//
-// TEST(Camera_Tests, Reboot)
-// {
-//   o3d3xx::Camera::Ptr cam =
-//     o3d3xx::Camera::Ptr(new o3d3xx::Camera());
-
-//   EXPECT_NO_THROW(cam->Reboot(o3d3xx::Camera::boot_mode::PRODUCTIVE));
-// }
-
 TEST(Camera_Tests, GetDeviceConfig)
 {
   o3d3xx::Camera::Ptr cam =
@@ -194,7 +179,7 @@ TEST(Camera_Tests, GetDeviceConfig)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  EXPECT_EQ(params.size(), 30);
+  EXPECT_EQ(params.size(), 32);
 
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
@@ -222,41 +207,15 @@ TEST(Camera_Tests, GetDeviceConfig)
             dev->ExtrinsicCalibTransZ());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotX")),
             dev->ExtrinsicCalibRotX());
-  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotZ")),
             dev->ExtrinsicCalibRotY());
-  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotZ")),
             dev->ExtrinsicCalibRotY());
+  EXPECT_EQ(std::stoi(params.at("EvaluationFinishedMinHoldTime")),
+            dev->EvaluationFinishedMinHoldTime());
+  EXPECT_EQ(o3d3xx::stob(params.at("SaveRestoreStatsOnApplSwitch")),
+            dev->SaveRestoreStatsOnApplSwitch());
 }
-
-//
-// This has to do with enabling and disabling the Ethernet/IP interface on the
-// camera. The sensor frequently fails when doing that. So, for now, I am going
-// to comment out this test.
-//
-// TEST(Camera_Tests, PcicEipEnabled)
-// {
-//   o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
-//   o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
-
-//   bool orig = dev->PcicEipEnabled();
-
-//   EXPECT_NO_THROW(cam->RequestSession());
-//   EXPECT_NO_THROW(cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT));
-
-//   EXPECT_NO_THROW(dev->SetPcicEipEnabled(! orig));
-//   cam->SetDeviceConfig(dev.get());
-//   cam->SaveDevice();
-
-//   dev = cam->GetDeviceConfig();
-//   EXPECT_NE(orig, dev->PcicEipEnabled());
-
-//   EXPECT_NO_THROW(dev->SetPcicEipEnabled(orig));
-//   cam->SetDeviceConfig(dev.get());
-//   cam->SaveDevice();
-
-//   dev = cam->GetDeviceConfig();
-//   EXPECT_EQ(orig, dev->PcicEipEnabled());
-// }
 
 TEST(Camera_Tests, ActivateDisablePassword)
 {
@@ -336,6 +295,10 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->ExtrinsicCalibRotX(), dev2->ExtrinsicCalibRotX());
   EXPECT_EQ(dev->ExtrinsicCalibRotY(), dev2->ExtrinsicCalibRotY());
   EXPECT_EQ(dev->ExtrinsicCalibRotZ(), dev2->ExtrinsicCalibRotZ());
+  EXPECT_EQ(dev->EvaluationFinishedMinHoldTime(),
+            dev2->EvaluationFinishedMinHoldTime());
+  EXPECT_EQ(dev->SaveRestoreStatsOnApplSwitch(),
+            dev2->SaveRestoreStatsOnApplSwitch());
 
   // we do not want to compare the read-only properties
 }
@@ -368,36 +331,6 @@ TEST(Camera_Tests, NetConfig)
   cam->SetNetConfig(net.get(), &has_changed);
   EXPECT_FALSE(has_changed);
 }
-
-// TEST(Camera_Tests, NetConfig)
-// {
-//   o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
-//   cam->RequestSession();
-//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-
-//   o3d3xx::NetConfig::Ptr net = cam->GetNetConfig();
-//   std::string orig_ip = net->StaticIPv4Address();
-//   net->SetStaticIPv4Address("192.168.0.70");
-
-//   EXPECT_NO_THROW(cam->SetNetConfig(net.get()));
-//   EXPECT_NO_THROW(cam->SaveNet());
-
-//   usleep(2000);
-//   cam->RequestSession();
-//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-//   o3d3xx::NetConfig::Ptr net2 = cam->GetNetConfig();
-//   EXPECT_EQ(net->StaticIPv4Address(), net2->StaticIPv4Address());
-
-//   net2->SetStaticIPv4Address(orig_ip);
-//   EXPECT_NO_THROW(cam->SetNetConfig(net2.get()));
-//   EXPECT_NO_THROW(cam->SaveNet());
-
-//   usleep(2000);
-//   cam->RequestSession();
-//   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-//   o3d3xx::NetConfig::Ptr net3 = cam->GetNetConfig();
-//   EXPECT_EQ(orig_ip, net3->StaticIPv4Address());
-// }
 
 TEST(Camera_Tests, NetConfig_JSON)
 {

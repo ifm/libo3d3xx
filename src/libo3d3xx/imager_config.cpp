@@ -46,7 +46,8 @@ o3d3xx::ImagerConfig::ImagerConfig()
     exposure_time_ratio_(40),
     frame_rate_(5.0),
     minimum_amplitude_(0),
-    output_100k_(false),
+    resolution_(o3d3xx::RES_23K),
+    clipping_cuboid_(""),
     reduce_motion_artifacts_(false),
     spatial_filter_type_(
       static_cast<int>(o3d3xx::Camera::spatial_filter::OFF)),
@@ -248,7 +249,7 @@ o3d3xx::ImagerConfig::ExposureTimeList() const noexcept
 }
 
 void
-o3d3xx::ImagerConfig::SetExposureTimeList(const std::string s) noexcept
+o3d3xx::ImagerConfig::SetExposureTimeList(const std::string& s) noexcept
 {
   this->exposure_time_list_ = s;
 }
@@ -290,16 +291,28 @@ o3d3xx::ImagerConfig::SetMinimumAmplitude(int min) noexcept
   this->minimum_amplitude_ = min;
 }
 
-bool
-o3d3xx::ImagerConfig::Output100K() const noexcept
+int
+o3d3xx::ImagerConfig::Resolution() const noexcept
 {
-  return this->output_100k_;
+  return this->resolution_;
 }
 
 void
-o3d3xx::ImagerConfig::SetOutput100K(bool on) noexcept
+o3d3xx::ImagerConfig::SetResolution(int res) noexcept
 {
-  this->output_100k_ = on;
+  this->resolution_ = res;
+}
+
+std::string
+o3d3xx::ImagerConfig::ClippingCuboid() const noexcept
+{
+  return this->clipping_cuboid_;
+}
+
+void
+o3d3xx::ImagerConfig::SetClippingCuboid(const std::string& s) noexcept
+{
+  this->clipping_cuboid_ = s;
 }
 
 bool
@@ -473,9 +486,13 @@ o3d3xx::ImagerConfig::mutator_map =
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetMinimumAmplitude(std::stoi(val)); }},
 
-    {"Output100K",
+    {"Resolution",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetOutput100K(o3d3xx::stob(val)); }},
+     { im->SetResolution(std::stoi(val)); }},
+
+    {"ClippingCuboid",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetClippingCuboid(val); }},
 
     {"ReduceMotionArtifacts",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
@@ -548,7 +565,8 @@ o3d3xx::ImagerConfig::ToJSON() const
 
   pt.put("FrameRate", this->FrameRate());
   pt.put("MinimumAmplitude", this->MinimumAmplitude());
-  pt.put("Output100K", this->Output100K());
+  pt.put("Resolution", this->Resolution());
+  pt.put("ClippingCuboid", this->ClippingCuboid());
   pt.put("ReduceMotionArtifacts", this->ReduceMotionArtifacts());
   pt.put("SpatialFilterType", this->SpatialFilterType());
   pt.put("SymmetryThreshold", this->SymmetryThreshold());

@@ -270,7 +270,8 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("ExposureTimeList"));
       ASSERT_NO_THROW(params.at("FrameRate"));
       ASSERT_NO_THROW(params.at("MinimumAmplitude"));
-      ASSERT_NO_THROW(params.at("Output100K"));
+      ASSERT_NO_THROW(params.at("Resolution"));
+      ASSERT_NO_THROW(params.at("ClippingCuboid"));
       ASSERT_NO_THROW(params.at("ReduceMotionArtifacts"));
       ASSERT_NO_THROW(params.at("SpatialFilterType"));
       ASSERT_NO_THROW(params.at("SymmetryThreshold"));
@@ -285,21 +286,21 @@ TEST_F(AppImagerTest, GetImagerParameters)
           ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 24);
+          ASSERT_EQ(params.size(), 25);
         }
       else if (boost::algorithm::ends_with(type, "low"))
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 25);
+          ASSERT_EQ(params.size(), 26);
         }
       else
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
 
-          ASSERT_EQ(params.size(), 26);
+          ASSERT_EQ(params.size(), 27);
         }
     }
 
@@ -405,7 +406,7 @@ TEST_F(AppImagerTest, ImagerConfig)
 
       ASSERT_NO_THROW(im->SetFrameRate(10));
       ASSERT_NO_THROW(im->SetMinimumAmplitude(5));
-      ASSERT_NO_THROW(im->SetOutput100K(false));
+      ASSERT_NO_THROW(im->SetResolution(o3d3xx::RES_23K));
       ASSERT_NO_THROW(im->SetReduceMotionArtifacts(true));
       ASSERT_NO_THROW(im->SetSpatialFilterType(
         static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER)));
@@ -532,7 +533,8 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
 
   ASSERT_EQ(im->FrameRate(), im2->FrameRate());
   ASSERT_EQ(im->MinimumAmplitude(), im2->MinimumAmplitude());
-  ASSERT_EQ(im->Output100K(), im2->Output100K());
+  ASSERT_EQ(im->Resolution(), im2->Resolution());
+  ASSERT_EQ(im->ClippingCuboid(), im2->ClippingCuboid());
   ASSERT_EQ(im->ReduceMotionArtifacts(), im2->ReduceMotionArtifacts());
   ASSERT_EQ(im->SpatialFilterType(), im2->SpatialFilterType());
   ASSERT_EQ(im->SymmetryThreshold(), im2->SymmetryThreshold());

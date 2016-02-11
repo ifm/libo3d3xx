@@ -117,7 +117,7 @@ namespace o3d3xx
     void SetExposureTime(int usecs);
 
     std::string ExposureTimeList() const noexcept;
-    void SetExposureTimeList(const std::string s) noexcept;
+    void SetExposureTimeList(const std::string& s) noexcept;
 
     int ExposureTimeRatio() const;
     void SetExposureTimeRatio(int ratio);
@@ -128,8 +128,11 @@ namespace o3d3xx
     int MinimumAmplitude() const noexcept;
     void SetMinimumAmplitude(int min) noexcept;
 
-    bool Output100K() const noexcept;
-    void SetOutput100K(bool on) noexcept;
+    int Resolution() const noexcept;
+    void SetResolution(int res) noexcept;
+
+    std::string ClippingCuboid() const noexcept;
+    void SetClippingCuboid(const std::string& s) noexcept;
 
     bool ReduceMotionArtifacts() const noexcept;
     void SetReduceMotionArtifacts(bool on) noexcept;
@@ -227,8 +230,11 @@ namespace o3d3xx
     /** Minimum amplitude return required for a good pixel */
     int minimum_amplitude_;
 
-    /** Enables the 100K imager **/
-    bool output_100k_;
+    /** Toggles the image resolution */
+    int resolution_;
+
+    /** Sets a cuboid region of interest */
+    std::string clipping_cuboid_;
 
     /** Enables filtering for motion artifacts */
     bool reduce_motion_artifacts_;

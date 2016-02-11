@@ -55,6 +55,9 @@ namespace o3d3xx
   extern const std::string XMLRPC_SPATIALFILTER;
   extern const std::string XMLRPC_TEMPORALFILTER;
 
+  extern const int RES_23K;
+  extern const int RES_100K;
+
   /**
    * Software interface to the IFM O3D3XX camera.
    */

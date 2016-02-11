@@ -17,7 +17,7 @@ protected:
     idx_ = cam_->CopyApplication(old_active_idx_);
     cam_->EditApplication(idx_);
     o3d3xx::ImagerConfig::Ptr im = cam_->GetImagerConfig();
-    im->SetOutput100K(true);
+    im->SetResolution(o3d3xx::RES_100K);
     cam_->SetImagerConfig(im.get());
     cam_->SaveApp();
 

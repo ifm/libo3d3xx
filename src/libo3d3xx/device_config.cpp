@@ -44,6 +44,8 @@ o3d3xx::DeviceConfig::DeviceConfig()
     extrinsic_calib_rot_x_(0.0),
     extrinsic_calib_rot_y_(0.0),
     extrinsic_calib_rot_z_(0.0),
+    evaluation_finished_min_hold_time_(10),
+    save_restore_stats_on_appl_switch_(true),
     ip_address_config_(0),
     password_activated_(false),
     operating_mode_(0)
@@ -289,6 +291,30 @@ o3d3xx::DeviceConfig::SetExtrinsicCalibRotZ(double z) noexcept
 }
 
 int
+o3d3xx::DeviceConfig::EvaluationFinishedMinHoldTime() const noexcept
+{
+  return this->evaluation_finished_min_hold_time_;
+}
+
+void
+o3d3xx::DeviceConfig::SetEvaluationFinishedMinHoldTime(int t) noexcept
+{
+  this->evaluation_finished_min_hold_time_ = t;
+}
+
+bool
+o3d3xx::DeviceConfig::SaveRestoreStatsOnApplSwitch() const noexcept
+{
+  return this->save_restore_stats_on_appl_switch_;
+}
+
+void
+o3d3xx::DeviceConfig::SetSaveRestoreStatsOnApplSwitch(bool on) noexcept
+{
+  this->save_restore_stats_on_appl_switch_ = on;
+}
+
+int
 o3d3xx::DeviceConfig::IPAddressConfig() const noexcept
 {
   return this->ip_address_config_;
@@ -367,75 +393,83 @@ o3d3xx::DeviceConfig::mutator_map =
   {
     {"Name",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetName(val); } },
+     { dev->SetName(val); }},
 
     {"Description",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetDescription(val); } },
+     { dev->SetDescription(val); }},
 
     {"ActiveApplication",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetActiveApplication(std::stoi(val)); } },
+     { dev->SetActiveApplication(std::stoi(val)); }},
 
     {"PcicEipEnabled",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetPcicEipEnabled(o3d3xx::stob(val)); } },
+     { dev->SetPcicEipEnabled(o3d3xx::stob(val)); }},
 
     {"PcicTcpPort",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetPcicTCPPort(std::stoi(val)); } },
+     { dev->SetPcicTCPPort(std::stoi(val)); }},
 
     {"PcicProtocolVersion",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetPcicProtocolVersion(std::stoi(val)); } },
+     { dev->SetPcicProtocolVersion(std::stoi(val)); }},
 
     {"IOLogicType",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetIOLogicType(std::stoi(val)); } },
+     { dev->SetIOLogicType(std::stoi(val)); }},
 
     {"IODebouncing",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetIODebouncing(o3d3xx::stob(val)); } },
+     { dev->SetIODebouncing(o3d3xx::stob(val)); }},
 
     {"IOExternApplicationSwitch",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetIOExternApplicationSwitch(std::stoi(val)); } },
+     { dev->SetIOExternApplicationSwitch(std::stoi(val)); }},
 
     {"SessionTimeout",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetSessionTimeout(std::stoi(val)); } },
+     { dev->SetSessionTimeout(std::stoi(val)); }},
 
     {"ServiceReportPassedBuffer",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetServiceReportPassedBuffer(std::stoi(val)); } },
+     { dev->SetServiceReportPassedBuffer(std::stoi(val)); }},
 
     {"ServiceReportFailedBuffer",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetServiceReportFailedBuffer(std::stoi(val)); } },
+     { dev->SetServiceReportFailedBuffer(std::stoi(val)); }},
 
     {"ExtrinsicCalibTransX",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetExtrinsicCalibTransX(std::stod(val)); } },
+     { dev->SetExtrinsicCalibTransX(std::stod(val)); }},
 
     {"ExtrinsicCalibTransY",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetExtrinsicCalibTransY(std::stod(val)); } },
+     { dev->SetExtrinsicCalibTransY(std::stod(val)); }},
 
     {"ExtrinsicCalibTransZ",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetExtrinsicCalibTransZ(std::stod(val)); } },
+     { dev->SetExtrinsicCalibTransZ(std::stod(val)); }},
 
     {"ExtrinsicCalibRotX",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetExtrinsicCalibRotX(std::stod(val)); } },
+     { dev->SetExtrinsicCalibRotX(std::stod(val)); }},
 
     {"ExtrinsicCalibRotY",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetExtrinsicCalibRotY(std::stod(val)); } },
+     { dev->SetExtrinsicCalibRotY(std::stod(val)); }},
 
     {"ExtrinsicCalibRotZ",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetExtrinsicCalibRotZ(std::stod(val)); } },
+     { dev->SetExtrinsicCalibRotZ(std::stod(val)); }},
+
+    {"EvaluationFinishedMinHoldTime",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetEvaluationFinishedMinHoldTime(std::stoi(val)); }},
+
+    {"SaveRestoreStatsOnApplSwitch",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetSaveRestoreStatsOnApplSwitch(o3d3xx::stob(val)); }},
   };
 
 std::string
@@ -461,6 +495,10 @@ o3d3xx::DeviceConfig::ToJSON() const
   pt.put("ExtrinsicCalibRotX", this->ExtrinsicCalibRotX());
   pt.put("ExtrinsicCalibRotY", this->ExtrinsicCalibRotY());
   pt.put("ExtrinsicCalibRotZ", this->ExtrinsicCalibRotZ());
+  pt.put("EvaluationFinishedMinHoldTime",
+         this->EvaluationFinishedMinHoldTime());
+  pt.put("SaveRestoreStatsOnApplSwitch",
+         this->SaveRestoreStatsOnApplSwitch());
   pt.put("IPAddressConfig", this->IPAddressConfig());
   pt.put("PasswordActivated", this->PasswordActivated());
   pt.put("OperatingMode", this->OperatingMode());
