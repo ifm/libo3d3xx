@@ -15,7 +15,7 @@ set(GIT_PROJECT_NAME "libo3d3xx")
 ## $ make
 ##
 ################################################
-set(CMAKE_INSTALL_PREFIX /opt/${GIT_PROJECT_NAME})
+set(CMAKE_INSTALL_PREFIX /usr)
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
 
 option(BUILD_TESTS "Build unit tests" ON)
@@ -138,20 +138,6 @@ if(BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS)
     EXPORT o3d3xx-targets DESTINATION lib/o3d3xx)
 endif(BUILD_SHARED_LIBS OR BUILD_STATIC_LIBS)
 
-file(COPY ${O3D3XX_SOURCE_DIR}/etc
-  DESTINATION ${O3D3XX_BINARY_DIR}
-  )
-configure_file(
-  ${O3D3XX_BINARY_DIR}/etc/setup.bash.in
-  ${O3D3XX_BINARY_DIR}/etc/setup.bash
-  @ONLY
-  )
-install(DIRECTORY ${O3D3XX_BINARY_DIR}/etc
-  DESTINATION ${CMAKE_INSTALL_PREFIX}
-  PATTERN "*.in" EXCLUDE
-  PATTERN ".git" EXCLUDE
-  PATTERN "*~" EXCLUDE
-  )
 install(DIRECTORY ${O3D3XX_BINARY_DIR}/include
   DESTINATION ${CMAKE_INSTALL_PREFIX}
   PATTERN "*.in" EXCLUDE
@@ -159,15 +145,6 @@ install(DIRECTORY ${O3D3XX_BINARY_DIR}/include
   PATTERN "*~" EXCLUDE
   )
 
-# `make package`
-configure_file(
-  ${O3D3XX_SOURCE_DIR}/debian/conffiles.in
-  ${O3D3XX_BINARY_DIR}/debian/conffiles
-  @ONLY
-  )
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA
-  "${O3D3XX_BINARY_DIR}/debian/conffiles"
-  )
 set(CPACK_SET_DESTDIR "on")
 set(CPACK_GENERATOR "DEB")
 set(CPACK_PACKAGE_NAME ${GIT_PROJECT_NAME})

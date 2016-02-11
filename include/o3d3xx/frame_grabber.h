@@ -127,6 +127,11 @@ namespace o3d3xx
      */
     virtual void Run();
 
+    /**
+     * Sets the PCIC 'c' command schema buffer to send to the camera.
+     */
+    void SetSchemaBuffer(std::uint16_t mask);
+
   private:
     /**
      * Shared pointer to the camera this frame grabber will grab frames from.
@@ -143,6 +148,11 @@ namespace o3d3xx
      * communicates directly with the sensor.
      */
     std::unique_ptr<std::thread> thread_;
+
+    /**
+     * The user-supplied schema mask to stream from the camera.
+     */
+    std::uint16_t mask_;
 
     /**
      * Holds the PCIC command needed to set the result schema

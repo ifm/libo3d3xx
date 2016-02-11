@@ -219,12 +219,12 @@ available to you can be viewed with:
 	    IMG_AMP:  2
 	    IMG_RAMP: 4
 	    IMG_CART: 8
-	    IMG_UVEC: 16
+        IMG_UVEC: 16
 
 So, to generate a schema (and its associated mask) you can:
 
-    $ o3d3xx-schema -s "IMG_RDIS|IMG_AMP|IMG_UVEC"
-    mask=19, str=IMG_RDIS|IMG_AMP|IMG_UVEC
+    $ o3d3xx-schema -s "IMG_RDIS|IMG_AMP"
+    mask=3, str=IMG_RDIS|IMG_AMP
     ---
 
       {
@@ -235,12 +235,13 @@ So, to generate a schema (and its associated mask) you can:
            {"type":"string", "value":"star", "id":"start_string"},
            {"type":"blob", "id":"distance_image"},
            {"type":"blob", "id":"normalized_amplitude_image"},
-           {"type":"blob", "id":"all_unit_vector_matrices"},
            {"type":"blob", "id":"confidence_image"},
-           {"type":"blob", "id":"diagnostic_data" },
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }
 
+
 This shows that if this is the schema you wanted the camera to stream back, you
-can pass a mask of `19` to the `o3d3xx::FrameGrabber` ctor.
+can pass a mask of `3` to the `o3d3xx::FrameGrabber` ctor. Of course, in your
+code, you will use the defined constants (e.g., `o3d3xx::IMG_RDIS`) and `or`
+them together to build up the desired schema.

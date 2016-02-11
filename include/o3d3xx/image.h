@@ -35,8 +35,8 @@ namespace o3d3xx
   extern const std::uint16_t IMG_RDIS; // radial distance
   extern const std::uint16_t IMG_AMP;  // normalized amplitude
   extern const std::uint16_t IMG_RAMP; // raw amplitude
-  extern const std::uint16_t IMG_CART; // cartesian
-  extern const std::uint16_t IMG_UVEC; // unit vectors
+  extern const std::uint16_t IMG_CART; // Cartesian
+  extern const std::uint16_t IMG_UVEC; // Unit vectors
 
   enum class pixel_format : std::uint8_t
   {
@@ -110,6 +110,16 @@ namespace o3d3xx
     cv::Mat DepthImage();
 
     /**
+     * Returns the wrapped unit vector image. This does NOT make a copy of the
+     * data.
+     *
+     * The unit vector matrix is a 3-channel matrix where for each pixel in the
+     * RadialDistanceImage, there exists the vector e_x, e_y, e_z (the three
+     * channels of this matrix).
+     */
+    cv::Mat UnitVectors();
+
+    /**
      * Returns the wrapped amplitude image. This does NOT make a copy of the
      * data.
      *
@@ -167,6 +177,18 @@ namespace o3d3xx
     pcl::PointCloud<o3d3xx::PointT>::Ptr Cloud();
 
     /**
+     * Returns a 6-element vector containing the extrinsic calibration
+     * data. NOTE: This is the extrinsics WRT the IFM optical frame.
+     *
+     * The elements are:
+     * tx, ty, tz, rot_x, rot_y, rot_z
+     *
+     * The translation units are mm
+     * The rotation units are degrees
+     */
+    std::vector<float> Extrinsics();
+
+    /**
      * Returns (a copy of) the underlying byte buffer read from the camera.
      */
     std::vector<std::uint8_t> Bytes();
@@ -215,6 +237,11 @@ namespace o3d3xx
     std::vector<std::uint8_t> bytes_;
 
     /**
+     * The extrinsic calibration data
+     */
+    std::vector<float> extrinsics_;
+
+    /**
      * Point cloud used to hold the cartesian xyz and amplitude data (intensity
      * channel).
      *
@@ -226,10 +253,15 @@ namespace o3d3xx
     /**
      * OpenCV image encoding of the radial image data
      *
-     * NOTE: Unlike the point cloude, the data in the depth image remain in
+     * NOTE: Unlike the point cloud, the data in the depth image remain in
      * millimeters.
      */
     cv::Mat depth_;
+
+    /**
+     * OpenCV image encoding of the unit vectors
+     */
+    cv::Mat uvec_;
 
     /**
      * OpenCV image encoding of the normalized amplitude data

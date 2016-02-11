@@ -39,12 +39,15 @@ auto __o3d3xx_schema_mask__ = []()->std::uint16_t
     try
       {
         return std::getenv("O3D3XX_MASK") == nullptr ?
-                 o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_CART :
-                 std::stoul(std::string(std::getenv("O3D3XX_MASK"))) & 0xFFFF;
+            o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_RAMP|o3d3xx::IMG_CART :
+            std::stoul(std::string(std::getenv("O3D3XX_MASK"))) & 0xFFFF;
       }
     catch (const std::exception& ex)
       {
-        return o3d3xx::IMG_RDIS|o3d3xx::IMG_AMP|o3d3xx::IMG_CART;
+        return o3d3xx::IMG_RDIS |
+               o3d3xx::IMG_AMP  |
+               o3d3xx::IMG_RAMP |
+               o3d3xx::IMG_CART;
       }
   };
 
@@ -52,25 +55,10 @@ const std::uint16_t o3d3xx::DEFAULT_SCHEMA_MASK = __o3d3xx_schema_mask__();
 
 o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam, std::uint16_t mask)
   : cam_(cam),
-    io_service_()
+    io_service_(),
+    mask_(mask)
 {
-  std::string schema = o3d3xx::make_pcic_schema(mask);
-  int c_len = 4 + 1 + 9 + schema.size() + 2;
-  std::ostringstream str;
-  str << "1000"
-      << 'L' << std::setfill('0') << std::setw(9) << c_len
-      << '\r' << '\n'
-      << "1000" << 'c'
-      << std::setfill('0') << std::setw(9)
-      << schema.size()
-      << schema
-      << '\r' << '\n';
-
-  DLOG(INFO) << "'c' command: " << str.str();
-
-  std::string c_command = str.str();
-  this->schema_buffer_.assign(c_command.begin(), c_command.end());
-  DLOG(INFO) << "c_command: " << c_command;
+  this->SetSchemaBuffer(this->mask_);
 
   //
   // start the frame grabber thread
@@ -94,6 +82,28 @@ o3d3xx::FrameGrabber::~FrameGrabber()
     }
 
   DLOG(INFO) << "FrameGrabber done.";
+}
+
+void
+o3d3xx::FrameGrabber::SetSchemaBuffer(std::uint16_t mask)
+{
+  std::string schema = o3d3xx::make_pcic_schema(mask);
+  int c_len = 4 + 1 + 9 + schema.size() + 2;
+  std::ostringstream str;
+  str << "1000"
+      << 'L' << std::setfill('0') << std::setw(9) << c_len
+      << '\r' << '\n'
+      << "1000" << 'c'
+      << std::setfill('0') << std::setw(9)
+      << schema.size()
+      << schema
+      << '\r' << '\n';
+
+  DLOG(INFO) << "'c' command: " << str.str();
+
+  std::string c_command = str.str();
+  this->schema_buffer_.assign(c_command.begin(), c_command.end());
+  DLOG(INFO) << "c_command: " << c_command;
 }
 
 void

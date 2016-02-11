@@ -1,6 +1,9 @@
 ## Changes between libo3d3xx 0.2.0 and 0.3.0
 
-**IMPORTANT:** This release breaks both API and ABI compatibility with 0.2.0.
+### CMAKE_INSTALL_PREFIX
+
+The default install location is now `/usr`. This removes the need for setting
+`LD_LIBRARY_PATH` and having a `setup.bash` file.
 
 ### Custom/Pluggable PCIC Schemas
 
@@ -18,14 +21,18 @@ variable is interrpeted as a `uint16_t`. If the passed in value causes an error
 during conversion, the default mask is used -- i.e., the mask returned by
 running `o3d3xx-schema` with no arguments.
 
-### Raw Amplitude
+### ImageBuffer
 
-Now with the support of pluggable schemas, the raw amplitude is no longer part
-of the default schema. This can be turned on by users on a case-by-case basis.
+* Has a new method `Extrinsics()` to return the camera extrinsics as reported
+  by the O3D (so, from the internal o3d frame (from the sensor glass) to the
+  target frame). This is provided to assist in reconstructing the Cartesian
+  data from the radial distance image and the unit vectors.
 
-### o3d3xx-viewer
-
-DOCUMENT THE CHANGES HERE
+* Has a new method `UnitVectors()` to return the rotated unit vectors that can
+  be used, together with the radial distance image and extrinsics, to compute
+  the cartesian data off-board the camera. An example of effectively using this
+  can be found in the `ImageBuffers_Tests.ComputeCartesian` unit test in
+  `o3d3xx-image-tests.cpp`.
 
 ### o3d3xx-schema
 
@@ -43,16 +50,16 @@ DOCUMENT THE CHANGES HERE
 
 ### DeviceConfig
 
-* Changed default for the ServiceReportFailedBuffer and ServiceReportPassedBuffer
-  default values from 5 to 15. This is an un-doing of the change from 0.1.11
-  to 0.2.0 (see below), but the new 1.2.x firmware restores these old defaults
-  so we will do the same here.
+* Changed default for the ServiceReportFailedBuffer and
+  ServiceReportPassedBuffer default values from 5 to 15. This is an un-doing of
+  the change from 0.1.11 to 0.2.0 (see below), but the new 1.2.x firmware
+  restores these old defaults so we will do the same here.
 
 ### 100K Imager
 
-As of the 1.2.x firmware, 100K images are officially supported by IFM. So, we
-have implemented that support into this library and have removed the backdoor
-methods for doing it.
+* As of the 1.2.x firmware, 100K images are officially supported by IFM. So, we
+  have implemented that support into this library and have removed the backdoor
+  methods for doing it.
 
 ## Changes between libo3d3xx 0.1.11 and 0.2.0
 

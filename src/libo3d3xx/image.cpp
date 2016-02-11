@@ -35,7 +35,7 @@ const std::uint16_t o3d3xx::IMG_RDIS = 1;  // 2^0
 const std::uint16_t o3d3xx::IMG_AMP  = 2;  // 2^1
 const std::uint16_t o3d3xx::IMG_RAMP = 4;  // 2^2
 const std::uint16_t o3d3xx::IMG_CART = 8;  // 2^3
-const std::uint16_t o3d3xx::IMG_UVEC = 16; // 2^4
+const std::uint16_t o3d3xx::IMG_UVEC = 16; // 2^16
 
 bool
 o3d3xx::verify_ticket_buffer(const std::vector<std::uint8_t>& buff)
@@ -131,7 +131,8 @@ o3d3xx::get_num_bytes_in_pixel_format(o3d3xx::pixel_format f)
 
 o3d3xx::ImageBuffer::ImageBuffer()
   : dirty_(false),
-    cloud_(new pcl::PointCloud<o3d3xx::PointT>())
+    cloud_(new pcl::PointCloud<o3d3xx::PointT>()),
+    extrinsics_({0., 0., 0., 0., 0., 0.})
 { }
 
 o3d3xx::ImageBuffer::ImageBuffer(const o3d3xx::ImageBuffer& src_buff)
@@ -200,6 +201,13 @@ o3d3xx::ImageBuffer::DepthImage()
 }
 
 cv::Mat
+o3d3xx::ImageBuffer::UnitVectors()
+{
+  this->Organize();
+  return this->uvec_;
+}
+
+cv::Mat
 o3d3xx::ImageBuffer::AmplitudeImage()
 {
   this->Organize();
@@ -234,6 +242,13 @@ o3d3xx::ImageBuffer::Cloud()
   return this->cloud_;
 }
 
+std::vector<float>
+o3d3xx::ImageBuffer::Extrinsics()
+{
+  this->Organize();
+  return this->extrinsics_;
+}
+
 std::vector<std::uint8_t>
 o3d3xx::ImageBuffer::Bytes()
 {
@@ -251,7 +266,7 @@ o3d3xx::ImageBuffer::Organize()
   // get indices to the start of each chunk of interest in the image buffer
   // NOTE: These could get optimized by using apriori values if necessary
   std::size_t INVALID_IDX = std::numeric_limits<std::size_t>::max();
-  std::size_t xidx, yidx, zidx, aidx, raw_aidx, cidx, didx = INVALID_IDX;
+  std::size_t xidx, yidx, zidx, aidx, raw_aidx, cidx, didx, uidx = INVALID_IDX;
 
   xidx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::CARTESIAN_X);
@@ -267,6 +282,8 @@ o3d3xx::ImageBuffer::Organize()
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::CONFIDENCE);
   didx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::RADIAL_DISTANCE);
+  uidx =
+    o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::UNIT_VECTOR_ALL);
 
   // We *must* have the confidence image. If we do not, we bail out now
   if (cidx == INVALID_IDX)
@@ -277,6 +294,7 @@ o3d3xx::ImageBuffer::Organize()
   bool AMP_OK = aidx != INVALID_IDX;
   bool RAW_AMP_OK = raw_aidx != INVALID_IDX;
   bool RDIST_OK = didx != INVALID_IDX;
+  bool UVEC_OK = uidx != INVALID_IDX;
   bool CARTESIAN_OK =
     (xidx != INVALID_IDX) && (yidx != INVALID_IDX) && (zidx != INVALID_IDX);
 
@@ -286,7 +304,8 @@ o3d3xx::ImageBuffer::Organize()
              << ", aidx=" << aidx
              << ", raw_aidx=" << raw_aidx
              << ", cidx=" << cidx
-             << ", didx=" << didx;
+             << ", didx=" << didx
+             << ", uidx=" << uidx;
 
   // Get how many bytes to increment in the buffer for each pixel
   // NOTE: These can be discovered dynamically, however, for now we use our a
@@ -298,6 +317,7 @@ o3d3xx::ImageBuffer::Organize()
   std::size_t aincr = aidx != INVALID_IDX ? 2 : 0; // uint16_t
   std::size_t raw_aincr = raw_aidx != INVALID_IDX ? 2 : 0; // uint16_t
   std::size_t dincr = didx != INVALID_IDX ? 2 : 0; // uint16_t
+  std::size_t uincr = uidx != INVALID_IDX ? 4 * 3 : 0; // float32 * 3
 
   // NOTE: we use the `cidx' corresponding to the confidence image because
   // it is an invariant in terms of what we send to the camera as valid pcic
@@ -323,6 +343,7 @@ o3d3xx::ImageBuffer::Organize()
   this->cloud_->points.resize(num_points);
 
   this->xyz_image_.create(height, width, CV_16SC3);
+  this->uvec_.create(height, width, CV_32FC3);
   this->conf_.create(height, width, CV_8UC1);
   this->depth_.create(height, width, CV_16UC1);
   this->amp_.create(height, width, CV_16UC1);
@@ -331,6 +352,7 @@ o3d3xx::ImageBuffer::Organize()
   // move index pointers to where pixel data starts
   cidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
   didx += RDIST_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
+  uidx += UVEC_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
   aidx += AMP_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
   raw_aidx += RAW_AMP_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
   if (CARTESIAN_OK)
@@ -347,24 +369,28 @@ o3d3xx::ImageBuffer::Organize()
   int col = 0;
   int row = -1;
   int xyz_col = 0;
+  int uvec_col = 0;
 
   std::uint16_t* depth_row_ptr;
   std::uint16_t* amp_row_ptr;
   std::uint16_t* raw_amp_row_ptr;
   std::uint8_t* conf_row_ptr;
   std::int16_t* xyz_row_ptr;
+  float* uvec_row_ptr;
 
   std::int16_t x_, y_, z_;
+  float e_x, e_y, e_z;
 
   for (std::size_t i = 0; i < num_points;
        ++i, xidx += xincr, yidx += yincr, zidx += zincr,
          cidx += cincr, aidx += aincr, didx += dincr,
-         raw_aidx += raw_aincr)
+         raw_aidx += raw_aincr, uidx += uincr)
     {
       o3d3xx::PointT& pt = this->cloud_->points[i];
 
       col = i % width;
       xyz_col = col * 3; // 3 channels: xyz
+      uvec_col = col * 3; // 3 channels: u_x, u_y, u_z
       if (col == 0)
         {
           row += 1;
@@ -373,6 +399,7 @@ o3d3xx::ImageBuffer::Organize()
           raw_amp_row_ptr = this->raw_amp_.ptr<std::uint16_t>(row);
           conf_row_ptr = this->conf_.ptr<std::uint8_t>(row);
           xyz_row_ptr = this->xyz_image_.ptr<std::int16_t>(row);
+          uvec_row_ptr = this->uvec_.ptr<float>(row);
         }
 
       conf_row_ptr[col] = this->bytes_.at(cidx);
@@ -449,6 +476,20 @@ o3d3xx::ImageBuffer::Organize()
           raw_amp_row_ptr[col] = bad_pixel;
         }
 
+      if (UVEC_OK)
+        {
+          e_x = o3d3xx::mkval<float>(this->bytes_.data()+uidx);
+          e_y = o3d3xx::mkval<float>(this->bytes_.data()+uidx+4);
+          e_z = o3d3xx::mkval<float>(this->bytes_.data()+uidx+8);
+
+          uvec_row_ptr[uvec_col] = e_x;
+          uvec_row_ptr[uvec_col + 1] = e_y;
+          uvec_row_ptr[uvec_col + 2] = e_z;
+
+          // Intentionlly no 'else' clause on this. We do not want to stomp
+          // on any previously stored unit vector data.
+        }
+
       pt.data_c[0] = pt.data_c[1] = pt.data_c[2] = pt.data_c[3] = 0;
       pt.intensity = amp_row_ptr[col];
     }
@@ -458,6 +499,28 @@ o3d3xx::ImageBuffer::Organize()
   this->cloud_->sensor_orientation_.x() = 0.0f;
   this->cloud_->sensor_orientation_.y() = 0.0f;
   this->cloud_->sensor_orientation_.z() = 0.0f;
+
+  // Set the extrinsics. Since our schema architecture assumes the extrinsics
+  // to be an invariant, and we know where the data are a-priori, we leverage
+  // that here.
+  //
+  // NOTE: The last 6-bytes of the buffer contain the sentinel data:
+  //
+  // [115, 116, 111, 112, 13, 10] aka ['s', 't', 'o', 'p', '\r', '\n']
+  //
+  std::size_t last_idx = this->bytes_.size() - 1;
+  this->extrinsics_[0] = // tx
+    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 29);
+  this->extrinsics_[1] = // ty
+    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 25);
+  this->extrinsics_[2] = // tz
+    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 21);
+  this->extrinsics_[3] = // rot_x
+    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 17);
+  this->extrinsics_[4] = // rot_y
+    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 13);
+  this->extrinsics_[5] = // rot_z
+    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 9);
 
   this->_SetDirty(false);
 }
