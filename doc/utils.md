@@ -168,24 +168,24 @@ run the program with no arguments:
     $ o3d3xx-schema
     mask=15, str=-
     ---
+
       {
         "layouter": "flexible",
         "format"  : {"dataencoding":"ascii"},
         "elements":
          [
            {"type":"string", "value":"star", "id":"start_string"},
+           {"type":"blob", "id":"distance_image"},
            {"type":"blob", "id":"normalized_amplitude_image"},
            {"type":"blob", "id":"amplitude_image"},
-           {"type":"blob", "id":"distance_image"},
            {"type":"blob", "id":"x_image"},
            {"type":"blob", "id":"y_image"},
            {"type":"blob", "id":"z_image"},
            {"type":"blob", "id":"confidence_image"},
-           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"blob", "id":"extrinsic_calibration"},
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }
-
 
 You can see the schema that would be generated from a specific mask. For
 example, if you specified a mask of `1`:
@@ -202,7 +202,7 @@ example, if you specified a mask of `1`:
            {"type":"string", "value":"star", "id":"start_string"},
            {"type":"blob", "id":"distance_image"},
            {"type":"blob", "id":"confidence_image"},
-           {"type":"blob", "id":"diagnostic_data" },
+           {"type":"blob", "id":"extrinsic_calibration"},
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }
@@ -236,10 +236,10 @@ So, to generate a schema (and its associated mask) you can:
            {"type":"blob", "id":"distance_image"},
            {"type":"blob", "id":"normalized_amplitude_image"},
            {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"extrinsic_calibration"},
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }
-
 
 This shows that if this is the schema you wanted the camera to stream back, you
 can pass a mask of `3` to the `o3d3xx::FrameGrabber` ctor. Of course, in your
