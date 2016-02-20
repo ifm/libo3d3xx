@@ -1,3 +1,32 @@
+## Changes between libo3d3xx 0.3.0 and 0.4.0
+
+### Modularization of libo3d3xx
+
+* The project has been broken up into three separate sub-projects or
+  *modules*. They are:
+  * libo3d3xx-camera: Implements the XML-RPC protocol
+  * libo3d3xx-framegrabber: Streams image data from camera
+  * libo3d3xx-image: Organizes the image data utilizing OpenCV and PCL data
+    structures.
+
+* The main README page contains updated build instructions for the new code
+  structure.
+
+### ByteBuffer interface
+
+* Introduced a new ByteBuffer interface. This is a class intended to be
+  subclassed and would allow developers to use only the `camera` and
+  `framegrabber` modules and supply their own image/cloud data structures. This
+  effectively makes the usage of OpenCV and PCL optional. ByteBuffer is bundled
+  as part of the `framegrabber` module.
+
+### Deprecations
+
+* Removed `hist1` function from `util.hpp`. This has already been taken out of
+  usage by `o3d3xx-ros` which to the best of my knowledge, was the only
+  consumer of this interface. The function is simple enough to implement for
+  users that need it.
+
 ## Changes between libo3d3xx 0.2.0 and 0.3.0
 
 ### XML-RPC Protocol

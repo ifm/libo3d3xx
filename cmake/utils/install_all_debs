@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+set -e
+
+for deb in $(ls -1 *.deb)
+do
+    dpkg -i ${deb}
+done
