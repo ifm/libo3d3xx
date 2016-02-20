@@ -62,3 +62,19 @@ ExternalProject_Add_Step(O3D3XX_FRAMEGRABBER
 ################################################
 ## o3d3xx-image module
 ################################################
+
+ExternalProject_Add(O3D3XX_IMAGE
+  DEPENDS O3D3XX_CAMERA O3D3XX_FRAMEGRABBER
+  SOURCE_DIR ${O3D3XX_SOURCE_DIR}/modules/image
+  TEST_BEFORE_INSTALL 1
+  TEST_COMMAND make check
+  INSTALL_COMMAND sudo ${O3D3XX_INSTALL_CMD} install
+  )
+
+ExternalProject_Add_Step(O3D3XX_IMAGE
+  package
+  DEPENDEES test
+  DEPENDERS install
+  COMMAND ${CMAKE_COMMAND} -E chdir .  make package
+  WORKING_DIRECTORY O3D3XX_IMAGE-prefix/src/O3D3XX_IMAGE-build
+  )
