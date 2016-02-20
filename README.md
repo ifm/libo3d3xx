@@ -77,7 +77,7 @@ Features
 High-level features of this library include:
 
 * The code is written in modern C++11.
-* The library is modular, allowing developer to use only the parts they need
+* The library is modular, allowing developers to use only the parts they need
   without incurring the overhead of unnecessary dependencies.
 * The `image` module of the library employs PCL and OpenCV native image formats
   for users who wish to immediately take advantage of the time-tested
@@ -114,7 +114,7 @@ of cameras.
 
 Implements a framegrabber for acquiring image data from the
 O3D3xx. Additionally, this module defines a `ByteBuffer` interface allowing
-developers to bridge the data image data from the camera to their favorite
+developers to bridge the image data from the camera to their favorite
 image and point cloud data structures.
 
 * libo3d3xx_camera (part of this project)

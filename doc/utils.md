@@ -3,7 +3,8 @@ libo3d3xx Command Line Utilities
 
 The following command-line utilities are provided with `libo3d3xx`:
 
-0. [o3d3xx-viewer](#o3d3xx-viewer)
+### camera module utilities:
+
 1. [o3d3xx-config](#o3d3xx-config)
 2. [o3d3xx-dump](#o3d3xx-dump)
 3. [o3d3xx-ls](#o3d3xx-ls)
@@ -11,17 +12,25 @@ The following command-line utilities are provided with `libo3d3xx`:
 5. [o3d3xx-reset](#o3d3xx-reset)
 6. [o3d3xx-rm](#o3d3xx-rm)
 7. [o3d3xx-version](#o3d3xx-version)
-8. [o3d3xx-hz](#o3d3xx-hz)
-9. [o3d3xx-ifm-import](#o3d3xx-ifm-import)
-10. [o3d3xx-ifm-export](#o3d3xx-ifm-export)
-11. [o3d3xx-schema](#o3d3xx-schema)
+8. [o3d3xx-ifm-import](#o3d3xx-ifm-import)
+9. [o3d3xx-ifm-export](#o3d3xx-ifm-export)
+
+
+### framegrabber module utilities:
+
+1. [o3d3xx-hz](#o3d3xx-hz)
+2. [o3d3xx-schema](#o3d3xx-schema)
+
+### image module utilities:
+
+1. [o3d3xx-viewer](#o3d3xx-viewer)
+
 
 All of the command-line utilities accept the `--help` and the `--version`
 flags. `--help` will list the arguments accepted by the program and `--version`
 will display the version of `libo3d3xx` that the program is linked to.
 
 A brief description of each program now follows:
-
 
 o3d3xx-viewer
 -------------
