@@ -27,6 +27,9 @@
   consumer of this interface. The function is simple enough to implement for
   users that need it.
 
+* Removed some old documentation that no longer applies: `custom_builds` and
+  `using`. They have been moved to `doc/attic`.
+
 ## Changes between libo3d3xx 0.2.0 and 0.3.0
 
 ### XML-RPC Protocol
@@ -43,9 +46,9 @@
 * The `FrameGrabber` now supports parsing return data from custom schemas based
   on a _mask_. This feature has been implemented so that user of low bandwidth
   or noisy (e.g., WiFi) networks can configure the camera to return only the
-  data they need and to not consume unnecessary bandwith. As of this writing,
-  the aforementioned goal is only partially achieved with the current
-  code. This feature is still under active development.
+  data they need and to not consume unnecessary bandwith. The aforementioned
+  goal is only partially achieved with this feature. See the addition of the
+  `Extrinsics()` and `UnitVectors()` calls below to complete this feature.
 
 * The introduction of this feature also brought about the introduction of a new
   environment variable called `O3D3XX_MASK` which can be used to set the schema
@@ -57,8 +60,7 @@
 ### ImageBuffer
 
 * Has a new method `Extrinsics()` to return the camera extrinsics as reported
-  by the O3D (so, from the internal o3d frame (from the sensor glass) to the
-  target frame). This is provided to assist in reconstructing the Cartesian
+  by the O3D. This is provided to assist in reconstructing the Cartesian
   data from the radial distance image and the unit vectors.
 
 * Has a new method `UnitVectors()` to return the rotated unit vectors that can

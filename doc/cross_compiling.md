@@ -2,6 +2,8 @@
 Cross-compiling libo3d3xx
 =========================
 
+**NOTE:** This is currently out-of-date. I need to update it.
+
 As of the `0.2.0` release, `libo3d3xx` has support for cross-compiling to
 different architectures (e.g., ARM). However, the current cross-compiliation
 support makes some general assumptions that the `target` is an embedded Linux
