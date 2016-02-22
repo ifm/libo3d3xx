@@ -2,8 +2,6 @@
 Cross-compiling libo3d3xx
 =========================
 
-**NOTE:** This is currently out-of-date. I need to update it.
-
 As of the `0.2.0` release, `libo3d3xx` has support for cross-compiling to
 different architectures (e.g., ARM). However, the current cross-compiliation
 support makes some general assumptions that the `target` is an embedded Linux
@@ -172,28 +170,41 @@ Building and deploying the code
 
 Building the code is done in the standard way it is done for a native build
 except you need to tell `cmake` which cross-compiler to use. This is done by
-specifying the toolchain file. Assuming you are in the top-level of this source
+specifying the toolchain file. Additionally, you need to build and install each
+module separately and in this order: camera, framegrabber, image. For each
+module, the directions are the same. So, we will use the camera module for
+exemplary purposes. Assuming you are in the top-level of this source
 distribution:
 
+    $ cd modules/camera
     $ mkdir build
     $ cd build
     $ cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchains/linaro-arm-linux-gnueabihf.cmake ..
     $ make
     $ make package
     $ sudo make install
+
+You would now do the same thing for `modules/framegrabber` and
+`modules/image`. A few important notes:
+
+1. The order of the commands above is important. Specifically, running
+   `make package` prior to `make install`.
+2. The `make package` step creates a deb that can be deployed to your embedded
+   target (see below).
+3. The `make install` step installs the files into your sysroot. This is
+   necessary because, for example, in order to properly build the
+   `framegrabber` module, the `camera` module needs to exist on the system.
+
+Once you have the deployable deb packages build for each project, you can
+optionally (recommended) clean up your sysroot with the following *uninstall*
+command. Please note, you would do this in the `build` directory for each
+module you built and installed. Here is an example of cleaning up the `camera`
+module install from your sysroot (do the same for `framegrabber` and `image`):
+
+    $ cd modules/camera/build
     $ sudo xargs rm < install_manifest.txt
 
-
-
-
-    $ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/linaro-arm-linux-gnueabihf.cmake ..
-    $ make
-    $ make package
-
-**NOTE:** Beyond specifying the `-DCMAKE_TOOLCHAIN_FILE` directive, you can
-  also specify any of the other options discussed [here](custom_builds.md).
-
-A few things to note at this point. First, by default, the GUI viewer
+A few other things to note at this point. First, by default, the GUI viewer
 application is not built as it is assumed you are deploying code to a headless
 embedded Linux system. Second, the unit tests have been built but you will not
 have a `make check` target available to you as the built code is for the ARM
@@ -205,41 +216,42 @@ Installing and testing the build
 
 Once you have built the code as discussed above, the only thing that is left is
 to copy the binaries to the target and install them. Assuming your target is
-Debian or Ubuntu, you built the deb as shown above, and your target is running
-an SSH daemon, you can simply:
+Debian or Ubuntu, you built the debs as shown above, and your target is running
+an SSH daemon, from each of the respective modules `build` directories, you can
+simply:
 
     $ make deploy
 
-The deployment parameters can be customized as described
-[here](custom_builds.md) and for the sake of brevity will not be
-repeated. Assuming you accepted all of the defaults (which you likely will NOT
+The deployment parameters can be customized by editing the top-level
+`CMakeLists.txt` for each respective module. The pertinent directives to edit
+are:
+
+    set(TARGET_IP "192.168.0.68")
+    set(TARGET_USER "lovepark")
+    set(TARGET_DIR "/home/lovepark/debs/")
+
+Assuming you accepted all of the defaults (which you likely will NOT
 want to do), you can now:
 
     $ ssh lovepark@192.168.0.68
 
-Now assuming you are on the remote machine:
+Now assuming you are on the remote machine (using the camera module as an
+example):
 
     $ cd debs
-    $ sudo dpkg -i libo3d3xx_0.2.0_armhf.deb
+    $ sudo dpkg -i libo3d3xx-camera_0.4.0_armhf.deb
 
 **NOTE:** The version string in the deb file may be different based upon the
   version of libo3d3xx that you are building.
 
-Now the code is installed on the remote target. At this point, it is highly
-advised that you copy the following snippet to your _login script_ (e.g.,
-`~/.bashrc`):
+Now the code is installed on the remote target. If you want to run the unit
+tests, you can do the following:
 
-    if [ -f /opt/libo3d3xx/etc/setup.bash ]; then
-        source /opt/libo3d3xx/etc/setup.bash
-    fi
-
-With that in place, you should log out then log back in via SSH. Now, assuming
-you are back on to the target machine and you want to run the unit tests, you
-can do the following:
-
-    $ cd /opt/libo3d3xx/test/
+    $ cd /usr/test/
     $ . env.sh
-    $ ./o3d3xx-tests
+    $ ./o3d3xx-camera-tests
+    $ ./o3d3xx-framegrabber-tests
+    $ ./o3d3xx-image-tests
 
 Assuming all of the tests passed, you are ready to use `libo3d3xx` on your
 embedded system.
