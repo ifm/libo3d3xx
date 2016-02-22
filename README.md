@@ -148,6 +148,7 @@ distribution:
 
     $ mkdir build
     $ cd build
+    $ cmake ..
     $ make
 
 That is it, you are done! Please don't walk away from your computer while the
