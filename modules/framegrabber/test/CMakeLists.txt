@@ -38,9 +38,9 @@ if(NOT CMAKE_CROSSCOMPILING)
                     DEPENDS o3d3xx-framegrabber-tests)
 else()
   install(TARGETS o3d3xx-framegrabber-tests DESTINATION test)
-  install(FILES
-          ${O3D3XX_FRAMEGRABBER_BINARY_DIR}/test/gtest_bin/libgtest.so
-          ${O3D3XX_FRAMEGRABBER_BINARY_DIR}/test/gtest_bin/libgtest_main.so
-          DESTINATION test/gtest_bin)
+  #install(FILES
+  #        ${O3D3XX_FRAMEGRABBER_BINARY_DIR}/test/gtest_bin/libgtest.so
+  #        ${O3D3XX_FRAMEGRABBER_BINARY_DIR}/test/gtest_bin/libgtest_main.so
+  #        DESTINATION test/gtest_bin)
 
 endif(NOT CMAKE_CROSSCOMPILING)

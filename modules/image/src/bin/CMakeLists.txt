@@ -45,7 +45,13 @@ else()
   message(STATUS "Skipping o3d3xx-viewer")
 endif(BUILD_EXE_VIEWER)
 
-#
-# NOTE: If we are cross-compiling, building the viewer application
-# is implicitly turned off.
-#
+#-----------------------------------------------
+#-----------------------------------------------
+#-----------------------------------------------
+if(CMAKE_CROSSCOMPILING)
+  foreach(exe_target ${O3D3XX_IMAGE_EXE_TARGETS})
+    set_target_properties(${exe_target} PROPERTIES
+                          LINK_FLAGS "${CROSSTOOL_EXE_LINKER_FLAGS}"
+                          COMPILE_FLAGS "${CROSSTOOL_COMPILE_FLAGS}")
+  endforeach(exe_target)
+endif(CMAKE_CROSSCOMPILING)

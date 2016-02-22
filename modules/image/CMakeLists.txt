@@ -2,7 +2,14 @@ project(O3D3XX_IMAGE)
 cmake_minimum_required(VERSION 2.8.12)
 set(O3D3XX_IMAGE_MODULE_NAME "libo3d3xx-image")
 
-set(CMAKE_INSTALL_PREFIX /usr)
+set(CPACK_SET_DESTDIR true)
+if(NOT CMAKE_CROSSCOMPILING)
+  set(CMAKE_INSTALL_PREFIX /usr)
+else()
+  set(CMAKE_INSTALL_PREFIX ${CMAKE_SYSROOT}/usr)
+  set(CPACK_INSTALL_PREFIX /usr)
+endif()
+
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
 
 option(BUILD_TESTS "Build unit tests" ON)
