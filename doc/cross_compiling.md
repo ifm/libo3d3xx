@@ -177,6 +177,15 @@ distribution:
 
     $ mkdir build
     $ cd build
+    $ cmake -DCMAKE_TOOLCHAIN_FILE=../../../cmake/toolchains/linaro-arm-linux-gnueabihf.cmake ..
+    $ make
+    $ make package
+    $ sudo make install
+    $ sudo xargs rm < install_manifest.txt
+
+
+
+
     $ cmake -DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/linaro-arm-linux-gnueabihf.cmake ..
     $ make
     $ make package

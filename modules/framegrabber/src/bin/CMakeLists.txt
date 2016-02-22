@@ -27,7 +27,7 @@ if(BUILD_EXE_HZ)
 
   install(TARGETS o3d3xx-hz DESTINATION bin)
 
-  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-hz)
+  list(APPEND O3D3XX_FRAMEGRABBER_EXE_TARGETS o3d3xx-hz)
 else()
   message(STATUS "Skipping o3d3xx-hz")
 endif(BUILD_EXE_HZ)
@@ -53,7 +53,7 @@ if(BUILD_EXE_SCHEMA)
 
   install(TARGETS o3d3xx-schema DESTINATION bin)
 
-  list(APPEND O3D3XX_EXE_TARGETS o3d3xx-schema)
+  list(APPEND O3D3XX_FRAMEGRABBER_EXE_TARGETS o3d3xx-schema)
 else()
   message(STATUS "Skipping o3d3xx-schema")
 endif(BUILD_EXE_SCHEMA)
