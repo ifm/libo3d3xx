@@ -277,7 +277,7 @@ Running
 -------
 
 * [Command-line utilities](doc/utils.md)
-* Examples coming soon.
+* [Examples](modules/examples)
 
 Known Issues, Bugs, and our TODO list
 -------------------------------------

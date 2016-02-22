@@ -20,6 +20,11 @@
   effectively makes the usage of OpenCV and PCL optional. ByteBuffer is bundled
   as part of the `framegrabber` module.
 
+### Examples
+
+* Added a pseudo-module called `examples` as a place to collect simple programs
+  that demonstrate a particular concept.
+
 ### Deprecations
 
 * Removed `hist1` function from `util.hpp`. This has already been taken out of
