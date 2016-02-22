@@ -1,6 +1,7 @@
 find_library(LIB_glog NAMES glog)
 find_library(LIB_boost_system NAMES boost_system)
-find_library(LIB_o3d3xx_camera NAMES o3d3xx_camera)
+find_library(LIB_xmlrpcxx NAMES xmlrpc++)
+find_library(LIB_xmlrpc_clientxx NAMES xmlrpc_client++)
 
 file(GLOB O3D3XX_FRAMEGRABBER_SOURCES *.cpp)
 
@@ -22,9 +23,11 @@ if(BUILD_SHARED_LIBS)
               SHARED $<TARGET_OBJECTS:o3d3xx_framegrabber>)
     target_link_libraries(
       o3d3xx_framegrabber_shared
-      ${LIB_o3d3xx_camera}
+      ${O3D3XX_CAMERA_LIBRARIES}
       ${LIB_glog}
       ${LIB_boost_system}
+      ${LIB_xmlrpcxx}
+      ${LIB_xmlrpc_clientxx}
       ${CMAKE_THREAD_LIBS_INIT}
       )
 
@@ -50,9 +53,11 @@ if(BUILD_STATIC_LIBS)
               STATIC $<TARGET_OBJECTS:o3d3xx_framegrabber>)
   target_link_libraries(
     o3d3xx_framegrabber_static
-    ${LIB_o3d3xx_camera}_static
+    ${O3D3XX_CAMERA_LIBRARIES}
     ${LIB_glog}
     ${LIB_boost_system}
+    ${LIB_xmlrpcxx}
+    ${LIB_xmlrpc_clientxx}
     )
 
   set_target_properties(o3d3xx_framegrabber_static PROPERTIES

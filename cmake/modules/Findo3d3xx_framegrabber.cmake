@@ -6,7 +6,7 @@ find_path(O3D3XX_FRAMEGRABBER_INCLUDE_DIRS
   )
 
 find_library(O3D3XX_FRAMEGRABBER_LIBRARIES
-  NAMES o3d3xx_framegrabber
+  NAMES o3d3xx_framegrabber libo3d3xx_framegrabber_static.a
   PATHS /opt/libo3d3xx/lib /usr/lib
   NO_DEFAULT_PATH
   DOC "o3d3xx_framegrabber shared object file"

@@ -1,12 +1,10 @@
 ################################################
 ## Build the command-line tools
 ################################################
+find_library(LIB_boost_program_options NAMES boost_program_options)
 
 # Empty list
 set(O3D3XX_FRAMEGRABBER_EXE_TARGETS)
-
-find_library(LIB_o3d3xx_camera
-             NAMES o3d3xx_camera libo3d3xx_camera_static.a)
 
 #-----------------------------------------------
 # o3d3xx-hz
@@ -14,10 +12,18 @@ find_library(LIB_o3d3xx_camera
 if(BUILD_EXE_HZ)
   add_executable(o3d3xx-hz o3d3xx-hz.cpp)
 
-  target_link_libraries(o3d3xx-hz
-                        o3d3xx_framegrabber_shared
-                        ${LIB_o3d3xx_camera}
-                        boost_program_options)
+  if(BUILD_SHARED_LIBS)
+    target_link_libraries(o3d3xx-hz
+                          o3d3xx_framegrabber_shared
+                          ${O3D3XX_CAMERA_LIBRARIES}
+                          ${LIB_boost_program_options})
+  else()
+    target_link_libraries(o3d3xx-hz
+                          o3d3xx_framegrabber_static
+                          ${O3D3XX_CAMERA_LIBRARIES}
+                          ${LIB_boost_program_options}
+                          )
+  endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-hz DESTINATION bin)
 
@@ -32,10 +38,18 @@ endif(BUILD_EXE_HZ)
 if(BUILD_EXE_SCHEMA)
   add_executable(o3d3xx-schema o3d3xx-schema.cpp)
 
-  target_link_libraries(o3d3xx-schema
-                        o3d3xx_framegrabber_shared
-                        ${LIB_o3d3xx_camera}
-                        boost_program_options)
+  if(BUILD_SHARED_LIBS)
+    target_link_libraries(o3d3xx-schema
+                          o3d3xx_framegrabber_shared
+                          ${O3D3XX_CAMERA_LIBRARIES}
+                          ${LIB_boost_program_options})
+  else()
+    target_link_libraries(o3d3xx-schema
+                          o3d3xx_framegrabber_static
+                          ${O3D3XX_CAMERA_LIBRARIES}
+                          ${LIB_boost_program_options}
+                          )
+  endif(BUILD_SHARED_LIBS)
 
   install(TARGETS o3d3xx-schema DESTINATION bin)
 

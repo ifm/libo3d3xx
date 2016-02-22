@@ -6,7 +6,7 @@ find_path(O3D3XX_CAMERA_INCLUDE_DIRS
   )
 
 find_library(O3D3XX_CAMERA_LIBRARIES
-  NAMES o3d3xx_camera
+  NAMES o3d3xx_camera libo3d3xx_camera_static.a
   PATHS /opt/libo3d3xx/lib /usr/lib
   NO_DEFAULT_PATH
   DOC "o3d3xx_camera shared object file"

@@ -6,10 +6,14 @@ add_executable(o3d3xx-framegrabber-tests
                ${FRAMEGRABBER_TEST_SOURCES})
 if(BUILD_SHARED_LIBS)
   target_link_libraries(o3d3xx-framegrabber-tests
-                        gtest_main o3d3xx_framegrabber_shared)
+                        gtest_main o3d3xx_framegrabber_shared
+                        ${O3D3XX_CAMERA_LIBRARIES}
+                        )
 else()
   target_link_libraries(o3d3xx-framegrabber-tests
-                        gtest_main o3d3xx_framegrabber_static)
+                        gtest_main o3d3xx_framegrabber_static
+                        ${O3D3XX_CAMERA_LIBRARIES}
+                        )
 endif(BUILD_SHARED_LIBS)
 
 if(CMAKE_CROSSCOMPILING)
