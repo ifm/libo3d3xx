@@ -90,7 +90,7 @@ int main(int argc, const char **argv)
   cv::Mat y_f = ey.mul(rdis_f) + ty;
   cv::Mat z_f = ez.mul(rdis_f) + tz;
 
-  // cast to uint16_t
+  // cast to int16_t
   cv::Mat x_i, y_i, z_i;
   x_f.convertTo(x_i, CV_16SC1);
   y_f.convertTo(y_i, CV_16SC1);
