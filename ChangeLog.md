@@ -23,7 +23,9 @@
 ### Examples
 
 * Added a pseudo-module called `examples` as a place to collect simple programs
-  that demonstrate a particular concept.
+  that demonstrate a particular concept. Initial concrete examples include:
+  ex-100k, ex-cartesian, and ex-file_io. The README in the `examples` directory
+  for more information.
 
 ### Deprecations
 

@@ -22,6 +22,9 @@ find_package(o3d3xx_framegrabber ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(o3d3xx_image ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(PCL 1.7.1 REQUIRED COMPONENTS common io)
 find_package(OpenCV REQUIRED)
+find_package(Boost REQUIRED COMPONENTS system)
+
+find_library(LIB_boost_system NAMES boost_system)
 
 ################################################
 ## Manage our compiler and linker flags
@@ -47,14 +50,33 @@ add_definitions(
   ${OpenCV_DEFINITIONS}
   )
 
-##
-## ex-100k.cpp
-##
+################################################
+## Build the examples
+################################################
+
 add_executable(ex-100k ex-100k.cpp)
 target_link_libraries(ex-100k
                       ${O3D3XX_CAMERA_LIBRARIES}
                       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${PCL_COMMON_LIBRARIES}
+                      ${OpenCV_LIBS}
+                      )
+
+add_executable(ex-cartesian ex-cartesian.cpp)
+target_link_libraries(ex-cartesian
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${O3D3XX_IMAGE_LIBRARIES}
+                      ${OpenCV_LIBS}
+                      ${LIB_boost_system}
+                      )
+
+add_executable(ex-file_io ex-file_io.cpp)
+target_link_libraries(ex-file_io
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${O3D3XX_IMAGE_LIBRARIES}
+                      ${PCL_IO_LIBRARIES}
                       ${OpenCV_LIBS}
                       )

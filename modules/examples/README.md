@@ -51,3 +51,10 @@ What is included?
   data from it rather than using the API to manipulate the applications on the
   camera. However, we have gotten enough requests for this, that we are going
   to show how to do it.
+
+* [ex-cartesian](ex-cartesian.cpp) Shows how to compute the Cartesian data from
+  the unit vectors, extrinsics, and radial distance image.
+
+* [ex-file_io](ex-file_io.cpp) Shows how to capture data from the camera and
+  write the images to disk. In this example, the amplitude and radial distance
+  image are written out as PNG files and the point cloud is written as a PCD.
