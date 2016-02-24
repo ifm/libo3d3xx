@@ -80,3 +80,10 @@ target_link_libraries(ex-file_io
                       ${PCL_IO_LIBRARIES}
                       ${OpenCV_LIBS}
                       )
+
+add_executable(ex-framegrabber_recycling ex-framegrabber_recycling.cpp)
+target_link_libraries(ex-framegrabber_recycling
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${LIB_boost_system}
+                      )

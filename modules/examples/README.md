@@ -58,3 +58,7 @@ What is included?
 * [ex-file_io](ex-file_io.cpp) Shows how to capture data from the camera and
   write the images to disk. In this example, the amplitude and radial distance
   image are written out as PNG files and the point cloud is written as a PCD.
+
+* [ex-framegrabber_recycling](ex-framegrabber_recycling.cpp) Shows how to make
+  your framegrabbing robust to the camera "disappearing" (e.g., due to power
+  cycling, lost network, etc.).
