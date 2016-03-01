@@ -1,0 +1,84 @@
+diff --git a/deploy/package/data/usr/share/gecco/schema/application.json b/deploy/package/data/usr/share/gecco/schema/application.json
+index 6d9904a..2903ed0 100644
+--- a/deploy/package/data/usr/share/gecco/schema/application.json
++++ b/deploy/package/data/usr/share/gecco/schema/application.json
+@@ -25,10 +25,6 @@
+ 			"type": "string",
+ 			"default": "{\"layouter\" : \"flexible\", \"format\": { \"dataencoding\": \"binary\", \"order\": \"little\" }, \"elements\" : [ { \"type\": \"string\", \"value\": \"star\", \"id\": \"start_string\" }, { \"type\": \"records\", \"id\": \"models\", \"elements\": [ { \"type\": \"int16\", \"id\": \"boxFound\" }, { \"type\": \"int16\", \"id\": \"width\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"height\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"length\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"xMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"zMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yawAngle\" }, { \"type\": \"int16\", \"id\": \"qualityLength\" }, { \"type\": \"int16\", \"id\": \"qualityWidth\" }, { \"type\": \"int16\", \"id\": \"qualityHeight\" } ] }, { \"type\": \"string\", \"value\": \"stop\", \"id\": \"end_string\" } ] }"
+ 		},
+-		"PcicTcpResultOutputEnabled": {
+-			"type": "boolean",
+-			"default": true
+-		},
+ 		"ImagerConfiguration": {
+ 			"type": "array",
+ 			"items": {
+diff --git a/deploy/package/data/usr/share/gecco/schema/device.json b/deploy/package/data/usr/share/gecco/schema/device.json
+index b3fb98d..4291363 100644
+--- a/deploy/package/data/usr/share/gecco/schema/device.json
++++ b/deploy/package/data/usr/share/gecco/schema/device.json
+@@ -175,7 +175,7 @@
+ 	"required": [
+ 		"Name", "Description", "ActiveApplication", "PcicTcpPort", "PcicProtocolVersion",
+ 		"IOLogicType", "IODebouncing", "IOExternApplicationSwitch", "SessionTimeout",
+-		"ServiceReportPassedBuffer", "ServiceReportFailedBuffer",
++		
+ 		"ExtrinsicCalibTransX", "ExtrinsicCalibTransY", "ExtrinsicCalibTransZ",
+ 		"ExtrinsicCalibRotX", "ExtrinsicCalibRotY", "ExtrinsicCalibRotZ",
+ 		"DeviceType", "ArticleNumber", "ArticleStatus", "PasswordHash"
+diff --git a/deploy/package/data/usr/share/gecco/schema/imager_config.json b/deploy/package/data/usr/share/gecco/schema/imager_config.json
+index dd72fbb..1e6fab0 100644
+--- a/deploy/package/data/usr/share/gecco/schema/imager_config.json
++++ b/deploy/package/data/usr/share/gecco/schema/imager_config.json
+@@ -26,10 +26,6 @@
+ 			"type": "integer",
+ 			"attributes": [ "readonly" ]
+ 		},
+-		"ReduceMotionArtifacts": {
+-			"type": "boolean",
+-			"default": false
+-		},
+ 		"SpatialFilterType": {
+ 			"type": "integer",
+ 			"minimum": 0,
+@@ -146,6 +142,10 @@
+ 			"type": "integer",
+ 			"attributes": [ "private", "readonly" ]
+ 		},
++		"MaxAllowedLEDFrameRate": {
++			"type": "number",
++			"attributes": [ "readonly" ]
++		},
+ 		"EnableFastFrequency": {
+ 			"type": "boolean",
+ 			"default": false
+@@ -166,6 +166,6 @@
+ 	},
+ 	
+ 	"required": [
+-		"FrameRate", "ReduceMotionArtifacts", "SpatialFilterType", "TemporalFilterType", "Type"
++		"FrameRate", "SpatialFilterType", "TemporalFilterType", "Type"
+ 	]
+ }
+\ No newline at end of file
+diff --git a/deploy/package/data/usr/share/gecco/schema/o3d3xx.json b/deploy/package/data/usr/share/gecco/schema/o3d3xx.json
+index 21e06c5..443499a 100644
+--- a/deploy/package/data/usr/share/gecco/schema/o3d3xx.json
++++ b/deploy/package/data/usr/share/gecco/schema/o3d3xx.json
+@@ -18,9 +18,13 @@
+ 			"minItems": 32,
+ 			"maxItems": 32
+ 		},
+-		"Firmware": {
+-		    "type": "string"
+-		}
++
++        "Firmware": {
++            "type": "string",
++            "pattern": "[0-9]+\\.[0-9]+\\.[0-9]+"
++        },
++        
++        "SchemaVersion" : { "type" : "integer" }
+ 	},
+ 	
+ 	"required": [ "Device", "Network", "Applications", "Firmware" ]

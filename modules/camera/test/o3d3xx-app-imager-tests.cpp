@@ -128,12 +128,11 @@ TEST_F(AppImagerTest, GetAppParameters)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  ASSERT_EQ(params.size(), 9);
+  ASSERT_EQ(params.size(), 8);
 
   ASSERT_NO_THROW(params.at("Name"));
   ASSERT_NO_THROW(params.at("Description"));
   ASSERT_NO_THROW(params.at("TriggerMode"));
-  ASSERT_NO_THROW(params.at("PcicTcpResultOutputEnabled"));
   ASSERT_NO_THROW(params.at("PcicTcpResultSchema"));
   ASSERT_NO_THROW(params.at("PcicEipResultSchema"));
   ASSERT_NO_THROW(params.at("TemplateInfo"));
@@ -184,8 +183,6 @@ TEST_F(AppImagerTest, AppConfig_JSON)
   ASSERT_EQ(app->Name(), app2->Name());
   ASSERT_EQ(app->Description(), app2->Description());
   ASSERT_EQ(app->TriggerMode(), app2->TriggerMode());
-  ASSERT_EQ(app->PcicTcpResultOutputEnabled(),
-            app2->PcicTcpResultOutputEnabled());
   ASSERT_EQ(app->PcicTcpResultSchema(),
             app2->PcicTcpResultSchema());
   ASSERT_EQ(app->PcicEipResultSchema(),
@@ -272,7 +269,6 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("MinimumAmplitude"));
       ASSERT_NO_THROW(params.at("Resolution"));
       ASSERT_NO_THROW(params.at("ClippingCuboid"));
-      ASSERT_NO_THROW(params.at("ReduceMotionArtifacts"));
       ASSERT_NO_THROW(params.at("SpatialFilterType"));
       ASSERT_NO_THROW(params.at("SymmetryThreshold"));
       ASSERT_NO_THROW(params.at("TemporalFilterType"));
@@ -280,6 +276,7 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("ThreeFreqMax3FLineDistPercentage"));
       ASSERT_NO_THROW(params.at("TwoFreqMaxLineDistPercentage"));
       ASSERT_NO_THROW(params.at("Type"));
+      ASSERT_NO_THROW(params.at("MaxAllowedLEDFrameRate"));
 
       if (boost::algorithm::ends_with(type, "high"))
         {
@@ -407,7 +404,6 @@ TEST_F(AppImagerTest, ImagerConfig)
       ASSERT_NO_THROW(im->SetFrameRate(10));
       ASSERT_NO_THROW(im->SetMinimumAmplitude(5));
       ASSERT_NO_THROW(im->SetResolution(o3d3xx::RES_23K));
-      ASSERT_NO_THROW(im->SetReduceMotionArtifacts(true));
       ASSERT_NO_THROW(im->SetSpatialFilterType(
         static_cast<int>(o3d3xx::Camera::spatial_filter::MEDIAN_FILTER)));
       //ASSERT_NO_THROW(im->SetSymmetryThreshold(1));
@@ -439,7 +435,6 @@ TEST_F(AppImagerTest, ImagerConfig)
 
       ASSERT_EQ(im2->FrameRate() , im->FrameRate());
       ASSERT_EQ(im2->MinimumAmplitude(), im->MinimumAmplitude());
-      ASSERT_EQ(im2->ReduceMotionArtifacts(), im->ReduceMotionArtifacts());
       ASSERT_EQ(im2->SpatialFilterType(), im->SpatialFilterType());
       //ASSERT_EQ(im2->SymmetryThreshold(), im->SymmetryThreshold());
       ASSERT_EQ(im2->TemporalFilterType(), im->TemporalFilterType());
@@ -535,7 +530,6 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
   ASSERT_EQ(im->MinimumAmplitude(), im2->MinimumAmplitude());
   ASSERT_EQ(im->Resolution(), im2->Resolution());
   ASSERT_EQ(im->ClippingCuboid(), im2->ClippingCuboid());
-  ASSERT_EQ(im->ReduceMotionArtifacts(), im2->ReduceMotionArtifacts());
   ASSERT_EQ(im->SpatialFilterType(), im2->SpatialFilterType());
   ASSERT_EQ(im->SymmetryThreshold(), im2->SymmetryThreshold());
   ASSERT_EQ(im->TemporalFilterType(), im2->TemporalFilterType());

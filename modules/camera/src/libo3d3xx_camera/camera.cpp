@@ -627,14 +627,6 @@ o3d3xx::Camera::SetAppConfig(const o3d3xx::AppConfig* config)
                       "TriggerMode", config->TriggerMode());
     }
 
-  if (app->PcicTcpResultOutputEnabled() !=
-      config->PcicTcpResultOutputEnabled())
-    {
-      this->_XCallApp("setParameter",
-                      "PcicTcpResultOutputEnabled",
-                      config->PcicTcpResultOutputEnabled());
-    }
-
   //
   // To avoid making extraneous network calls, we compare the
   // parsed JSON and not the JSON strings for the result schema.
@@ -826,7 +818,6 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
                          "ClippingRight", config->ClippingRight());
     }
 
-
   if (im->ClippingTop() != config->ClippingTop())
     {
       DLOG(INFO) << "Setting ClippingTop="
@@ -969,16 +960,6 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
 
       this->_XCallImager("setParameter",
                          "Resolution", config->Resolution());
-    }
-
-  if (im->ReduceMotionArtifacts() != config->ReduceMotionArtifacts())
-    {
-      DLOG(INFO) << "Setting ReduceMotionArtifacts="
-                 << config->ReduceMotionArtifacts();
-
-      this->_XCallImager("setParameter",
-                         "ReduceMotionArtifacts",
-                         config->ReduceMotionArtifacts());
     }
 
   if (im->SpatialFilterType() != config->SpatialFilterType())

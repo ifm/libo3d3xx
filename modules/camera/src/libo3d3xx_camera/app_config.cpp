@@ -30,7 +30,6 @@ o3d3xx::AppConfig::AppConfig()
   : name_("New application"),
     description_(""),
     trigger_mode_(1),
-    pcic_tcp_result_output_enabled_(true),
     pcic_tcp_result_schema_(""),
     pcic_eip_result_schema_(""),
     logic_graph_(""),
@@ -94,18 +93,6 @@ void
 o3d3xx::AppConfig::SetTriggerMode(int mode) noexcept
 {
   this->trigger_mode_ = mode;
-}
-
-bool
-o3d3xx::AppConfig::PcicTcpResultOutputEnabled() const noexcept
-{
-  return this->pcic_tcp_result_output_enabled_;
-}
-
-void
-o3d3xx::AppConfig::SetPcicTcpResultOutputEnabled(bool on) noexcept
-{
-  this->pcic_tcp_result_output_enabled_ = on;
 }
 
 std::string
@@ -173,10 +160,6 @@ o3d3xx::AppConfig::mutator_map =
      [](o3d3xx::AppConfig* app, const std::string& val)
      { app->SetTriggerMode(std::stoi(val)); } },
 
-    {"PcicTcpResultOutputEnabled",
-     [](o3d3xx::AppConfig* app, const std::string& val)
-     { app->SetPcicTcpResultOutputEnabled(o3d3xx::stob(val)); } },
-
     {"PcicTcpResultSchema",
      [](o3d3xx::AppConfig* app, const std::string& val)
      { app->SetPcicTcpResultSchema(val); } },
@@ -202,7 +185,6 @@ o3d3xx::AppConfig::ToJSON() const
   pt.put("Name", this->Name());
   pt.put("Description", this->Description());
   pt.put("TriggerMode", this->TriggerMode());
-  pt.put("PcicTcpResultOutputEnabled", this->PcicTcpResultOutputEnabled());
   pt.put("PcicTcpResultSchema", this->PcicTcpResultSchema());
   pt.put("PcicEipResultSchema", this->PcicEipResultSchema());
   pt.put("LogicGraph", this->LogicGraph());

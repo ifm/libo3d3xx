@@ -87,9 +87,6 @@ namespace o3d3xx
     int TriggerMode() const noexcept;
     void SetTriggerMode(int mode) noexcept;
 
-    bool PcicTcpResultOutputEnabled() const noexcept;
-    void SetPcicTcpResultOutputEnabled(bool on) noexcept;
-
     std::string PcicTcpResultSchema() const noexcept;
     void SetPcicTcpResultSchema(const std::string& schema) noexcept;
 
@@ -111,11 +108,6 @@ namespace o3d3xx
 
     /** Trigger mode for image acquisition */
     int trigger_mode_;
-
-    /** Flag that allows for disabling the automatic output of results vis
-     *  PCIC
-     */
-    bool pcic_tcp_result_output_enabled_;
 
     /**
      * The schema that defines which images and result data will be sent back

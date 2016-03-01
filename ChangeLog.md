@@ -1,3 +1,8 @@
+## Changes between libo3d3xx 0.4.0 and 0.4.1
+
+* Updates to XML-RPC protocol for FW 1.4.x. See JSON schema diff in
+  `docs/json`.
+
 ## Changes between libo3d3xx 0.3.0 and 0.4.0
 
 ### Modularization of libo3d3xx

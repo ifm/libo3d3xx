@@ -134,9 +134,6 @@ namespace o3d3xx
     std::string ClippingCuboid() const noexcept;
     void SetClippingCuboid(const std::string& s) noexcept;
 
-    bool ReduceMotionArtifacts() const noexcept;
-    void SetReduceMotionArtifacts(bool on) noexcept;
-
     int SpatialFilterType() const noexcept;
     void SetSpatialFilterType(int filt) noexcept;
 
@@ -161,6 +158,9 @@ namespace o3d3xx
 
     std::string Type() const noexcept;
     void SetType(const std::string& type) noexcept;
+
+    double MaxAllowedLEDFrameRate() const noexcept;
+    void SetMaxAllowedLEDFrameRate(double rate) noexcept;
 
   protected:
     /** channel */
@@ -236,9 +236,6 @@ namespace o3d3xx
     /** Sets a cuboid region of interest */
     std::string clipping_cuboid_;
 
-    /** Enables filtering for motion artifacts */
-    bool reduce_motion_artifacts_;
-
     /** The type code for the applied spatial filter */
     int spatial_filter_type_;
 
@@ -253,6 +250,9 @@ namespace o3d3xx
 
     /** Type of imager */
     std::string type_;
+
+    /** Maximum frame rate allowed given the overall imager config */
+    double max_allowed_led_frame_rate_;
 
   }; // end: class ImagerConfig
 

@@ -48,7 +48,6 @@ o3d3xx::ImagerConfig::ImagerConfig()
     minimum_amplitude_(0),
     resolution_(o3d3xx::RES_23K),
     clipping_cuboid_(""),
-    reduce_motion_artifacts_(false),
     spatial_filter_type_(
       static_cast<int>(o3d3xx::Camera::spatial_filter::OFF)),
     symmetry_threshold_(0),
@@ -57,7 +56,8 @@ o3d3xx::ImagerConfig::ImagerConfig()
     three_freq_max_3f_line_dist_percentage_(0),
     three_freq_max_2f_line_dist_percentage_(0),
     two_freq_max_line_dist_percentage_(0),
-    type_("under5m_low")
+    type_("under5m_low"),
+    max_allowed_led_frame_rate_(0.0)
 { }
 
 o3d3xx::ImagerConfig::ImagerConfig(
@@ -315,18 +315,6 @@ o3d3xx::ImagerConfig::SetClippingCuboid(const std::string& s) noexcept
   this->clipping_cuboid_ = s;
 }
 
-bool
-o3d3xx::ImagerConfig::ReduceMotionArtifacts() const noexcept
-{
-  return this->reduce_motion_artifacts_;
-}
-
-void
-o3d3xx::ImagerConfig::SetReduceMotionArtifacts(bool on) noexcept
-{
-  this->reduce_motion_artifacts_ = on;
-}
-
 int
 o3d3xx::ImagerConfig::SpatialFilterType() const noexcept
 {
@@ -413,6 +401,18 @@ o3d3xx::ImagerConfig::SetType(const std::string& type) noexcept
   this->type_ = type;
 }
 
+double
+o3d3xx::ImagerConfig::MaxAllowedLEDFrameRate() const noexcept
+{
+  return this->max_allowed_led_frame_rate_;
+}
+
+void
+o3d3xx::ImagerConfig::SetMaxAllowedLEDFrameRate(double rate) noexcept
+{
+  this->max_allowed_led_frame_rate_ = rate;
+}
+
 const std::unordered_map<std::string,
                          std::function<void(o3d3xx::ImagerConfig*,
                                             const std::string&)> >
@@ -494,10 +494,6 @@ o3d3xx::ImagerConfig::mutator_map =
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetClippingCuboid(val); }},
 
-    {"ReduceMotionArtifacts",
-     [](o3d3xx::ImagerConfig* im, const std::string& val)
-     { im->SetReduceMotionArtifacts(o3d3xx::stob(val)); }},
-
     {"SpatialFilterType",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetSpatialFilterType(std::stoi(val)); }},
@@ -525,6 +521,10 @@ o3d3xx::ImagerConfig::mutator_map =
     {"Type",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetType(val); }},
+
+    {"MaxAllowedLEDFrameRate",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetMaxAllowedLEDFrameRate(std::stod(val)); }},
   };
 
 std::string
@@ -567,7 +567,6 @@ o3d3xx::ImagerConfig::ToJSON() const
   pt.put("MinimumAmplitude", this->MinimumAmplitude());
   pt.put("Resolution", this->Resolution());
   pt.put("ClippingCuboid", this->ClippingCuboid());
-  pt.put("ReduceMotionArtifacts", this->ReduceMotionArtifacts());
   pt.put("SpatialFilterType", this->SpatialFilterType());
   pt.put("SymmetryThreshold", this->SymmetryThreshold());
   pt.put("TemporalFilterType", this->TemporalFilterType());
@@ -578,6 +577,7 @@ o3d3xx::ImagerConfig::ToJSON() const
   pt.put("TwoFreqMaxLineDistPercentage",
          this->TwoFreqMaxLineDistPercentage());
   pt.put("Type", this->Type());
+  pt.put("MaxAllowedLEDFrameRate", this->MaxAllowedLEDFrameRate());
 
   std::ostringstream buf;
   boost::property_tree::write_json(buf, pt);
