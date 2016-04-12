@@ -559,12 +559,12 @@ TEST(ImageBuffers_Tests, ComputeCartesian)
   // 5. Compare for correctness.
   //
   // Recall, the XYZImage from the ImageBuffer is in mm, so, we will consider
-  // these values equal if they are within 1 mm of eachother (rounding
+  // these values equal if they are within 1 cm of eachother (rounding
   // differences in OpenCV (in the cast from float to int16_t above) vs. the
   // camera is a likely source of such discrepancies).
   //
   auto cmp = [](std::int16_t a, std::int16_t b) -> bool
-    { return std::abs(a - b) <= 1; };
+    { return std::abs(a - b) <= 10; }; // testing to 1 cm accuracy
 
   EXPECT_TRUE(std::equal(x_cam.begin<std::int16_t>(), x_cam.end<std::int16_t>(),
                          x_computed.begin<std::int16_t>(), cmp));

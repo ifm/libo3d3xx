@@ -71,7 +71,7 @@ Software Compatibility Matrix
   </tr>
   <tr>
     <td>0.4.1</td>
-    <td>1.4.1499</td>
+    <td>1.4.1639</td>
     <td>O3D303</td>
     <td>
     Updates for Firmware version-1.4.x XML-RPC protocol changes.
