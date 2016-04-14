@@ -350,46 +350,124 @@ TEST(ImageBuffers_Tests, Extrinsics)
   o3d3xx::FrameGrabber::Ptr fg = std::make_shared<o3d3xx::FrameGrabber>(cam);
   o3d3xx::ImageBuffer::Ptr img = std::make_shared<o3d3xx::ImageBuffer>();
 
+  //
+  // Helpers to generate rotation matrices
+  //
+  const auto& radians = [](double deg) -> double { return deg*M_PI/180.; };
+
+  const auto& rot_x = [](float alpha) -> cv::Mat
+    {
+      cv::Mat r = (cv::Mat_<float>(3,3) <<
+                   1., 0., 0.,
+                   0., std::cos(alpha), -std::sin(alpha),
+                   0., std::sin(alpha), std::cos(alpha));
+      return r;
+    };
+
+  const auto& rot_y = [](float alpha) -> cv::Mat
+    {
+      cv::Mat r = (cv::Mat_<float>(3,3) <<
+                   std::cos(alpha), 0., std::sin(alpha),
+                   0., 1., 0.,
+                   -std::sin(alpha), 0., std::cos(alpha));
+      return r;
+    };
+
+  const auto& rot_z = [](float alpha) -> cv::Mat
+    {
+      cv::Mat r = (cv::Mat_<float>(3,3) <<
+                   std::cos(alpha), -std::sin(alpha), 0.,
+                   std::sin(alpha), std::cos(alpha), 0.,
+                   0., 0., 1.);
+      return r;
+    };
+
   // We assume the XML-RPC extrinsics are: 0,0,0,0,0,0
   // so, we get a reference set of extrincs that encode the transform
   // from the PMD chip to the camera glass
   EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
   std::vector<float> reference_extrinsics = img->Extrinsics();
 
+  // For clarity, we unpack the extrinsics into their scalar components
+  float t_ix = reference_extrinsics.at(0);
+  float t_iy = reference_extrinsics.at(1);
+  float t_iz = reference_extrinsics.at(2);
+  float alpha_ix = reference_extrinsics.at(3);
+  float alpha_iy = reference_extrinsics.at(4);
+  float alpha_iz = reference_extrinsics.at(5);
+
+  // Now construct R_i and t_i
+  cv::Mat R_i =  rot_x(radians(alpha_ix)) *
+                 rot_y(radians(alpha_iy)) *
+                 rot_z(radians(alpha_iz));
+
+  cv::Mat t_i = (cv::Mat_<float>(3,1) << t_ix, t_iy, t_iz);
+
   // Now, we set a dummy extrinsic calibration on the camera
   fg->Stop();
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
   o3d3xx::DeviceConfig::Ptr dev = cam->GetDeviceConfig();
-  dev->SetExtrinsicCalibTransX(2.);
-  dev->SetExtrinsicCalibTransY(3.);
-  dev->SetExtrinsicCalibTransZ(4.);
-  dev->SetExtrinsicCalibRotX(5.);
-  dev->SetExtrinsicCalibRotY(6.);
-  dev->SetExtrinsicCalibRotZ(7.);
+  float t_ux = 42.1;
+  float t_uy = 44.2;
+  float t_uz = 46.3;
+  float alpha_ux = 5.6;
+  float alpha_uy = 7.8;
+  float alpha_uz = 9.1;
+  dev->SetExtrinsicCalibTransX(t_ux);
+  dev->SetExtrinsicCalibTransY(t_uy);
+  dev->SetExtrinsicCalibTransZ(t_uz);
+  dev->SetExtrinsicCalibRotX(alpha_ux);
+  dev->SetExtrinsicCalibRotY(alpha_uy);
+  dev->SetExtrinsicCalibRotZ(alpha_uz);
   cam->SetDeviceConfig(dev.get());
   cam->SaveDevice();
   cam->CancelSession();
 
-  // Restart the frame grabber and get the new extrinsics. They should
-  // be the reference + dummy
+  // Now construct R_u and t_u
+  cv::Mat R_u = rot_x(radians(alpha_ux)) *
+                rot_y(radians(alpha_uy)) *
+                rot_z(radians(alpha_uz));
+  cv::Mat t_u = (cv::Mat_<float>(3,1) << t_ux, t_uy, t_uz);
+
+  // Restart the frame grabber and get the new extrinsics which should
+  // contain R_total and t_total.
   fg.reset(new o3d3xx::FrameGrabber(cam));
   EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
   std::vector<float> new_extrinsics = img->Extrinsics();
 
-  // NOTE: we can't use EXPECT_FLOAT_EQ here as there is likely differences in
-  // precision between Intel processors and what is available on the camera and
-  // the whole "hard" vs "soft" float issue may also be at play. To that end,
-  // we just check for accuracy to w/in 1 mm (trans) and 1 degree (rot)
-  float abs_error = 1.;
-  EXPECT_NEAR(reference_extrinsics[0] + 2., new_extrinsics[0], abs_error);
-  EXPECT_NEAR(reference_extrinsics[1] + 3., new_extrinsics[1], abs_error);
-  EXPECT_NEAR(reference_extrinsics[2] + 4., new_extrinsics[2], abs_error);
-  EXPECT_NEAR(reference_extrinsics[3] + 5., new_extrinsics[3], abs_error);
-  EXPECT_NEAR(reference_extrinsics[4] + 6., new_extrinsics[4], abs_error);
-  EXPECT_NEAR(reference_extrinsics[5] + 7., new_extrinsics[5], abs_error);
+  float t_totx = new_extrinsics.at(0);
+  float t_toty = new_extrinsics.at(1);
+  float t_totz = new_extrinsics.at(2);
+  float alpha_totx = new_extrinsics.at(3);
+  float alpha_toty = new_extrinsics.at(4);
+  float alpha_totz = new_extrinsics.at(5);
 
-  // now put it all back
+  cv::Mat R_total_expected = R_u * R_i;
+  cv::Mat R_total_actual = rot_x(radians(alpha_totx)) *
+                           rot_y(radians(alpha_toty)) *
+                           rot_z(radians(alpha_totz));
+
+  cv::Mat t_total_expected = R_u * t_i + t_u;
+  cv::Mat t_total_actual = (cv::Mat_<float>(3,1) << t_totx, t_toty, t_totz);
+
+  // Now check that our expect values agree with the actuals to w/in a
+  // tolerance ... for now, 3 decimal places
+  float tol = .001;
+  EXPECT_TRUE(std::equal(R_total_actual.begin<float>(),
+                         R_total_actual.end<float>(),
+                         R_total_expected.begin<float>(),
+                         [tol](float a, float b) -> bool
+                         { return std::abs(a - b) <= tol; }));
+
+  EXPECT_TRUE(std::equal(t_total_actual.begin<float>(),
+                         t_total_actual.end<float>(),
+                         t_total_expected.begin<float>(),
+                         [tol](float a, float b) -> bool
+                         { return std::abs(a - b) <= tol; }));
+
+  // now put it all back and validate that it is equal to the orignal
+  // reference extrinsics
   fg->Stop();
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
@@ -408,12 +486,12 @@ TEST(ImageBuffers_Tests, Extrinsics)
   EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
   new_extrinsics = img->Extrinsics();
 
-  EXPECT_NEAR(reference_extrinsics[0], new_extrinsics[0], abs_error);
-  EXPECT_NEAR(reference_extrinsics[1], new_extrinsics[1], abs_error);
-  EXPECT_NEAR(reference_extrinsics[2], new_extrinsics[2], abs_error);
-  EXPECT_NEAR(reference_extrinsics[3], new_extrinsics[3], abs_error);
-  EXPECT_NEAR(reference_extrinsics[4], new_extrinsics[4], abs_error);
-  EXPECT_NEAR(reference_extrinsics[5], new_extrinsics[5], abs_error);
+  EXPECT_FLOAT_EQ(reference_extrinsics[0], new_extrinsics[0]);
+  EXPECT_FLOAT_EQ(reference_extrinsics[1], new_extrinsics[1]);
+  EXPECT_FLOAT_EQ(reference_extrinsics[2], new_extrinsics[2]);
+  EXPECT_FLOAT_EQ(reference_extrinsics[3], new_extrinsics[3]);
+  EXPECT_FLOAT_EQ(reference_extrinsics[4], new_extrinsics[4]);
+  EXPECT_FLOAT_EQ(reference_extrinsics[5], new_extrinsics[5]);
 }
 
 TEST(ImageBuffers_Tests, UnitVectorAccess)
