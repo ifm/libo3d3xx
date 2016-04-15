@@ -77,6 +77,14 @@ Software Compatibility Matrix
     Updates for Firmware version-1.4.x XML-RPC protocol changes.
     </td>
   </tr>
+  <tr>
+    <td>0.4.2</td>
+    <td>1.4.1639</td>
+    <td>O3D303</td>
+    <td>
+    Fixed unit test validating Extrinsics (image module)
+    </td>
+  </tr>
 </table>
 
 Features

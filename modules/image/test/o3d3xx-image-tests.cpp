@@ -642,7 +642,20 @@ TEST(ImageBuffers_Tests, ComputeCartesian)
   // camera is a likely source of such discrepancies).
   //
   auto cmp = [](std::int16_t a, std::int16_t b) -> bool
-    { return std::abs(a - b) <= 10; }; // testing to 1 cm accuracy
+    {
+      if (std::abs(a - b) <= 10) // testing to w/in 1 cm tolerance
+        {
+          return true;
+        }
+
+      std::int16_t bad_pixel = std::numeric_limits<std::int16_t>::quiet_NaN();
+      if ((a == bad_pixel) || (b == bad_pixel))
+        {
+          return true; // ignore bad pixels
+        }
+
+      return false;
+    };
 
   EXPECT_TRUE(std::equal(x_cam.begin<std::int16_t>(), x_cam.end<std::int16_t>(),
                          x_computed.begin<std::int16_t>(), cmp));

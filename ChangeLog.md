@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.4.1 and 0.4.2
+
+* Updated unit tests to properly validate Extrinsics
+
 ## Changes between libo3d3xx 0.4.0 and 0.4.1
 
 * Updates to XML-RPC protocol for FW 1.4.x. See JSON schema diff in
