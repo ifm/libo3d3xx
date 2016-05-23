@@ -164,7 +164,7 @@ validated:
 Installation (from source)
 --------------------------
 
-(Assumes Linux)
+(Assumes Ubuntu Linux)
 
 ### Quick Start
 
@@ -194,9 +194,9 @@ running the unit tests.
 
 ### Full Instructions
 
-If you need finer-grained control over the build of the individual modules or
-you want to selectively build a module, or you are cross-compiling, etc., these
-are the instructions for you.
+If you need finer-grained control over the build of the individual modules, you
+are not on Ubuntu, you want to selectively build a module, or you are
+cross-compiling, etc., these are the instructions for you.
 
 **NOTE:** The `dpkg` commands issued in support of the installation(s) are here
   as an example. The particular version and architecture may differ on your
@@ -258,6 +258,20 @@ distribution:
 
 If you are not on Debian or Ubuntu, you can substitute the `make package` and
 `dpkg ...` commands with `make install`.
+
+Also note that due to some library changes (and a VTK bug) from Ubuntu 14.04 to
+16.04, linking the `o3d3xx-viewer` and building the deb file dependencies now
+has some conditional code in the build scripts to accomodate for this. If you
+are on Ubuntu (and you don't mess with your `/etc/issue` file), the build
+scripts auto-detect your Ubuntu version and try to do the right thing. However,
+if you are *not* on Ubuntu, you have to give the build some extra
+hints. Specifically, in the `cmake` line above, you can lie to us and tell us
+you are on a particular Ubuntu version, for example:
+
+    $ cmake -DUBUNTU_VERSION:STRING=16.04 ..
+
+So, the above line will have the build scripts act as if you are on the 16.04
+variant of Ubuntu.
 
 #### Customizing the builds
 
