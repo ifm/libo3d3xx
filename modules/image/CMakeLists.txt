@@ -4,6 +4,7 @@ set(O3D3XX_IMAGE_MODULE_NAME "libo3d3xx-image")
 
 set(CPACK_SET_DESTDIR true)
 if(NOT CMAKE_CROSSCOMPILING)
+  #set(CMAKE_INSTALL_PREFIX /opt/libo3d3xx-opencv2)
   set(CMAKE_INSTALL_PREFIX /usr)
 else()
   set(CMAKE_INSTALL_PREFIX ${CMAKE_SYSROOT}/usr)

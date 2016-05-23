@@ -90,7 +90,8 @@ Software Compatibility Matrix
     <td>1.4.1639</td>
     <td>O3D303</td>
     <td>
-    Updated build scripts for Ubuntu 16.04 LTS (Xenial)
+    Updated build scripts for Ubuntu 16.04 LTS (Xenial) and parallel installs
+    of OpenCV 3 and 2.4 (e.g., systems w/ ROS Kinetic installed)
     </td>
   </tr>
 </table>
