@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.4.2 and 0.4.3
+
+* Updated build scripts to support Ubuntu 16.04 LTS
+
 ## Changes between libo3d3xx 0.4.1 and 0.4.2
 
 * Updated unit tests to properly validate Extrinsics

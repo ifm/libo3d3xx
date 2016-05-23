@@ -165,13 +165,9 @@ set(CPACK_PACKAGE_FILE_NAME
   "${O3D3XX_CAMERA_MODULE_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libgoogle-glog0,
-   libboost-system1.54.0,
-   libboost-program-options1.54.0,
-   libxmlrpc-c++8,
-   libstdc++6,
-   libc6,
-   libgcc1")
+  "libgoogle-glog-dev,
+   libboost-dev (>= 1.54),
+   libxmlrpc-c++8-dev (>= 1.33)")
 include(CPack)
 
 set(DEB_FILE

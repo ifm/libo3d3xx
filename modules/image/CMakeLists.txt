@@ -61,17 +61,32 @@ configure_file(
   )
 
 ################################################
+## Auto-detect the version of Ubuntu ... this
+## can be overridden on the command line with:
+##
+## cmake -DUBUNTU_VERSION:STRING=16.04 ..
+##
+################################################
+include(ubuntu_version)
+get_ubuntu_version(${UBUNTU_VERSION})
+
+################################################
 ## Bring in dependent projects
 ################################################
 
 find_package(o3d3xx_camera ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(o3d3xx_framegrabber ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
-find_package(PCL 1.7.1 REQUIRED COMPONENTS common)
+find_package(PCL 1.7 REQUIRED COMPONENTS common)
 if (BUILD_EXE_VIEWER)
-  find_package(PCL 1.7.1 REQUIRED COMPONENTS visualization)
+  find_package(PCL 1.7 REQUIRED COMPONENTS visualization)
+  if(NOT (UBUNTU_VERSION VERSION_LESS "16.04"))
+    # https://bugs.launchpad.net/ubuntu/+source/vtk6/+bug/1573234
+    list(REMOVE_ITEM PCL_VISUALIZATION_LIBRARIES "vtkproj4")
+  endif()
+
   find_package(Boost REQUIRED COMPONENTS program_options system)
 endif(BUILD_EXE_VIEWER)
-find_package(OpenCV REQUIRED)
+find_package(OpenCV 2.4 REQUIRED)
 
 ################################################
 ## Manage our compiler and linker flags
@@ -167,22 +182,18 @@ set(CPACK_PACKAGE_FILE_NAME
   "${O3D3XX_IMAGE_MODULE_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
-  "libgoogle-glog0,
+  "libgoogle-glog-dev,
    libo3d3xx-camera (= ${O3D3XX_VERSION_STRING}),
    libo3d3xx-framegrabber (= ${O3D3XX_VERSION_STRING}),
-   libopencv-core2.4,
-   libopencv-imgproc2.4,
-   libstdc++6,
-   libc6,
-   libgcc1")
+   libopencv-core-dev,
+   libopencv-imgproc-dev")
 if(BUILD_EXE_VIEWER)
   set(CPACK_DEBIAN_PACKAGE_DEPENDS
     "${CPACK_DEBIAN_PACKAGE_DEPENDS},
-     libvtk5.8,
-     libpcl-visualization-1.7,
-     libpcl-common-1.7,
-     libopencv-highgui2.4,
-     libopencv-contrib2.4")
+     libvtk6-dev,
+     libpcl1.7,
+     libopencv-highgui-dev,
+     libopencv-contrib-dev")
 endif(BUILD_EXE_VIEWER)
 include(CPack)
 
