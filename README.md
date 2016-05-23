@@ -85,6 +85,14 @@ Software Compatibility Matrix
     Fixed unit test validating Extrinsics (image module)
     </td>
   </tr>
+  <tr>
+    <td>0.4.3</td>
+    <td>1.4.1639</td>
+    <td>O3D303</td>
+    <td>
+    Updated build scripts for Ubuntu 16.04 LTS (Xenial)
+    </td>
+  </tr>
 </table>
 
 Features
@@ -145,8 +153,13 @@ Bridges the O3D3xx to OpenCV and PCL utilizing the `framegrabber` module's
 * [OpenCV](http://opencv.org) (>= 2.4)
 * [PCL](http://pointclouds.org) (>= 1.7.1)
 
-Additionally, your compiler must support C++11. We are using g++ 4.8.x on
-Ubuntu Linux 14.04 LTS.
+Additionally, your compiler must support a modern C++ implementation, i.e.,
+C++11. You should note that we will not hesitate to employ features in C++14/17
+and beyond as necessary. Bottom-line: keep your compiler current. We have
+validated:
+
+* g++ 4.8.x on Ubuntu Linux 14.04 LTS
+* g++ 5.3.x on Ubuntu Linux 16.04 LTS
 
 Installation (from source)
 --------------------------

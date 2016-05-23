@@ -188,12 +188,22 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS
    libopencv-core-dev,
    libopencv-imgproc-dev")
 if(BUILD_EXE_VIEWER)
-  set(CPACK_DEBIAN_PACKAGE_DEPENDS
-    "${CPACK_DEBIAN_PACKAGE_DEPENDS},
-     libvtk6-dev,
-     libpcl1.7,
-     libopencv-highgui-dev,
-     libopencv-contrib-dev")
+  if(NOT (UBUNTU_VERSION VERSION_LESS "16.04"))
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+      "${CPACK_DEBIAN_PACKAGE_DEPENDS},
+       libvtk6-dev,
+       libpcl1.7,
+       libopencv-highgui-dev,
+       libopencv-contrib-dev")
+  else()
+    set(CPACK_DEBIAN_PACKAGE_DEPENDS
+      "${CPACK_DEBIAN_PACKAGE_DEPENDS},
+       libvtk5.8,
+       libpcl-visualization-1.7,
+       libpcl-common-1.7,
+       libopencv-highgui2.4,
+       libopencv-contrib2.4")
+  endif()
 endif(BUILD_EXE_VIEWER)
 include(CPack)
 
