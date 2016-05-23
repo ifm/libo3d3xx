@@ -19,7 +19,7 @@ if(BUILD_EXE_VIEWER)
       ${O3D3XX_CAMERA_LIBRARIES}
       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
       ${PCL_VISUALIZATION_LIBRARIES}
-      ${OpenCV_LIBS}
+      ${OpenCV_LIBRARIES}
       ${LIB_boost_program_options}
       )
   else()
@@ -28,7 +28,7 @@ if(BUILD_EXE_VIEWER)
       ${O3D3XX_CAMERA_LIBRARIES}
       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
       ${PCL_VISUALIZATION_LIBRARIES}
-      ${OpenCV_LIBS}
+      ${OpenCV_LIBRARIES}
       ${LIB_boost_program_options}
       )
   endif(BUILD_SHARED_LIBS)

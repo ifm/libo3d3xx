@@ -1,6 +1,4 @@
 find_library(LIB_glog NAMES glog)
-find_library(LIB_opencv_core NAMES opencv_core)
-find_library(LIB_opencv_imgproc NAMES opencv_imgproc)
 find_library(LIB_xmlrpcxx NAMES xmlrpc++)
 find_library(LIB_xmlrpc_clientxx NAMES xmlrpc_client++)
 
@@ -26,9 +24,8 @@ if(BUILD_SHARED_LIBS)
       o3d3xx_image_shared
       ${O3D3XX_CAMERA_LIBRARIES}
       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+      ${OpenCV_LIBRARIES}
       ${LIB_glog}
-      ${LIB_opencv_core}
-      ${LIB_opencv_imgproc}
       ${LIB_xmlrpcxx}
       ${LIB_xmlrpc_clientxx}
       )
@@ -57,9 +54,8 @@ if(BUILD_STATIC_LIBS)
     o3d3xx_image_static
     ${O3D3XX_CAMERA_LIBRARIES}
     ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+    ${OpenCV_LIBRARIES}
     ${LIB_glog}
-    ${LIB_opencv_core}
-    ${LIB_opencv_imgproc}
     ${LIB_xmlrpcxx}
     ${LIB_xmlrpc_clientxx}
     )

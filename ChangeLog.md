@@ -1,6 +1,8 @@
 ## Changes between libo3d3xx 0.4.2 and 0.4.3
 
 * Updated build scripts to support Ubuntu 16.04 LTS
+* Updated build scripts to deal with parallel installations of
+  OpenCV 3 and OpenCV 2.4. This is important for our ROS users.
 
 ## Changes between libo3d3xx 0.4.1 and 0.4.2
 

@@ -12,6 +12,7 @@ endif()
 
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
 
+option(FORCE_OPENCV2 "Force the build to require OpenCV 2.4" OFF)
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" ON)
@@ -76,6 +77,8 @@ get_ubuntu_version(${UBUNTU_VERSION})
 
 find_package(o3d3xx_camera ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(o3d3xx_framegrabber ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
+
+# PCL
 find_package(PCL 1.7 REQUIRED COMPONENTS common)
 if (BUILD_EXE_VIEWER)
   find_package(PCL 1.7 REQUIRED COMPONENTS visualization)
@@ -86,7 +89,36 @@ if (BUILD_EXE_VIEWER)
 
   find_package(Boost REQUIRED COMPONENTS program_options system)
 endif(BUILD_EXE_VIEWER)
-find_package(OpenCV 2.4 REQUIRED)
+
+# OpenCV 2/3 support
+if(NOT CMAKE_CROSSCOMPILING)
+  if(FORCE_OPENCV2)
+    find_package(OpenCV 2.4 REQUIRED)
+  else()
+    if(NOT (UBUNTU_VERSION VERSION_LESS "16.04"))
+      if(EXISTS "/opt/ros/kinetic")
+        set(OpenCV_DIR "/opt/ros/kinetic")
+        find_package(OpenCV 3 REQUIRED)
+      else()
+        find_package(OpenCV)
+      endif()
+    else()
+      # We will assume OpenCV is installed in a system location
+      # or the user specified `-DOpenCV_DIR=/path/to/opencv`
+      find_package(OpenCV)
+    endif()
+  endif()
+else()
+  # We are cross-compiling, so take any OpenCV unless 2.4
+  # is required of us by the user's command line. You
+  # may also want to provide: `-DOpenCV_DIR=/path/to/opencv`
+  if(FORCE_OPENCV2)
+    find_package(OpenCV 2.4 REQUIRED)
+  else()
+    find_package(OpenCV)
+  endif()
+endif(NOT CMAKE_CROSSCOMPILING)
+MESSAGE(STATUS "OpenCV_DIR: " ${OpenCV_DIR})
 
 ################################################
 ## Manage our compiler and linker flags

@@ -13,6 +13,10 @@ include(MacroOutOfSourceBuild)
 macro_ensure_out_of_source_build(
   "Please build ${PROJECT_NAME} out-of-source")
 
+# get version of ubuntu
+include(ubuntu_version)
+get_ubuntu_version(${UBUNTU_VERSION})
+
 ################################################
 ## Bring in dependent projects
 ################################################
@@ -25,6 +29,11 @@ find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
 find_library(LIB_boost_system NAMES boost_system)
+
+# Fix this: https://bugs.launchpad.net/ubuntu/+source/vtk6/+bug/1573234
+if(NOT (UBUNTU_VERSION VERSION_LESS "16.04"))
+  list(REMOVE_ITEM PCL_IO_LIBRARIES "vtkproj4")
+endif()
 
 ################################################
 ## Manage our compiler and linker flags
@@ -60,7 +69,7 @@ target_link_libraries(ex-100k
                       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${PCL_COMMON_LIBRARIES}
-                      ${OpenCV_LIBS}
+                      ${OpenCV_LIBRARIES}
                       )
 
 add_executable(ex-cartesian ex-cartesian.cpp)
@@ -68,7 +77,7 @@ target_link_libraries(ex-cartesian
                       ${O3D3XX_CAMERA_LIBRARIES}
                       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
                       ${O3D3XX_IMAGE_LIBRARIES}
-                      ${OpenCV_LIBS}
+                      ${OpenCV_LIBRARIES}
                       ${LIB_boost_system}
                       )
 
@@ -78,7 +87,7 @@ target_link_libraries(ex-file_io
                       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${PCL_IO_LIBRARIES}
-                      ${OpenCV_LIBS}
+                      ${OpenCV_LIBRARIES}
                       )
 
 add_executable(ex-framegrabber_recycling ex-framegrabber_recycling.cpp)
