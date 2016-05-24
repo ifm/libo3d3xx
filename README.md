@@ -94,6 +94,15 @@ Software Compatibility Matrix
     of OpenCV 3 and 2.4 (e.g., systems w/ ROS Kinetic installed)
     </td>
   </tr>
+  <tr>
+    <td>0.4.4</td>
+    <td>1.4.1639</td>
+    <td>O3D303</td>
+    <td>
+    SW triggering in framegrabber and utilities for flashing fleets of
+    cameras.
+    </td>
+  </tr>
 </table>
 
 Features
