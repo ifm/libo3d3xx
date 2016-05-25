@@ -49,6 +49,11 @@ namespace o3d3xx
     using ReadHandler =
       std::function<void(const boost::system::error_code&, std::size_t)>;
 
+    // extern const std::size_t TICKET_SZ; // bytes
+    // extern const std::string IMG_TICKET;
+    // extern const std::string SCHEMA_TICKET;
+    // extern const std::string TRIGGER_TICKET;
+
     /**
      * Stores reference to the passed in camera and starts the worker thread
      *
@@ -79,6 +84,22 @@ namespace o3d3xx
      * instance. To do that, you would need to instantiate a new FrameGrabber.
      */
     void Stop();
+
+    /**
+     * Triggers the camera for an image acquisition.
+     *
+     * You should be sure to set the `TriggerMode` for your application to
+     * `PROCESS_INTERFACE` in order for this to be effective. This function
+     * simply does the triggering, data are still received asynchronously via
+     * `WaitForFrame()`.
+     *
+     * It should be noted that this function establishes its own TCP connecton
+     * to the camera (independent of the one reading image data). Should this
+     * TCP setup/teardown become a "performance issue" for you, perhaps you
+     * should consider running in `FREE_RUN` mode, at which case, you do not
+     * need to manually trigger the image acquisition with this function.
+     */
+    void SWTrigger();
 
     /**
      * This function is used to grab and parse out time synchronized image data
@@ -128,6 +149,11 @@ namespace o3d3xx
      */
     void SetSchemaBuffer(std::uint16_t mask);
 
+    /**
+     * Sets the PCIC 't' buffer
+     */
+    void SetTriggerBuffer();
+
   private:
     /**
      * Shared pointer to the camera this frame grabber will grab frames from.
@@ -135,9 +161,29 @@ namespace o3d3xx
     o3d3xx::Camera::Ptr cam_;
 
     /**
+     * Cached copy of the camera IP address
+     */
+    std::string cam_ip_;
+
+    /**
+     * Cached copy of the camera PCIC TCP port
+     */
+    int cam_port_;
+
+    /**
      * The ASIO event loop handle
      */
     boost::asio::io_service io_service_;
+
+    /**
+     * The ASIO socket to PCIC
+     */
+    boost::asio::ip::tcp::socket sock_;
+
+    /**
+     * The ASIO endpoint to PCIC
+     */
+    boost::asio::ip::tcp::endpoint endpoint_;
 
     /**
      * A pointer to the wrapped thread object. This is the thread that
@@ -155,6 +201,11 @@ namespace o3d3xx
      * for our open socket connection.
      */
     std::vector<std::uint8_t> schema_buffer_;
+
+    /**
+     * Holds the PCIC command needed to s/w trigger an image acquisition.
+     */
+    std::vector<std::uint8_t> trigger_buffer_;
 
     /**
      * Holds the raw 'Ticket' bytes received from the sensor.

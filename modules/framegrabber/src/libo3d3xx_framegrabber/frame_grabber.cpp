@@ -34,16 +34,39 @@
 #include "o3d3xx_framegrabber/byte_buffer.hpp"
 #include "o3d3xx_framegrabber/pcic_schema.h"
 
+// const std::size_t o3d3xx::FrameGrabber::TICKET_SZ = 16;
+// const std::string o3d3xx::FrameGrabber::IMG_TICKET = "0000";
+// const std::string o3d3xx::FrameGrabber::SCHEMA_TICKET = "1000";
+// const std::string o3d3xx::FrameGrabber::TRIGGER_TICKET = "1001";
+
 o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam, std::uint16_t mask)
   : cam_(cam),
     io_service_(),
+    sock_(io_service_),
     mask_(mask)
 {
   this->SetSchemaBuffer(this->mask_);
+  this->SetTriggerBuffer();
 
-  //
-  // start the frame grabber thread
-  //
+  try
+    {
+      this->cam_ip_ = this->cam_->GetIP();
+      this->cam_port_ = std::stoi(this->cam_->GetParameter("PcicTcpPort"));
+    }
+  catch (const o3d3xx::error_t& ex)
+    {
+      LOG(ERROR) << "Could not get IP/Port of the camera: "
+                 << ex.what();
+      throw;
+    }
+
+  LOG(INFO) << "Camera connection info: ip=" << this->cam_ip_
+            << ", port=" << this->cam_port_;
+
+  this->endpoint_ =
+    boost::asio::ip::tcp::endpoint(
+      boost::asio::ip::address::from_string(this->cam_ip_), this->cam_port_);
+
   this->thread_ =
     std::unique_ptr<std::thread>(
       new std::thread(std::bind(&o3d3xx::FrameGrabber::Run, this)));
@@ -80,11 +103,77 @@ o3d3xx::FrameGrabber::SetSchemaBuffer(std::uint16_t mask)
       << schema
       << '\r' << '\n';
 
-  DLOG(INFO) << "'c' command: " << str.str();
-
   std::string c_command = str.str();
   this->schema_buffer_.assign(c_command.begin(), c_command.end());
   DLOG(INFO) << "c_command: " << c_command;
+}
+
+void
+o3d3xx::FrameGrabber::SetTriggerBuffer()
+{
+  int t_len = 4 + 1 + 2;
+  std::ostringstream str;
+  str << "1001"
+      << 'L' << std::setfill('0') << std::setw(9) << t_len
+      << '\r' << '\n'
+      << "1001" << 't' << '\r' << '\n';
+
+  std::string t_command = str.str();
+  this->trigger_buffer_.assign(t_command.begin(), t_command.end());
+}
+
+void
+o3d3xx::FrameGrabber::SWTrigger()
+{
+  // boost::asio::ip::tcp::socket sock(this->io_service_);
+  // boost::asio::ip::tcp::endpoint endpoint(
+  //   boost::asio::ip::address::from_string(this->cam_ip_),
+  //   this->cam_port_);
+
+  // o3d3xx::FrameGrabber::WriteHandler trigger_write_handler =
+  //   [&, this]
+  //   (const boost::system::error_code& ec, std::size_t bytes_transferred)
+  //   {
+  //     if (ec) { throw o3d3xx::error_t(ec.value()); }
+
+  //     std::size_t t_buff_sz = 16 + 7;
+  //     std::uint8_t resp_buff[t_buff_sz];
+  //     std::size_t resp_bytes_read =
+  //       boost::asio::read(sock, boost::asio::buffer(resp_buff, t_buff_sz));
+
+  //     if (resp_bytes_read < t_buff_sz)
+  //       {
+  //         LOG(ERROR) << "Error getting t_command response!";
+  //         throw o3d3xx::error_t(O3D3XX_IO_ERROR);
+  //       }
+
+  //     if (resp_buff[20] != '*')
+  //       {
+  //         LOG(ERROR) << "Got back bad response from camera: '"
+  //                    << resp_buff[20] << "'";
+  //         throw o3d3xx::error_t(O3D3XX_PCIC_BAD_REPLY);
+  //       }
+  //   };
+
+  // try
+  //   {
+  //     sock.async_connect(endpoint,
+  //                        [&, this]
+  //                        (const boost::system::error_code& ec)
+  //                        {
+  //                          if (ec) { throw o3d3xx::error_t(ec.value()); }
+
+  //                          boost::asio::async_write(
+  //                            sock,
+  //                            boost::asio::buffer(this->trigger_buffer_.data(),
+  //                                                this->trigger_buffer_.size()),
+  //                            trigger_write_handler);
+  //                        });
+  //   }
+  // catch (const std::exception& ex)
+  //   {
+  //     LOG(WARNING) << "Exception: " << ex.what();
+  //   }
 }
 
 void
@@ -146,23 +235,6 @@ o3d3xx::FrameGrabber::Run()
   //
   // setup the camera for image acquistion
   //
-  std::string cam_ip;
-  int cam_port;
-  try
-    {
-      cam_ip = this->cam_->GetIP();
-      cam_port = std::stoi(this->cam_->GetParameter("PcicTcpPort"));
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "Could not get IP/Port of the camera: "
-                 << ex.what();
-      return;
-    }
-
-  LOG(INFO) << "Camera connection info: ip=" << cam_ip
-            << ", port=" << cam_port;
-
   try
     {
       this->cam_->RequestSession();
@@ -175,13 +247,6 @@ o3d3xx::FrameGrabber::Run()
                  << ex.what();
       return;
     }
-
-  //
-  // init the asio structures
-  //
-  boost::asio::ip::tcp::socket sock(this->io_service_);
-  boost::asio::ip::tcp::endpoint endpoint(
-    boost::asio::ip::address::from_string(cam_ip), cam_port);
 
   //
   // Forward declare our read handlers (because they need to call
@@ -231,7 +296,7 @@ o3d3xx::FrameGrabber::Run()
             }
 
           // read another ticket
-          sock.async_read_some(
+          this->sock_.async_read_some(
                boost::asio::buffer(this->ticket_buffer_.data(),
                                    o3d3xx::IMG_TICKET_SZ),
                ticket_handler);
@@ -239,7 +304,7 @@ o3d3xx::FrameGrabber::Run()
           return;
         }
 
-      sock.async_read_some(
+      this->sock_.async_read_some(
         boost::asio::buffer(&this->back_buffer_[bytes_read],
                             buff_sz - bytes_read),
         image_handler);
@@ -275,7 +340,7 @@ o3d3xx::FrameGrabber::Run()
               DLOG(INFO) << "Image buffer size: " << buff_sz;
               this->back_buffer_.resize(buff_sz);
 
-              sock.async_read_some(
+              this->sock_.async_read_some(
                    boost::asio::buffer(this->back_buffer_.data(),
                                        buff_sz),
                    image_handler);
@@ -286,7 +351,7 @@ o3d3xx::FrameGrabber::Run()
           LOG(WARNING) << "Bad ticket!";
         }
 
-      sock.async_read_some(
+      this->sock_.async_read_some(
            boost::asio::buffer(&this->ticket_buffer_[ticket_bytes_read],
                                ticket_buff_sz - ticket_bytes_read),
            ticket_handler);
@@ -305,7 +370,8 @@ o3d3xx::FrameGrabber::Run()
       std::size_t c_buff_sz = 16 + 7;
       std::uint8_t resp_buff[c_buff_sz];
       std::size_t resp_bytes_read =
-        boost::asio::read(sock, boost::asio::buffer(resp_buff, c_buff_sz));
+        boost::asio::read(this->sock_,
+                          boost::asio::buffer(resp_buff, c_buff_sz));
 
       if (resp_bytes_read < c_buff_sz)
         {
@@ -320,7 +386,7 @@ o3d3xx::FrameGrabber::Run()
           throw o3d3xx::error_t(O3D3XX_PCIC_BAD_REPLY);
         }
 
-      sock.async_read_some(
+      this->sock_.async_read_some(
         boost::asio::buffer(
           this->ticket_buffer_.data(), ticket_buff_sz),
         ticket_handler);
@@ -332,14 +398,14 @@ o3d3xx::FrameGrabber::Run()
   //
   try
     {
-      sock.async_connect(endpoint,
+      this->sock_.async_connect(this->endpoint_,
                          [&, this]
                          (const boost::system::error_code& ec)
                          {
                            if (ec) { throw o3d3xx::error_t(ec.value()); }
 
                            boost::asio::async_write(
-                             sock,
+                             this->sock_,
                              boost::asio::buffer(this->schema_buffer_.data(),
                                                  this->schema_buffer_.size()),
                              result_schema_write_handler);
