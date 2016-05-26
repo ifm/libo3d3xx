@@ -33,6 +33,14 @@
 
 namespace o3d3xx
 {
+  extern const std::size_t TICKET_SZ_image;
+  extern const std::size_t TICKET_SZ_c;
+  extern const std::size_t TICKET_SZ_t;
+
+  extern const std::string TICKET_image;
+  extern const std::string TICKET_c;
+  extern const std::string TICKET_t;
+
   /**
    * The FrameGrabber is a class that, when given access to an
    * o3d3xx::Camera::Ptr, it will grab frames from the camera in a separate
@@ -42,17 +50,6 @@ namespace o3d3xx
   {
   public:
     using Ptr = std::shared_ptr<FrameGrabber>;
-
-    using WriteHandler =
-      std::function<void(const boost::system::error_code&, std::size_t)>;
-
-    using ReadHandler =
-      std::function<void(const boost::system::error_code&, std::size_t)>;
-
-    // extern const std::size_t TICKET_SZ; // bytes
-    // extern const std::string IMG_TICKET;
-    // extern const std::string SCHEMA_TICKET;
-    // extern const std::string TRIGGER_TICKET;
 
     /**
      * Stores reference to the passed in camera and starts the worker thread
@@ -154,6 +151,22 @@ namespace o3d3xx
      */
     void SetTriggerBuffer();
 
+    /**
+     * Callback function for reading ticket data from the camera.
+     * This function is generalized to handle reading (as of now) all return
+     * tickets that we expect to see.
+     */
+    void TicketHandler(const boost::system::error_code& ec,
+                       std::size_t bytes_transferred,
+                       std::size_t bytes_read);
+
+    /**
+     * Callback function for reading image data from the camera.
+     */
+    void ImageHandler(const boost::system::error_code& ec,
+                      std::size_t bytes_transferred,
+                      std::size_t bytes_read);
+
   private:
     /**
      * Shared pointer to the camera this frame grabber will grab frames from.
@@ -195,6 +208,11 @@ namespace o3d3xx
      * The user-supplied schema mask to stream from the camera.
      */
     std::uint16_t mask_;
+
+    /**
+     * Cached copy of the active application's trigger mode
+     */
+    int trigger_mode_;
 
     /**
      * Holds the PCIC command needed to set the result schema

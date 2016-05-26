@@ -28,10 +28,6 @@ const std::size_t o3d3xx::IMG_CHUNK_HEADER_SZ = 36;
 bool
 o3d3xx::verify_ticket_buffer(const std::vector<std::uint8_t>& buff)
 {
-  std::string str;
-  str.assign(buff.begin(), buff.end());
-  LOG(INFO) << "Ticket: " << str;
-
   return buff.size() == o3d3xx::IMG_TICKET_SZ &&
          buff.at(4) == 'L' &&
          buff.at(14) == '\r' &&

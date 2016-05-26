@@ -1,6 +1,8 @@
 ## Changes between libo3d3xx 0.4.3 and 0.4.4
 
 * Firmware files move to new `o3d3xx-firmware` repository.
+* Deb files have been renamed to include ubuntu version string in filename
+* FrameGrabber has been refactored and now supports S/W triggering
 
 ## Changes between libo3d3xx 0.4.2 and 0.4.3
 

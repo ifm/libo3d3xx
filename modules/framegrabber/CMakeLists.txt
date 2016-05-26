@@ -57,6 +57,9 @@ configure_file(
   @ONLY
   )
 
+include(ubuntu_version)
+get_ubuntu_version(${UBUNTU_VERSION})
+
 ################################################
 ## Bring in dependent projects
 ################################################
@@ -146,8 +149,11 @@ else()
       )
   endif(NOT CMAKE_CROSSCOMPILING)
 endif(NOT DPKG_CMD)
-set(CPACK_PACKAGE_FILE_NAME
-  "${O3D3XX_FRAMEGRABBER_MODULE_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+string(CONCAT CPACK_PACKAGE_FILE_NAME
+       "${O3D3XX_FRAMEGRABBER_MODULE_NAME}" "_"
+       "${O3D3XX_VERSION_STRING}" "_"
+       "ubuntu-${UBUNTU_VERSION}" "_"
+       "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
   "libgoogle-glog-dev,
@@ -155,8 +161,12 @@ set(CPACK_DEBIAN_PACKAGE_DEPENDS
    libo3d3xx-camera (= ${O3D3XX_VERSION_STRING})")
 include(CPack)
 
-set(DEB_FILE
-    "${O3D3XX_FRAMEGRABBER_MODULE_NAME}_${O3D3XX_VERSION_STRING}_${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}.deb")
+string(CONCAT DEB_FILE
+       "${O3D3XX_FRAMEGRABBER_MODULE_NAME}" "_"
+       "${O3D3XX_VERSION_STRING}" "_"
+       "ubuntu-${UBUNTU_VERSION}" "_"
+       "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" ".deb")
+MESSAGE(STATUS "DEB_FILE: " ${DEB_FILE})
 
 if(CMAKE_CROSSCOMPILING)
   find_program(SCP_EXE scp)
