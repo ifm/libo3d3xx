@@ -39,6 +39,7 @@ int main(int argc, const char** argv)
   std::string password;
   int nframes;
   int nruns;
+  bool sw_trigger;
   bool organize;
   double mean = 0.0;
 
@@ -56,6 +57,10 @@ int main(int argc, const char** argv)
          po::value<int>()->default_value(1),
          "Number of runs to average")
 
+        ("sw,s",
+         po::value<bool>()->default_value(false),
+         "Software Trigger the FrameGrabber")
+
         ("organize,o",
          po::value<bool>()->default_value(false),
          "Calls the Organize() hook on the ByteBuffer interface (DEPRECATED)");
@@ -69,6 +74,7 @@ int main(int argc, const char** argv)
 
       nframes = opts.vm["nframes"].as<int>();
       nruns = opts.vm["nruns"].as<int>();
+      sw_trigger = opts.vm["sw"].as<bool>();
       organize = opts.vm["organize"].as<bool>();
 
       if (nframes <= 0)
@@ -92,6 +98,11 @@ int main(int argc, const char** argv)
           auto start = std::chrono::steady_clock::now();
           for (int j = 0; j < nframes; j++)
             {
+              if (sw_trigger)
+                {
+                  fg->SWTrigger();
+                }
+
               if (! fg->WaitForFrame(buff.get(), 1000, false, organize))
                 {
                   std::cerr << "Timeout waiting for camera!"

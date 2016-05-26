@@ -161,6 +161,9 @@ TEST_F(FrameGrabberTest, SoftwareTrigger)
   //
   // Now, do a s/w trigger and fetch the data
   //
-  fg->SWTrigger();
-  EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
+  for (int i = 0; i < 10; ++i)
+    {
+      fg->SWTrigger();
+      EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
+    }
 }

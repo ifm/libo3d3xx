@@ -150,7 +150,9 @@ o3d3xx-hz
 This program can be used to measure the effective frame rate achieved by the
 FrameGrabber based upon the imager config of the active application. The
 program allows for configuring a number of frames to capture and a number of
-runs to perform before computing the FPS statistics. See `--help` for details.
+runs to perform before computing the FPS statistics. It also supports computing
+statistic from either free-running or s/w triggered image acquisition on the
+camera. See `--help` for details.
 
 
 o3d3xx-ifm-import

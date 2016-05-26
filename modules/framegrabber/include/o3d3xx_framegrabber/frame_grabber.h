@@ -17,6 +17,7 @@
 #ifndef __O3D3XX_FRAME_GRABBER_H__
 #define __O3D3XX_FRAME_GRABBER_H__
 
+#include <atomic>
 #include <condition_variable>
 #include <cstdint>
 #include <functional>
@@ -203,6 +204,12 @@ namespace o3d3xx
      * communicates directly with the sensor.
      */
     std::unique_ptr<std::thread> thread_;
+
+    /**
+     * Flag indicating that the PCIC daemon is ready
+     * (we define "ready" to mean that our schema has been uploaded)
+     */
+    std::atomic<bool> pcic_ready_;
 
     /**
      * The user-supplied schema mask to stream from the camera.

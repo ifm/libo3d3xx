@@ -1,8 +1,12 @@
 ## Changes between libo3d3xx 0.4.3 and 0.4.4
 
-* Firmware files move to new `o3d3xx-firmware` repository.
+* Firmware files moved to new `o3d3xx-firmware` repository
 * Deb files have been renamed to include ubuntu version string in filename
 * FrameGrabber has been refactored and now supports S/W triggering
+* o3d3xx-hz now supports a `--sw` argument indicating that you want it to
+  do a S/W trigger prior to fetching the image data -- if you set up your
+  applications correctly on the camera, you can benchmark a free-running camera
+  vs. a software triggering setup.
 
 ## Changes between libo3d3xx 0.4.2 and 0.4.3
 

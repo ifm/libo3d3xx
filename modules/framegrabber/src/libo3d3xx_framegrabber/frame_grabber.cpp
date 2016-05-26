@@ -50,6 +50,7 @@ o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam,
   : cam_(cam),
     io_service_(),
     sock_(io_service_),
+    pcic_ready_(false),
     mask_(mask),
     trigger_mode_((int) o3d3xx::Camera::trigger_mode::FREE_RUN)
 {
@@ -159,6 +160,19 @@ o3d3xx::FrameGrabber::SWTrigger()
       LOG(WARNING) << "Requested S/W trigger, but trigger_mode is: "
                    << this->trigger_mode_;
       return;
+    }
+
+  int i = 0;
+  while (! this->pcic_ready_.load())
+    {
+      std::this_thread::sleep_for(std::chrono::milliseconds(1));
+      i++;
+
+      if (i > 2000)
+        {
+          LOG(WARNING) << "pcic_ready_ flag not set!";
+          return;
+        }
     }
 
   this->io_service_.post(
@@ -282,6 +296,11 @@ o3d3xx::FrameGrabber::ImageHandler(const boost::system::error_code& ec,
         std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
                   std::placeholders::_1, std::placeholders::_2, 0));
     }
+  else
+    {
+      this->ticket_buffer_.clear();
+      this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_t);
+    }
 }
 
 void
@@ -295,13 +314,17 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
 
   if (bytes_read < 4)
     {
-      this->sock_.async_read_some(
-        boost::asio::buffer(&this->ticket_buffer_[bytes_read],
-                            4 - bytes_read),
-        std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
-                  std::placeholders::_1, std::placeholders::_2, bytes_read));
+      bytes_read +=
+        boost::asio::read(
+          this->sock_,
+          boost::asio::buffer(&this->ticket_buffer_[bytes_read],
+                              4 - bytes_read));
 
-      return;
+      if (bytes_read != 4)
+        {
+          LOG(ERROR) << "Timeout reading ticket!";
+          throw o3d3xx::error_t(O3D3XX_IO_ERROR);
+        }
     }
 
   std::string ticket;
@@ -324,20 +347,27 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
     }
   else
     {
+      LOG(ERROR) << "bytes_read: " << bytes_read;
       LOG(ERROR) << "Unknown ticket: " << ticket;
       throw o3d3xx::error_t(O3D3XX_INVALID_ARGUMENT);
     }
 
-  if (bytes_read != ticket_sz)
+  if (bytes_read < ticket_sz)
     {
-      this->sock_.async_read_some(
-        boost::asio::buffer(&this->ticket_buffer_[bytes_read],
-                            ticket_sz - bytes_read),
-        std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
-                  std::placeholders::_1, std::placeholders::_2,
-                  bytes_read));
+      bytes_read +=
+        boost::asio::read(
+          this->sock_,
+          boost::asio::buffer(&this->ticket_buffer_[bytes_read],
+                              ticket_sz - bytes_read));
 
-      return;
+      if (bytes_read != ticket_sz)
+        {
+          LOG(ERROR) << "Timeout reading whole ticket!";
+          LOG(ERROR) << "Got " << bytes_read << " bytes of "
+                     << ticket_sz << " bytes expected";
+
+          throw o3d3xx::error_t(O3D3XX_IO_ERROR);
+        }
     }
 
   std::string ticket_str;
@@ -381,8 +411,8 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
           this->ticket_buffer_.clear();
           this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_image);
           this->sock_.async_read_some(
-            boost::asio::buffer(this->back_buffer_.data(),
-                                this->back_buffer_.size()),
+            boost::asio::buffer(this->ticket_buffer_.data(),
+                                o3d3xx::TICKET_SZ_image),
             std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
                       std::placeholders::_1, std::placeholders::_2, 0));
         }
@@ -434,6 +464,8 @@ o3d3xx::FrameGrabber::Run()
         std::bind(&o3d3xx::FrameGrabber::TicketHandler,
                   this, std::placeholders::_1,
                   std::placeholders::_2, 0));
+
+      this->pcic_ready_.store(true);
     };
 
   //
