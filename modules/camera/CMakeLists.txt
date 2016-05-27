@@ -164,24 +164,29 @@ else()
       )
   endif(NOT CMAKE_CROSSCOMPILING)
 endif(NOT DPKG_CMD)
-string(CONCAT CPACK_PACKAGE_FILE_NAME
-       "${O3D3XX_CAMERA_MODULE_NAME}" "_"
-       "${O3D3XX_VERSION_STRING}" "_"
-       "ubuntu-${UBUNTU_VERSION}" "_"
-       "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+
+# `CONCAT` not available in earlier cmake versions
+# string(CONCAT CPACK_PACKAGE_FILE_NAME
+#        "${O3D3XX_CAMERA_MODULE_NAME}" "_"
+#        "${O3D3XX_VERSION_STRING}" "_"
+#        "ubuntu-${UBUNTU_VERSION}" "_"
+#        "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+set(PKG_COMPONENTS
+  "${O3D3XX_CAMERA_MODULE_NAME}"
+  "${O3D3XX_VERSION_STRING}"
+  "ubuntu-${UBUNTU_VERSION}"
+  "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}")
+string(REPLACE ";" "_" CPACK_PACKAGE_FILE_NAME "${PKG_COMPONENTS}")
+string(REPLACE ";" "_" DEB_FILE "${PKG_COMPONENTS}")
+set(DEB_FILE "${DEB_FILE}.deb")
+MESSAGE(STATUS "DEB_FILE: " ${DEB_FILE})
+
 set(CPACK_DEBIAN_PACKAGE_SECTION Libraries)
 set(CPACK_DEBIAN_PACKAGE_DEPENDS
   "libgoogle-glog-dev,
    libboost-dev (>= 1.54),
    libxmlrpc-c++8-dev (>= 1.33)")
 include(CPack)
-
-string(CONCAT DEB_FILE
-       "${O3D3XX_CAMERA_MODULE_NAME}" "_"
-       "${O3D3XX_VERSION_STRING}" "_"
-       "ubuntu-${UBUNTU_VERSION}" "_"
-       "${CPACK_DEBIAN_PACKAGE_ARCHITECTURE}" ".deb")
-MESSAGE(STATUS "DEB_FILE: " ${DEB_FILE})
 
 if(CMAKE_CROSSCOMPILING)
   find_program(SCP_EXE scp)
