@@ -99,8 +99,7 @@ Software Compatibility Matrix
     <td>1.4.1639</td>
     <td>O3D303</td>
     <td>
-    SW triggering in framegrabber and utilities for flashing fleets of
-    cameras.
+    SW triggering in framegrabber.
     </td>
   </tr>
 </table>
