@@ -34,10 +34,7 @@
 
 namespace o3d3xx
 {
-  extern const std::size_t TICKET_SZ_image;
-  extern const std::size_t TICKET_SZ_c;
-  extern const std::size_t TICKET_SZ_t;
-
+  extern const std::size_t TICKET_ID_SZ;
   extern const std::string TICKET_image;
   extern const std::string TICKET_c;
   extern const std::string TICKET_t;

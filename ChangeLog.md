@@ -1,3 +1,8 @@
+## Changes between libo3d3xx 0.4.4 and 0.4.5
+
+* Added support for multiple PCIC connections under software triggering. See
+  also: https://github.com/lovepark/libo3d3xx/issues/58
+
 ## Changes between libo3d3xx 0.4.3 and 0.4.4
 
 * Firmware files moved to new `o3d3xx-firmware` repository

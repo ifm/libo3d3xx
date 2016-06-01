@@ -167,3 +167,49 @@ TEST_F(FrameGrabberTest, SoftwareTrigger)
       EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
     }
 }
+
+TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
+{
+  //
+  // Modify the active application to operate in S/W trigger mode
+  //
+  this->cam_->RequestSession();
+  this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  this->cam_->EditApplication(this->idx_);
+  o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
+  app->SetTriggerMode((int) o3d3xx::Camera::trigger_mode::PROCESS_INTERFACE);
+  this->cam_->SetAppConfig(app.get());
+  this->cam_->SaveApp();
+  this->cam_->StopEditingApplication();
+  this->cam_->CancelSession();
+
+  // This establishes two PCIC connections
+  o3d3xx::FrameGrabber::Ptr fg1 = std::make_shared<o3d3xx::FrameGrabber>(cam_);
+  o3d3xx::FrameGrabber::Ptr fg2 = std::make_shared<o3d3xx::FrameGrabber>(cam_);
+
+  // Reuse a single byte buffer for both framegrabbers
+  o3d3xx::ByteBuffer::Ptr buff = std::make_shared<o3d3xx::ByteBuffer>();
+
+  // Now, waiting for image data should timeout
+  EXPECT_FALSE(fg1->WaitForFrame(buff.get(), 1000));
+  EXPECT_FALSE(fg2->WaitForFrame(buff.get(), 1000));
+
+  //
+  // Now, do a s/w trigger and fetch the data ... but note, only one of the two
+  // framegrabbers are going to trigger, while both should see the data.
+  //
+  for (int i = 0; i < 10; ++i)
+    {
+      if (i % 2 == 0)
+        {
+          fg2->SWTrigger();
+        }
+      else
+        {
+          fg1->SWTrigger();
+        }
+
+      EXPECT_TRUE(fg1->WaitForFrame(buff.get(), 1000));
+      EXPECT_TRUE(fg2->WaitForFrame(buff.get(), 1000));
+    }
+}

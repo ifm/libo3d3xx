@@ -37,10 +37,8 @@
 #include "o3d3xx_framegrabber/byte_buffer.hpp"
 #include "o3d3xx_framegrabber/pcic_schema.h"
 
-const std::size_t o3d3xx::TICKET_SZ_image = 16;
-const std::size_t o3d3xx::TICKET_SZ_c = 16 + 7;
-const std::size_t o3d3xx::TICKET_SZ_t = 16 + 7;
-
+// <Ticket><Length>CR+LF (16 bytes)
+const std::size_t o3d3xx::TICKET_ID_SZ = 16;
 const std::string o3d3xx::TICKET_image = "0000";
 const std::string o3d3xx::TICKET_c = "1000";
 const std::string o3d3xx::TICKET_t = "1001";
@@ -186,16 +184,6 @@ o3d3xx::FrameGrabber::SWTrigger()
              std::size_t bytes_transferred)
         {
           if (ec) { throw o3d3xx::error_t(ec.value()); }
-
-          this->ticket_buffer_.clear();
-          this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_t);
-
-          this->sock_.async_read_some(
-            boost::asio::buffer(this->ticket_buffer_.data(),
-                                o3d3xx::TICKET_SZ_t),
-            std::bind(&o3d3xx::FrameGrabber::TicketHandler,
-                      this, std::placeholders::_1,
-                      std::placeholders::_2, 0));
         });
     });
 }
@@ -285,22 +273,13 @@ o3d3xx::FrameGrabber::ImageHandler(const boost::system::error_code& ec,
       LOG(WARNING) << "Bad image!";
     }
 
-  if (this->trigger_mode_ ==
-      (int) o3d3xx::Camera::trigger_mode::FREE_RUN)
-    {
-      this->ticket_buffer_.clear();
-      this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_image);
-      this->sock_.async_read_some(
-        boost::asio::buffer(this->ticket_buffer_.data(),
-                            o3d3xx::TICKET_SZ_image),
-        std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
-                  std::placeholders::_1, std::placeholders::_2, 0));
-    }
-  else
-    {
-      this->ticket_buffer_.clear();
-      this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_t);
-    }
+  this->ticket_buffer_.clear();
+  this->ticket_buffer_.resize(o3d3xx::TICKET_ID_SZ);
+  this->sock_.async_read_some(
+    boost::asio::buffer(this->ticket_buffer_.data(),
+                        o3d3xx::TICKET_ID_SZ),
+    std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
+              std::placeholders::_1, std::placeholders::_2, 0));
 }
 
 void
@@ -312,15 +291,15 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
 
   bytes_read += bytes_transferred;
 
-  if (bytes_read < 4)
+  if (bytes_read < o3d3xx::TICKET_ID_SZ)
     {
       bytes_read +=
         boost::asio::read(
           this->sock_,
           boost::asio::buffer(&this->ticket_buffer_[bytes_read],
-                              4 - bytes_read));
+                              o3d3xx::TICKET_ID_SZ - bytes_read));
 
-      if (bytes_read != 4)
+      if (bytes_read != o3d3xx::TICKET_ID_SZ)
         {
           LOG(ERROR) << "Timeout reading ticket!";
           throw o3d3xx::error_t(O3D3XX_IO_ERROR);
@@ -331,38 +310,25 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
   ticket.assign(this->ticket_buffer_.begin(),
                 this->ticket_buffer_.begin() + 4);
 
-  std::size_t ticket_sz = 0;
+  std::string payload_sz_str;
+  payload_sz_str.assign(this->ticket_buffer_.begin()+5,
+                        this->ticket_buffer_.begin()+14);
+  int payload_sz = std::stoi(payload_sz_str);
+  int ticket_sz = o3d3xx::TICKET_ID_SZ;
 
-  if (ticket == o3d3xx::TICKET_image)
+  if (ticket != o3d3xx::TICKET_image)
     {
-      ticket_sz = o3d3xx::TICKET_SZ_image;
-    }
-  else if (ticket == o3d3xx::TICKET_c)
-    {
-      ticket_sz = o3d3xx::TICKET_SZ_c;
-    }
-  else if (ticket == o3d3xx::TICKET_t)
-    {
-      ticket_sz = o3d3xx::TICKET_SZ_t;
-    }
-  else
-    {
-      LOG(ERROR) << "bytes_read: " << bytes_read;
-      LOG(ERROR) << "Unknown ticket: " << ticket;
-      throw o3d3xx::error_t(O3D3XX_INVALID_ARGUMENT);
-    }
+      this->ticket_buffer_.resize(ticket_sz + payload_sz);
 
-  if (bytes_read < ticket_sz)
-    {
       bytes_read +=
         boost::asio::read(
           this->sock_,
           boost::asio::buffer(&this->ticket_buffer_[bytes_read],
-                              ticket_sz - bytes_read));
+                              (ticket_sz + payload_sz) - bytes_read));
 
-      if (bytes_read != ticket_sz)
+      if (bytes_read != (ticket_sz + payload_sz))
         {
-          LOG(ERROR) << "Timeout reading whole ticket!";
+          LOG(ERROR) << "Timeout reading whole response!";
           LOG(ERROR) << "Got " << bytes_read << " bytes of "
                      << ticket_sz << " bytes expected";
 
@@ -373,7 +339,7 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
   std::string ticket_str;
   ticket_str.assign(this->ticket_buffer_.begin(),
                     this->ticket_buffer_.end());
-  DLOG(INFO) << "Ticket: " << ticket_str;
+  DLOG(INFO) << "Ticket Full: '" << ticket_str << "'";
 
   if (ticket == o3d3xx::TICKET_image)
     {
@@ -404,18 +370,14 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
           throw(o3d3xx::error_t(O3D3XX_PCIC_BAD_REPLY));
         }
 
-      if ((ticket == o3d3xx::TICKET_t) ||
-          (this->trigger_mode_ ==
-           (int) o3d3xx::Camera::trigger_mode::FREE_RUN))
-        {
-          this->ticket_buffer_.clear();
-          this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_image);
-          this->sock_.async_read_some(
-            boost::asio::buffer(this->ticket_buffer_.data(),
-                                o3d3xx::TICKET_SZ_image),
-            std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
-                      std::placeholders::_1, std::placeholders::_2, 0));
-        }
+      this->ticket_buffer_.clear();
+      this->ticket_buffer_.resize(o3d3xx::TICKET_ID_SZ);
+      this->sock_.async_read_some(
+        boost::asio::buffer(this->ticket_buffer_.data(),
+                            o3d3xx::TICKET_ID_SZ),
+        std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
+                  std::placeholders::_1, std::placeholders::_2, 0));
+
       return;
     }
   else
@@ -456,11 +418,11 @@ o3d3xx::FrameGrabber::Run()
     {
       if (ec) { throw o3d3xx::error_t(ec.value()); }
       this->ticket_buffer_.clear();
-      this->ticket_buffer_.resize(o3d3xx::TICKET_SZ_c);
+      this->ticket_buffer_.resize(o3d3xx::TICKET_ID_SZ);
 
       this->sock_.async_read_some(
         boost::asio::buffer(this->ticket_buffer_.data(),
-                            o3d3xx::TICKET_SZ_c),
+                            o3d3xx::TICKET_ID_SZ),
         std::bind(&o3d3xx::FrameGrabber::TicketHandler,
                   this, std::placeholders::_1,
                   std::placeholders::_2, 0));

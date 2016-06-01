@@ -102,6 +102,14 @@ Software Compatibility Matrix
     SW triggering in framegrabber.
     </td>
   </tr>
+  <tr>
+    <td>0.4.5</td>
+    <td>1.4.1639</td>
+    <td>O3D303</td>
+    <td>
+    SW triggering supports multiple concurrent PCIC connections
+    </td>
+  </tr>
 </table>
 
 Features
