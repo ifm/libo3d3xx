@@ -1,5 +1,5 @@
 #
-# Toolchain for cross-building libpallet for the O3D303 camera.
+# Toolchain for cross-building libo3d3xx for the O3D303 camera.
 #
 # NOTE: For this file to work, you must first:
 # source /opt/poky/1.8.1/environment-setup-armv7ahf-vfp-neon-poky-linux-gnueabi
