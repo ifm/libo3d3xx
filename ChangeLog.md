@@ -2,6 +2,7 @@
 
 * Added support for multiple PCIC connections under software triggering. See
   also: https://github.com/lovepark/libo3d3xx/issues/58
+* Adapted build scripts to be able to cross-compile to the camera
 
 ## Changes between libo3d3xx 0.4.3 and 0.4.4
 

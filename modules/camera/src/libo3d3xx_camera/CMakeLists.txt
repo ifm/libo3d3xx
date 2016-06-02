@@ -1,6 +1,4 @@
 find_library(LIB_glog NAMES glog)
-find_library(LIB_boost_system NAMES boost_system)
-find_library(LIB_boost_program_options NAMES boost_program_options)
 find_library(LIB_xmlrpcxx NAMES xmlrpc++)
 find_library(LIB_xmlrpc_clientxx NAMES xmlrpc_client++)
 
@@ -36,8 +34,7 @@ if(BUILD_SHARED_LIBS)
     target_link_libraries(
       o3d3xx_camera_shared
       ${LIB_glog}
-      ${LIB_boost_system}
-      ${LIB_boost_program_options}
+      ${Boost_LIBRARIES}
       ${LIB_xmlrpcxx}
       ${LIB_xmlrpc_clientxx}
       )
@@ -64,8 +61,7 @@ if(BUILD_STATIC_LIBS)
   target_link_libraries(
     o3d3xx_camera_static
     ${LIB_glog}
-    ${LIB_boost_system}
-    ${LIB_boost_program_options}
+    ${Boost_LIBRARIES}
     ${LIB_xmlrpcxx}
     ${LIB_xmlrpc_clientxx}
     )

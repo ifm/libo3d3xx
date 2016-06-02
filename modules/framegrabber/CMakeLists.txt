@@ -4,10 +4,11 @@ set(O3D3XX_FRAMEGRABBER_MODULE_NAME "libo3d3xx-framegrabber")
 
 set(CPACK_SET_DESTDIR true)
 if(NOT CMAKE_CROSSCOMPILING)
-  set(CMAKE_INSTALL_PREFIX /usr)
+  set(CMAKE_INSTALL_PREFIX "/usr" CACHE STRING "CMake install prefix")
 else()
-  set(CMAKE_INSTALL_PREFIX ${CMAKE_SYSROOT}/usr)
-  set(CPACK_INSTALL_PREFIX /usr)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_SYSROOT}/usr"
+      CACHE STRING "CMake install prefix")
+  set(CPACK_INSTALL_PREFIX "/usr" CACHE STRING "CPack install prefix")
 endif()
 
 set(CMAKE_BUILD_TYPE Release) # Release or Debug

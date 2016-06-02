@@ -4,10 +4,11 @@ set(O3D3XX_CAMERA_MODULE_NAME "libo3d3xx-camera")
 
 set(CPACK_SET_DESTDIR true)
 if(NOT CMAKE_CROSSCOMPILING)
-  set(CMAKE_INSTALL_PREFIX /usr)
+  set(CMAKE_INSTALL_PREFIX "/usr" CACHE STRING "CMake install prefix")
 else()
-  set(CMAKE_INSTALL_PREFIX ${CMAKE_SYSROOT}/usr)
-  set(CPACK_INSTALL_PREFIX /usr)
+  set(CMAKE_INSTALL_PREFIX "${CMAKE_SYSROOT}/usr"
+      CACHE STRING "CMake install prefix")
+  set(CPACK_INSTALL_PREFIX "/usr" CACHE STRING "CPack install prefix")
 endif()
 
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
@@ -90,11 +91,21 @@ find_package(Boost REQUIRED COMPONENTS program_options system)
 ################################################
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
-include_directories(
-  ${O3D3XX_CAMERA_BINARY_DIR}/include
-  ${XMLRPC_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  )
+# NOTE: The `FindXMLRPC.cmake` file does not respect cross-compilation
+# environments, so, we make the assumption the includes are in a standard
+# directory in your sysroot.
+if (NOT CMAKE_CROSSCOMPILING)
+  include_directories(
+    ${O3D3XX_CAMERA_BINARY_DIR}/include
+    ${XMLRPC_INCLUDE_DIRS}
+    ${Boost_INCLUDE_DIRS}
+    )
+else()
+  include_directories(
+    ${O3D3XX_CAMERA_BINARY_DIR}/include
+    ${Boost_INCLUDE_DIRS}
+    )
+endif()
 link_directories(
   ${O3D3XX_CAMERA_BINARY_DIR}/lib
   ${Boost_LIBRARY_DIRS}

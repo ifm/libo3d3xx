@@ -1,5 +1,4 @@
 find_library(LIB_glog NAMES glog)
-find_library(LIB_boost_system NAMES boost_system)
 find_library(LIB_xmlrpcxx NAMES xmlrpc++)
 find_library(LIB_xmlrpc_clientxx NAMES xmlrpc_client++)
 
@@ -25,7 +24,7 @@ if(BUILD_SHARED_LIBS)
       o3d3xx_framegrabber_shared
       ${O3D3XX_CAMERA_LIBRARIES}
       ${LIB_glog}
-      ${LIB_boost_system}
+      ${Boost_LIBRARIES}
       ${LIB_xmlrpcxx}
       ${LIB_xmlrpc_clientxx}
       ${CMAKE_THREAD_LIBS_INIT}
@@ -55,7 +54,7 @@ if(BUILD_STATIC_LIBS)
     o3d3xx_framegrabber_static
     ${O3D3XX_CAMERA_LIBRARIES}
     ${LIB_glog}
-    ${LIB_boost_system}
+    ${Boost_LIBRARIES}
     ${LIB_xmlrpcxx}
     ${LIB_xmlrpc_clientxx}
     )
