@@ -207,10 +207,10 @@ TEST(Camera_Tests, GetDeviceConfig)
             dev->ExtrinsicCalibTransZ());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotX")),
             dev->ExtrinsicCalibRotX());
-  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotZ")),
+  EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotY")),
             dev->ExtrinsicCalibRotY());
   EXPECT_EQ(std::stod(params.at("ExtrinsicCalibRotZ")),
-            dev->ExtrinsicCalibRotY());
+            dev->ExtrinsicCalibRotZ());
   EXPECT_EQ(std::stoi(params.at("EvaluationFinishedMinHoldTime")),
             dev->EvaluationFinishedMinHoldTime());
   EXPECT_EQ(o3d3xx::stob(params.at("SaveRestoreStatsOnApplSwitch")),
