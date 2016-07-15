@@ -1,13 +1,13 @@
 find_path(O3D3XX_FRAMEGRABBER_INCLUDE_DIRS
   NAMES o3d3xx_framegrabber.h
-  PATHS /opt/libo3d3xx/include /usr/include
+  PATHS /opt/libo3d3xx/include /usr/include /usr/local/include /usr/local/libo3d3xx/include
   NO_DEFAULT_PATH
   DOC "o3d3xx_framegrabber Include directory"
   )
 
 find_library(O3D3XX_FRAMEGRABBER_LIBRARIES
   NAMES o3d3xx_framegrabber libo3d3xx_framegrabber_static.a
-  PATHS /opt/libo3d3xx/lib /usr/lib
+  PATHS /opt/libo3d3xx/lib /usr/lib /usr/local/lib /usr/local/libo3d3xx/lib
   NO_DEFAULT_PATH
   DOC "o3d3xx_framegrabber shared object file"
   )

@@ -227,7 +227,7 @@ distribution:
     $ cd modules/camera
     $ mkdir build
     $ cd build
-    $ cmake ..
+    $ cmake -DCMAKE_INSTALL_PREFIX=/usr ..
     $ make
     $ make check
     $ make package
@@ -247,7 +247,7 @@ distribution:
     $ cd modules/framegrabber
     $ mkdir build
     $ cd build
-    $ cmake ..
+    $ cmake -DCMAKE_INSTALL_PREFIX=/usr ..
     $ make
     $ make check
     $ make package
@@ -267,7 +267,7 @@ distribution:
     $ cd modules/image
     $ mkdir build
     $ cd build
-    $ cmake ..
+    $ cmake -DCMAKE_INSTALL_PREFIX=/usr ..
     $ make
     $ make check
     $ make package
@@ -297,10 +297,6 @@ build by supplying `-D...` options on the `cmake` command line. To see what is
 available to you, please look at the individual module's top-level
 `CMakeLists.txt` file. For example, this snippet is from the `camera` module:
 
-    # These `set` commands need to be manaully changed by editing the file
-    set(CMAKE_INSTALL_PREFIX /usr)
-    set(CMAKE_BUILD_TYPE Release) # Release or Debug
-
     # These can be set with -D... on the command line
     option(BUILD_TESTS "Build unit tests" ON)
     option(BUILD_SHARED_LIBS "Build shared libraries" ON)
@@ -315,11 +311,6 @@ available to you, please look at the individual module's top-level
     option(BUILD_EXE_IMAGER_TYPES "Build o3d3xx-imager-types" ON)
     option(BUILD_EXE_IFM_IMPORT "Build o3d3xx-ifm-import" ON)
     option(BUILD_EXE_IFM_EXPORT "Build o3d3xx-ifm-export" ON)
-
-    # These need to be manually changed by editing the file
-    set(TARGET_IP "192.168.0.68")
-    set(TARGET_USER "lovepark")
-    set(TARGET_DIR "/home/lovepark/debs/")
 
 So, for example, if you did not want to build and run the unit tests (bad idea,
 BTW), you could:

@@ -1,13 +1,13 @@
 find_path(O3D3XX_IMAGE_INCLUDE_DIRS
   NAMES o3d3xx_image.h
-  PATHS /opt/libo3d3xx/include /usr/include
+  PATHS /opt/libo3d3xx/include /usr/include /usr/local/include /usr/local/libo3d3xx/include
   NO_DEFAULT_PATH
   DOC "o3d3xx_image Include directory"
   )
 
 find_library(O3D3XX_IMAGE_LIBRARIES
   NAMES o3d3xx_image libo3d3xx_image_static.a
-  PATHS /opt/libo3d3xx/lib /usr/lib
+  PATHS /opt/libo3d3xx/lib /usr/lib /usr/local/lib /usr/local/libo3d3xx/lib
   NO_DEFAULT_PATH
   DOC "o3d3xx_image shared object file"
   )

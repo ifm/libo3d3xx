@@ -209,7 +209,7 @@ TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
           fg1->SWTrigger();
         }
 
-      EXPECT_TRUE(fg1->WaitForFrame(buff.get(), 1000));
-      EXPECT_TRUE(fg2->WaitForFrame(buff.get(), 1000));
+      EXPECT_TRUE(fg1->WaitForFrame(buff.get(), 1500));
+      EXPECT_TRUE(fg2->WaitForFrame(buff.get(), 1500));
     }
 }
