@@ -1,5 +1,7 @@
+#include <chrono>
 #include <cstdint>
 #include <memory>
+#include <thread>
 #include "gtest/gtest.h"
 #include "o3d3xx_camera.h"
 #include "o3d3xx_framegrabber.h"
@@ -187,18 +189,19 @@ TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
   o3d3xx::FrameGrabber::Ptr fg1 = std::make_shared<o3d3xx::FrameGrabber>(cam_);
   o3d3xx::FrameGrabber::Ptr fg2 = std::make_shared<o3d3xx::FrameGrabber>(cam_);
 
-  // Reuse a single byte buffer for both framegrabbers
-  o3d3xx::ByteBuffer::Ptr buff = std::make_shared<o3d3xx::ByteBuffer>();
+  // Byte buffers for each of the framegrabbers
+  o3d3xx::ByteBuffer::Ptr buff1 = std::make_shared<o3d3xx::ByteBuffer>();
+  o3d3xx::ByteBuffer::Ptr buff2 = std::make_shared<o3d3xx::ByteBuffer>();
 
   // Now, waiting for image data should timeout
-  EXPECT_FALSE(fg1->WaitForFrame(buff.get(), 1000));
-  EXPECT_FALSE(fg2->WaitForFrame(buff.get(), 1000));
+  EXPECT_FALSE(fg1->WaitForFrame(buff1.get(), 1000));
+  EXPECT_FALSE(fg2->WaitForFrame(buff2.get(), 1000));
 
   //
   // Now, do a s/w trigger and fetch the data ... but note, only one of the two
   // framegrabbers are going to trigger, while both should see the data.
   //
-  for (int i = 0; i < 10; ++i)
+  for (int i = 0; i < 5; ++i)
     {
       if (i % 2 == 0)
         {
@@ -209,7 +212,9 @@ TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
           fg1->SWTrigger();
         }
 
-      EXPECT_TRUE(fg1->WaitForFrame(buff.get(), 1500));
-      EXPECT_TRUE(fg2->WaitForFrame(buff.get(), 1500));
+      EXPECT_TRUE(fg1->WaitForFrame(buff1.get(), 1500));
+      EXPECT_TRUE(fg2->WaitForFrame(buff2.get(), 1500));
+
+      std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 }
