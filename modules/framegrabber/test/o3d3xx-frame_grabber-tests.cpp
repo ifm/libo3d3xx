@@ -187,6 +187,7 @@ TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
 
   // This establishes two PCIC connections
   o3d3xx::FrameGrabber::Ptr fg1 = std::make_shared<o3d3xx::FrameGrabber>(cam_);
+  std::this_thread::sleep_for(std::chrono::milliseconds(250));
   o3d3xx::FrameGrabber::Ptr fg2 = std::make_shared<o3d3xx::FrameGrabber>(cam_);
 
   // Byte buffers for each of the framegrabbers
@@ -198,22 +199,23 @@ TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
   EXPECT_FALSE(fg2->WaitForFrame(buff2.get(), 1000));
 
   //
-  // Now, do a s/w trigger and fetch the data ... but note, only one of the two
-  // framegrabbers are going to trigger, while both should see the data.
+  // Now, do a s/w trigger and fetch the data ...
+  //
+  // NOTE the sublty here: when `fg1` triggers, we make sure `fg2` can fetch
+  // data and vice versa.
   //
   for (int i = 0; i < 5; ++i)
     {
       if (i % 2 == 0)
         {
           fg2->SWTrigger();
+          EXPECT_TRUE(fg1->WaitForFrame(buff1.get(), 1500));
         }
       else
         {
           fg1->SWTrigger();
+          EXPECT_TRUE(fg2->WaitForFrame(buff2.get(), 1500));
         }
-
-      EXPECT_TRUE(fg1->WaitForFrame(buff1.get(), 1500));
-      EXPECT_TRUE(fg2->WaitForFrame(buff2.get(), 1500));
 
       std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
