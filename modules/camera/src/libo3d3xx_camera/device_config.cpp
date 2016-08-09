@@ -29,7 +29,6 @@ o3d3xx::DeviceConfig::DeviceConfig()
   : name_("New sensor"),
     description_(""),
     active_application_(0),
-    pcic_eip_enabled_(false),
     pcic_tcp_port_(50010),
     pcic_protocol_version_(3),
     io_logic_type_(1),
@@ -48,7 +47,9 @@ o3d3xx::DeviceConfig::DeviceConfig()
     save_restore_stats_on_appl_switch_(true),
     ip_address_config_(0),
     password_activated_(false),
-    operating_mode_(0)
+    operating_mode_(0),
+    pnio_device_name_(""),
+    ethernet_field_bus_(0)
 { }
 
 o3d3xx::DeviceConfig::DeviceConfig(
@@ -108,18 +109,6 @@ void
 o3d3xx::DeviceConfig::SetActiveApplication(int idx) noexcept
 {
   this->active_application_ = idx;
-}
-
-bool
-o3d3xx::DeviceConfig::PcicEipEnabled() const noexcept
-{
-  return this->pcic_eip_enabled_;
-}
-
-void
-o3d3xx::DeviceConfig::SetPcicEipEnabled(bool on) noexcept
-{
-  this->pcic_eip_enabled_ = on;
 }
 
 int
@@ -320,10 +309,22 @@ o3d3xx::DeviceConfig::IPAddressConfig() const noexcept
   return this->ip_address_config_;
 }
 
+void
+o3d3xx::DeviceConfig::SetIPAddressConfig(int c) noexcept
+{
+  this->ip_address_config_ = c;
+}
+
 bool
 o3d3xx::DeviceConfig::PasswordActivated() const noexcept
 {
   return this->password_activated_;
+}
+
+void
+o3d3xx::DeviceConfig::SetPasswordActivated(bool b) noexcept
+{
+  this->password_activated_ = b;
 }
 
 int
@@ -332,10 +333,22 @@ o3d3xx::DeviceConfig::OperatingMode() const noexcept
   return this->operating_mode_;
 }
 
+void
+o3d3xx::DeviceConfig::SetOperatingMode(int i) noexcept
+{
+  this->operating_mode_ = i;
+}
+
 std::string
 o3d3xx::DeviceConfig::DeviceType() const noexcept
 {
   return this->device_type_;
+}
+
+void
+o3d3xx::DeviceConfig::SetDeviceType(const std::string& s) noexcept
+{
+  this->device_type_ = s;
 }
 
 std::string
@@ -344,10 +357,22 @@ o3d3xx::DeviceConfig::ArticleNumber() const noexcept
   return this->article_number_;
 }
 
+void
+o3d3xx::DeviceConfig::SetArticleNumber(const std::string& s) noexcept
+{
+  this->article_number_ = s;
+}
+
 std::string
 o3d3xx::DeviceConfig::ArticleStatus() const noexcept
 {
   return this->article_status_;
+}
+
+void
+o3d3xx::DeviceConfig::SetArticleStatus(const std::string& s) noexcept
+{
+  this->article_status_ = s;
 }
 
 double
@@ -356,10 +381,22 @@ o3d3xx::DeviceConfig::Uptime() const noexcept
   return this->uptime_;
 }
 
+void
+o3d3xx::DeviceConfig::SetUptime(double d) noexcept
+{
+  this->uptime_ = d;
+}
+
 int
 o3d3xx::DeviceConfig::ImageTimestampReference() const noexcept
 {
   return this->image_timestamp_ref_;
+}
+
+void
+o3d3xx::DeviceConfig::SetImageTimestampReference(int i) noexcept
+{
+  this->image_timestamp_ref_ = i;
 }
 
 double
@@ -368,10 +405,22 @@ o3d3xx::DeviceConfig::TemperatureFront1() const noexcept
   return this->temp_front1_;
 }
 
+void
+o3d3xx::DeviceConfig::SetTemperatureFront1(double d) noexcept
+{
+  this->temp_front1_ = d;
+}
+
 double
 o3d3xx::DeviceConfig::TemperatureFront2() const noexcept
 {
   return this->temp_front2_;
+}
+
+void
+o3d3xx::DeviceConfig::SetTemperatureFront2(double d) noexcept
+{
+  this->temp_front2_ = d;
 }
 
 double
@@ -380,10 +429,46 @@ o3d3xx::DeviceConfig::TemperatureIMX6() const noexcept
   return this->temp_imx6_;
 }
 
+void
+o3d3xx::DeviceConfig::SetTemperatureIMX6(double d) noexcept
+{
+  this->temp_imx6_ = d;
+}
+
 double
 o3d3xx::DeviceConfig::TemperatureIllu() const noexcept
 {
   return this->temp_illu_;
+}
+
+void
+o3d3xx::DeviceConfig::SetTemperatureIllu(double d) noexcept
+{
+  this->temp_illu_ = d;
+}
+
+std::string
+o3d3xx::DeviceConfig::PNIODeviceName() const noexcept
+{
+  return this->pnio_device_name_;
+}
+
+void
+o3d3xx::DeviceConfig::SetPNIODeviceName(const std::string& s) noexcept
+{
+  this->pnio_device_name_ = s;
+}
+
+int
+o3d3xx::DeviceConfig::EthernetFieldBus() const noexcept
+{
+  return this->ethernet_field_bus_;
+}
+
+void
+o3d3xx::DeviceConfig::SetEthernetFieldBus(int i) noexcept
+{
+  this->ethernet_field_bus_ = i;
 }
 
 const std::unordered_map<std::string,
@@ -402,10 +487,6 @@ o3d3xx::DeviceConfig::mutator_map =
     {"ActiveApplication",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetActiveApplication(std::stoi(val)); }},
-
-    {"PcicEipEnabled",
-     [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetPcicEipEnabled(o3d3xx::stob(val)); }},
 
     {"PcicTcpPort",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
@@ -470,6 +551,66 @@ o3d3xx::DeviceConfig::mutator_map =
     {"SaveRestoreStatsOnApplSwitch",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetSaveRestoreStatsOnApplSwitch(o3d3xx::stob(val)); }},
+
+    //
+    // Read-only parameters on the camera
+    //
+
+    {"IPAddressConfig",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetIPAddressConfig(std::stoi(val)); }},
+
+    {"PasswordActivated",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetPasswordActivated(o3d3xx::stob(val)); }},
+
+    {"OperatingMode",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetOperatingMode(std::stoi(val)); }},
+
+    {"DeviceType",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetDeviceType(val); }},
+
+    {"ArticleNumber",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetArticleNumber(val); }},
+
+    {"ArticleStatus",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetArticleStatus(val); }},
+
+    {"UpTime",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetUptime(std::stod(val)); }},
+
+    {"ImageTimestampReference",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetImageTimestampReference(std::stoi(val)); }},
+
+    {"TemperatureFront1",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetTemperatureFront1(std::stod(val)); }},
+
+    {"TemperatureFront2",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetTemperatureFront2(std::stod(val)); }},
+
+    {"TemperatureIMX6",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetTemperatureIMX6(std::stod(val)); }},
+
+    {"TemperatureIllu",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetTemperatureIllu(std::stod(val)); }},
+
+    {"PNIODevicename",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetPNIODeviceName(val); }},
+
+    {"EthernetFieldBus",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetEthernetFieldBus(std::stoi(val)); }}
   };
 
 std::string
@@ -480,7 +621,6 @@ o3d3xx::DeviceConfig::ToJSON() const
   pt.put("Name", this->Name());
   pt.put("Description", this->Description());
   pt.put("ActiveApplication", this->ActiveApplication());
-  pt.put("PcicEipEnabled", this->PcicEipEnabled());
   pt.put("PcicTcpPort", this->PcicTCPPort());
   pt.put("PcicProtocolVersion", this->PcicProtocolVersion());
   pt.put("IOLogicType", this->IOLogicType());
@@ -511,6 +651,8 @@ o3d3xx::DeviceConfig::ToJSON() const
   pt.put("TemperatureFront2", this->TemperatureFront2());
   pt.put("TemperatureIMX6", this->TemperatureIMX6());
   pt.put("TemperatureIllu", this->TemperatureIllu());
+  pt.put("PNIODeviceName", this->PNIODeviceName());
+  pt.put("EthernetFieldBus", this->EthernetFieldBus());
 
   std::ostringstream buf;
   boost::property_tree::write_json(buf, pt);

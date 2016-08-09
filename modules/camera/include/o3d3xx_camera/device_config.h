@@ -88,9 +88,6 @@ namespace o3d3xx
     int ActiveApplication() const noexcept;
     void SetActiveApplication(int idx) noexcept;
 
-    bool PcicEipEnabled() const noexcept;
-    void SetPcicEipEnabled(bool on) noexcept;
-
     int PcicTCPPort() const noexcept;
     void SetPcicTCPPort(int port) noexcept;
 
@@ -139,18 +136,51 @@ namespace o3d3xx
     bool SaveRestoreStatsOnApplSwitch() const noexcept;
     void SetSaveRestoreStatsOnApplSwitch(bool on) noexcept;
 
+    //
+    // NOTE: This set of accessor/mutators correspond to attributes are
+    // read-only on the device
+    //
     int IPAddressConfig() const noexcept;
+    void SetIPAddressConfig(int c) noexcept;
+
     bool PasswordActivated() const noexcept;
+    void SetPasswordActivated(bool b) noexcept;
+
     int OperatingMode() const noexcept;
+    void SetOperatingMode(int i) noexcept;
+
     std::string DeviceType() const noexcept;
+    void SetDeviceType(const std::string& s) noexcept;
+
     std::string ArticleNumber() const noexcept;
+    void SetArticleNumber(const std::string& s) noexcept;
+
     std::string ArticleStatus() const noexcept;
+    void SetArticleStatus(const std::string& s) noexcept;
+
     double Uptime() const noexcept;
+    void SetUptime(double d) noexcept;
+
     int ImageTimestampReference() const noexcept;
+    void SetImageTimestampReference(int i) noexcept;
+
     double TemperatureFront1() const noexcept;
+    void SetTemperatureFront1(double d) noexcept;
+
     double TemperatureFront2() const noexcept;
+    void SetTemperatureFront2(double d) noexcept;
+
     double TemperatureIMX6() const noexcept;
+    void SetTemperatureIMX6(double d) noexcept;
+
     double TemperatureIllu() const noexcept;
+    void SetTemperatureIllu(double d) noexcept;
+
+    std::string PNIODeviceName() const noexcept;
+    void SetPNIODeviceName(const std::string& s) noexcept;
+
+    int EthernetFieldBus() const noexcept;
+    void SetEthernetFieldBus(int i) noexcept;
 
   protected:
     /**
@@ -167,11 +197,6 @@ namespace o3d3xx
      * Index of the active application
      */
     int active_application_;
-
-    /**
-     * Flag indicating EIP interface enabled status
-     */
-    bool pcic_eip_enabled_;
 
     /**
      * TCP/IP port for the PCIC connections
@@ -318,6 +343,16 @@ namespace o3d3xx
      * READONLY: Temperature of the illumination board (deg Celcius)
      */
     double temp_illu_;
+
+    /**
+     * READONLY
+     */
+    std::string pnio_device_name_;
+
+    /**
+     * READONLY
+     */
+    int ethernet_field_bus_;
 
   }; // end: class DeviceConfig
 

@@ -1,3 +1,12 @@
+## Changes between libo3d3xx 0.4.5 and 0.4.6
+
+* Updates to XML-RPC protocol for FW 1.6.x
+* Provided mutators on the DeviceConfig value object so that when fetching data
+  from the camera (e.g., in o3d3xx-dump), it will reflect the true state of the
+  camera.
+* Removed tests against the 100k pixel imager -- this firmware seems to
+  deprecate this feature.
+
 ## Changes between libo3d3xx 0.4.4 and 0.4.5
 
 * Added support for multiple PCIC connections under software triggering. See

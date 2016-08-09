@@ -93,6 +93,9 @@ namespace o3d3xx
     std::string PcicEipResultSchema() const noexcept;
     void SetPcicEipResultSchema(const std::string& schema) noexcept;
 
+    std::string PcicPnioResultSchema() const noexcept;
+    void SetPcicPnioResultSchema(const std::string& schema) noexcept;
+
     std::string LogicGraph() const noexcept;
     void SetLogicGraph(const std::string& graph) noexcept;
 
@@ -124,6 +127,12 @@ namespace o3d3xx
      * interface.
      */
     std::string pcic_eip_result_schema_;
+
+    /**
+     * @see pcic_tcp_result_schema_
+     * @see pcic_eip_result_schema_
+     */
+    std::string pcic_pnio_result_schema_;
 
     /**
      * @todo document this parameter

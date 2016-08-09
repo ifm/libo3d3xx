@@ -179,14 +179,12 @@ TEST(Camera_Tests, GetDeviceConfig)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  EXPECT_EQ(params.size(), 32);
+  EXPECT_EQ(params.size(), 33);
 
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
   EXPECT_EQ(std::stoi(params.at("ActiveApplication")),
             dev->ActiveApplication());
-  EXPECT_EQ(o3d3xx::stob(params.at("PcicEipEnabled")),
-            dev->PcicEipEnabled());
   EXPECT_EQ(std::stoi(params.at("PcicTcpPort")), dev->PcicTCPPort());
   EXPECT_EQ(std::stoi(params.at("PcicProtocolVersion")),
             dev->PcicProtocolVersion());
@@ -277,7 +275,6 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->Name(), dev2->Name());
   EXPECT_EQ(dev->Description(), dev2->Description());
   EXPECT_EQ(dev->ActiveApplication(), dev2->ActiveApplication());
-  EXPECT_EQ(dev->PcicEipEnabled(), dev2->PcicEipEnabled());
   EXPECT_EQ(dev->PcicTCPPort(), dev2->PcicTCPPort());
   EXPECT_EQ(dev->PcicProtocolVersion(), dev2->PcicProtocolVersion());
   EXPECT_EQ(dev->IOLogicType(), dev2->IOLogicType());

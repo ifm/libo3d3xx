@@ -110,6 +110,14 @@ Software Compatibility Matrix
     SW triggering supports multiple concurrent PCIC connections
     </td>
   </tr>
+  <tr>
+    <td>0.4.6</td>
+    <td>1.6.2038</td>
+    <td>O3D303</td>
+    <td>
+    Updates to XML-RPC protocol for 1.6 firmware
+    </td>
+  </tr>
 </table>
 
 Features
@@ -117,7 +125,8 @@ Features
 
 High-level features of this library include:
 
-* The code is written in modern C++11.
+* The code is written in modern C++11 (and will continue to evolve with
+  the standard C++14, C++17, and beyond as compiler support matures).
 * The library is modular, allowing developers to use only the parts they need
   without incurring the overhead of unnecessary dependencies.
 * The `image` module of the library employs PCL and OpenCV native image formats

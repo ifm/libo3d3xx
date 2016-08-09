@@ -32,6 +32,7 @@ o3d3xx::AppConfig::AppConfig()
     trigger_mode_(1),
     pcic_tcp_result_schema_(""),
     pcic_eip_result_schema_(""),
+    pcic_pnio_result_schema_(""),
     logic_graph_(""),
     type_("")
 { }
@@ -120,6 +121,18 @@ o3d3xx::AppConfig::SetPcicEipResultSchema(const std::string& schema) noexcept
 }
 
 std::string
+o3d3xx::AppConfig::PcicPnioResultSchema() const noexcept
+{
+  return this->pcic_pnio_result_schema_;
+}
+
+void
+o3d3xx::AppConfig::SetPcicPnioResultSchema(const std::string& schema) noexcept
+{
+  this->pcic_pnio_result_schema_ = schema;
+}
+
+std::string
 o3d3xx::AppConfig::LogicGraph() const noexcept
 {
   return this->logic_graph_;
@@ -168,6 +181,10 @@ o3d3xx::AppConfig::mutator_map =
      [](o3d3xx::AppConfig* app, const std::string& val)
      { app->SetPcicEipResultSchema(val); } },
 
+    {"PcicPnioResultSchema",
+     [](o3d3xx::AppConfig* app, const std::string& val)
+     { app->SetPcicPnioResultSchema(val); }},
+
     {"LogicGraph",
      [](o3d3xx::AppConfig* app, const std::string& val)
      { app->SetLogicGraph(val); } },
@@ -187,6 +204,7 @@ o3d3xx::AppConfig::ToJSON() const
   pt.put("TriggerMode", this->TriggerMode());
   pt.put("PcicTcpResultSchema", this->PcicTcpResultSchema());
   pt.put("PcicEipResultSchema", this->PcicEipResultSchema());
+  pt.put("PcicPnioResultSchema", this->PcicPnioResultSchema());
   pt.put("LogicGraph", this->LogicGraph());
   pt.put("Type", this->Type());
 
