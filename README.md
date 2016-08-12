@@ -115,8 +115,7 @@ Software Compatibility Matrix
     <td>1.6.2038</td>
     <td>O3D303</td>
     <td>
-    Updates to XML-RPC protocol for 1.6 firmware - NOT AN OFFICIAL RELEASE
-    YET. USE AT YOUR OWN RISK.
+    Updates to XML-RPC protocol for 1.6 firmware
     </td>
   </tr>
 </table>

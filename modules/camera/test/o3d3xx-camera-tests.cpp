@@ -213,6 +213,9 @@ TEST(Camera_Tests, GetDeviceConfig)
             dev->EvaluationFinishedMinHoldTime());
   EXPECT_EQ(o3d3xx::stob(params.at("SaveRestoreStatsOnApplSwitch")),
             dev->SaveRestoreStatsOnApplSwitch());
+  EXPECT_EQ(std::stoi(params.at("EthernetFieldBus")),
+            dev->EthernetFieldBus());
+  EXPECT_EQ(params.at("PNIODeviceName"), dev->PNIODeviceName());
 }
 
 TEST(Camera_Tests, ActivateDisablePassword)
@@ -246,19 +249,34 @@ TEST(Camera_Tests, SetDeviceConfig)
   std::string orig_name = dev->Name();
   std::string tmp_name = "foobar";
 
+  std::string orig_pnio_name = dev->PNIODeviceName();
+  std::string tmp_pnio_name = "baz";
+
+  int orig_eth_field_bus = dev->EthernetFieldBus();
+  int tmp_eth_field_bus = 2;
+
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
   dev->SetName(tmp_name);
+  dev->SetPNIODeviceName(tmp_pnio_name);
+  dev->SetEthernetFieldBus(tmp_eth_field_bus);
   EXPECT_NO_THROW(cam->SetDeviceConfig(dev.get()));
 
   dev = cam->GetDeviceConfig();
   EXPECT_EQ(tmp_name, dev->Name());
+  // XXX: Cannot seem to set this value?
+  //  EXPECT_EQ(tmp_pnio_name, dev->PNIODeviceName());
+  EXPECT_EQ(tmp_eth_field_bus, dev->EthernetFieldBus());
 
   dev->SetName(orig_name);
+  dev->SetPNIODeviceName(orig_pnio_name);
+  dev->SetEthernetFieldBus(orig_eth_field_bus);
   EXPECT_NO_THROW(cam->SetDeviceConfig(dev.get()));
 
   dev = cam->GetDeviceConfig();
   EXPECT_EQ(orig_name, dev->Name());
+  EXPECT_EQ(orig_pnio_name, dev->PNIODeviceName());
+  EXPECT_EQ(orig_eth_field_bus, dev->EthernetFieldBus());
 }
 
 TEST(Camera_Tests, DeviceConfig_JSON)
@@ -296,8 +314,19 @@ TEST(Camera_Tests, DeviceConfig_JSON)
             dev2->EvaluationFinishedMinHoldTime());
   EXPECT_EQ(dev->SaveRestoreStatsOnApplSwitch(),
             dev2->SaveRestoreStatsOnApplSwitch());
-
-  // we do not want to compare the read-only properties
+  EXPECT_EQ(dev->IPAddressConfig(), dev2->IPAddressConfig());
+  EXPECT_EQ(dev->PasswordActivated(), dev2->PasswordActivated());
+  EXPECT_EQ(dev->OperatingMode(), dev2->OperatingMode());
+  EXPECT_EQ(dev->DeviceType(), dev2->DeviceType());
+  EXPECT_EQ(dev->ArticleNumber(), dev2->ArticleNumber());
+  EXPECT_EQ(dev->ArticleStatus(), dev2->ArticleStatus());
+  EXPECT_EQ(dev->Uptime(), dev2->Uptime());
+  EXPECT_EQ(dev->ImageTimestampReference(), dev2->ImageTimestampReference());
+  EXPECT_EQ(dev->TemperatureFront1(), dev2->TemperatureFront1());
+  EXPECT_EQ(dev->TemperatureFront2(), dev2->TemperatureFront2());
+  EXPECT_EQ(dev->TemperatureIllu(), dev2->TemperatureIllu());
+  EXPECT_EQ(dev->PNIODeviceName(), dev2->PNIODeviceName());
+  EXPECT_EQ(dev->EthernetFieldBus(), dev2->EthernetFieldBus());
 }
 
 TEST(Camera_Tests, GetNetParameters)

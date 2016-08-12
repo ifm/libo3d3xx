@@ -406,6 +406,18 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
       this->_XCallDevice("setParameter", "SaveRestoreStatsOnApplSwitch",
                          config->SaveRestoreStatsOnApplSwitch());
     }
+
+  if (dev->PNIODeviceName() != config->PNIODeviceName())
+    {
+      this->_XCallDevice("setParameter", "PNIODeviceName",
+                         config->PNIODeviceName());
+    }
+
+  if (dev->EthernetFieldBus() != config->EthernetFieldBus())
+    {
+      this->_XCallDevice("setParameter", "EthernetFieldBus",
+                         config->EthernetFieldBus());
+    }
 }
 
 o3d3xx::NetConfig::Ptr

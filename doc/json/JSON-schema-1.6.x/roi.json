@@ -1,0 +1,95 @@
+{
+	"$schema": "http://json-schema.org/schema#",
+	"title": "O3D3xx ROI format",
+	"type": "object",
+
+	"definitions": {
+		"rect_ellipse": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"enum": [ "Rect", "Ellipse" ]
+				},
+				"width": { "type": "number" },
+				"height": { "type": "number" },
+				"angle": { "type": "number" },
+				"center_x": { "type": "number" },
+				"center_y": { "type": "number" }
+			},
+			"required": [ "type", "width", "height", "angle", "center_x", "center_y" ]
+		},
+		"poly": {
+			"type": "object",
+			"properties": {
+				"type": {
+					"enum": [ "Poly" ]
+				},
+				"points": {
+					"type": "array",
+					"items": {
+						"type": "object",
+						"properties": {
+							"x": { "type": "number" },
+							"y": { "type": "number" }
+						}
+					}
+				}
+			},
+			"required": [ "type", "points" ]
+		},
+		"region": {
+			"type": "object",
+			"properties": {
+				"id": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 63
+				}
+			},
+			"oneOf": [
+				{ "$ref": "#/definitions/rect_ellipse" },
+				{ "$ref": "#/definitions/poly" }
+			],
+			"required": [ "id" ]
+		},
+		"roi": {
+			"type": "object",
+			"allOf": [
+				{ "$ref": "#/definitions/region" }
+			],
+			"properties": {
+				"group": {
+					"type": "integer",
+					"minimum": 0,
+					"maximum": 63
+				}
+			},
+			"required": [ "group" ]
+		},
+		"rod": {
+			"allOf": [
+				{ "$ref": "#/definitions/region" }
+			]
+		}
+	},
+	
+	"properties": {
+		"ROIs": {
+			"type": "array",
+			"items": {
+				"allOf": [
+					{ "$ref": "#/definitions/roi" }
+				]
+			}
+		},
+		"RODs": {
+			"type": "array",
+			"items": {
+				"allOf": [
+					{ "$ref": "#/definitions/rod" }
+				]
+			}
+		}
+	}
+}
+

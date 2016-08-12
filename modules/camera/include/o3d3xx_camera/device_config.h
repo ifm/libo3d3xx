@@ -136,6 +136,12 @@ namespace o3d3xx
     bool SaveRestoreStatsOnApplSwitch() const noexcept;
     void SetSaveRestoreStatsOnApplSwitch(bool on) noexcept;
 
+    std::string PNIODeviceName() const noexcept;
+    void SetPNIODeviceName(const std::string& s) noexcept;
+
+    int EthernetFieldBus() const noexcept;
+    void SetEthernetFieldBus(int i) noexcept;
+
     //
     // NOTE: This set of accessor/mutators correspond to attributes are
     // read-only on the device
@@ -175,12 +181,6 @@ namespace o3d3xx
 
     double TemperatureIllu() const noexcept;
     void SetTemperatureIllu(double d) noexcept;
-
-    std::string PNIODeviceName() const noexcept;
-    void SetPNIODeviceName(const std::string& s) noexcept;
-
-    int EthernetFieldBus() const noexcept;
-    void SetEthernetFieldBus(int i) noexcept;
 
   protected:
     /**
@@ -345,12 +345,12 @@ namespace o3d3xx
     double temp_illu_;
 
     /**
-     * READONLY
+     * @todo needs documentation
      */
     std::string pnio_device_name_;
 
     /**
-     * READONLY
+     * @todo needs documentation
      */
     int ethernet_field_bus_;
 

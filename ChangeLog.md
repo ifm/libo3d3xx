@@ -3,7 +3,7 @@
 * Updates to XML-RPC protocol for FW 1.6.x
 * Provided mutators on the DeviceConfig value object so that when fetching data
   from the camera (e.g., in o3d3xx-dump), it will reflect the true state of the
-  camera.
+  camera. See: https://github.com/lovepark/libo3d3xx/issues/63
 * Removed tests against the 100k pixel imager -- this firmware seems to
   deprecate this feature.
 

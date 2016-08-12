@@ -1,0 +1,30 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "O3D3xx clipping cuboid configuration",
+	"type": "object",
+
+	"properties": {
+		"XMin": {
+			"type": "number"
+		},
+		"XMax": {
+			"type": "number"
+		},
+		"YMin": {
+			"type": "number"
+		},
+		"YMax": {
+			"type": "number"
+		},
+		"ZMin": {
+			"type": "number"
+		},
+		"ZMax": {
+			"type": "number"
+		}
+	},
+
+	"required": [
+		"XMin", "XMax", "YMin", "YMax", "ZMin", "ZMax"
+	]
+}
