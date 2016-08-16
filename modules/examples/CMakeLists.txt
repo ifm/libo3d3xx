@@ -26,9 +26,10 @@ find_package(o3d3xx_framegrabber ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(o3d3xx_image ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(PCL 1.7.1 REQUIRED COMPONENTS common io)
 find_package(OpenCV REQUIRED)
-find_package(Boost REQUIRED COMPONENTS system)
+find_package(Boost REQUIRED COMPONENTS system program_options)
 
 find_library(LIB_boost_system NAMES boost_system)
+find_library(LIB_boost_program_options NAMES boost_program_options)
 
 # Fix this: https://bugs.launchpad.net/ubuntu/+source/vtk6/+bug/1573234
 if(NOT (UBUNTU_VERSION VERSION_LESS "16.04"))
@@ -79,6 +80,7 @@ target_link_libraries(ex-cartesian
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${OpenCV_LIBRARIES}
                       ${LIB_boost_system}
+                      ${LIB_boost_program_options}
                       )
 
 add_executable(ex-file_io ex-file_io.cpp)
