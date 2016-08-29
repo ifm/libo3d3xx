@@ -45,6 +45,17 @@ else()
   message(STATUS "Skipping o3d3xx-viewer")
 endif(BUILD_EXE_VIEWER)
 
+# !!!!!!!!!!!! REMOVE THIS !!!!!!!!!!!!!!!
+add_executable(o3d3xx-crash-test o3d3xx-crash-test.cpp)
+target_link_libraries(o3d3xx-crash-test
+  o3d3xx_image_shared
+  boost_system
+  pthread
+  opencv_core
+      )
+install(TARGETS o3d3xx-crash-test DESTINATION bin)
+list(APPEND O3D3XX_EXE_TARGETS o3d3xx-crash-test)
+
 #-----------------------------------------------
 #-----------------------------------------------
 #-----------------------------------------------
