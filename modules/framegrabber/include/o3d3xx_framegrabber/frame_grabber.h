@@ -87,12 +87,6 @@ namespace o3d3xx
      * `PROCESS_INTERFACE` in order for this to be effective. This function
      * simply does the triggering, data are still received asynchronously via
      * `WaitForFrame()`.
-     *
-     * It should be noted that this function establishes its own TCP connecton
-     * to the camera (independent of the one reading image data). Should this
-     * TCP setup/teardown become a "performance issue" for you, perhaps you
-     * should consider running in `FREE_RUN` mode, at which case, you do not
-     * need to manually trigger the image acquisition with this function.
      */
     void SWTrigger();
 
@@ -212,11 +206,6 @@ namespace o3d3xx
      * The user-supplied schema mask to stream from the camera.
      */
     std::uint16_t mask_;
-
-    /**
-     * Cached copy of the active application's trigger mode
-     */
-    int trigger_mode_;
 
     /**
      * Holds the PCIC command needed to set the result schema

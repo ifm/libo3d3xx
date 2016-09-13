@@ -220,3 +220,40 @@ TEST_F(FrameGrabberTest, SoftwareTriggerMultipleClients)
       std::this_thread::sleep_for(std::chrono::milliseconds(250));
     }
 }
+
+TEST_F(FrameGrabberTest, SoftwareTriggerInFreeRunMode)
+{
+  //
+  // Ensure the active application runs in free run mode
+  //
+  this->cam_->RequestSession();
+  this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
+  this->cam_->EditApplication(this->idx_);
+  o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
+  app->SetTriggerMode((int) o3d3xx::Camera::trigger_mode::FREE_RUN);
+  this->cam_->SetAppConfig(app.get());
+  this->cam_->SaveApp();
+  this->cam_->StopEditingApplication();
+  this->cam_->CancelSession();
+
+  //
+  // Data structures we use to grab image data from the camera
+  //
+  o3d3xx::FrameGrabber::Ptr fg = std::make_shared<o3d3xx::FrameGrabber>(cam_);
+  o3d3xx::ByteBuffer::Ptr buff = std::make_shared<o3d3xx::ByteBuffer>();
+
+  //
+  // Waiting for image data should not timeout
+  //
+  EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
+
+  //
+  // Now, do a s/w triggers (unnecessarily) and fetch the data -- there should
+  // be no detrimental effect.
+  //
+  for (int i = 0; i < 10; ++i)
+    {
+      fg->SWTrigger();
+      EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
+    }
+}

@@ -49,8 +49,7 @@ o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam,
     io_service_(),
     sock_(io_service_),
     pcic_ready_(false),
-    mask_(mask),
-    trigger_mode_((int) o3d3xx::Camera::trigger_mode::FREE_RUN)
+    mask_(mask)
 {
   this->SetSchemaBuffer(this->mask_);
   this->SetTriggerBuffer();
@@ -64,31 +63,14 @@ o3d3xx::FrameGrabber::FrameGrabber(o3d3xx::Camera::Ptr cam,
     {
       LOG(ERROR) << "Could not get IP/Port of the camera: "
                  << ex.what();
-      throw;
+      // NOTE: GetIP() won't throw, so, the problem must be getting the PCIC
+      // port. Here we assume the default. Former behavior was to throw!
+      LOG(WARNING) << "Assuming default PCIC port!";
+      this->cam_port_ = o3d3xx::DEFAULT_PCIC_PORT;
     }
 
   LOG(INFO) << "Camera connection info: ip=" << this->cam_ip_
             << ", port=" << this->cam_port_;
-
-  try
-    {
-      this->cam_->RequestSession();
-      o3d3xx::DeviceConfig::Ptr dev = this->cam_->GetDeviceConfig();
-      this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
-      this->cam_->EditApplication(dev->ActiveApplication());
-      o3d3xx::AppConfig::Ptr app = this->cam_->GetAppConfig();
-      this->trigger_mode_ = (int) app->TriggerMode();
-      this->cam_->StopEditingApplication();
-      this->cam_->CancelSession();
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "Could not get active trigger mode: "
-                 << ex.what();
-      throw;
-    }
-
-  LOG(INFO) << "Assumed trigger mode: " << this->trigger_mode_;
 
   this->endpoint_ =
     boost::asio::ip::tcp::endpoint(
@@ -152,14 +134,6 @@ o3d3xx::FrameGrabber::SetTriggerBuffer()
 void
 o3d3xx::FrameGrabber::SWTrigger()
 {
-  if (this->trigger_mode_ !=
-      (int) o3d3xx::Camera::trigger_mode::PROCESS_INTERFACE)
-    {
-      LOG(WARNING) << "Requested S/W trigger, but trigger_mode is: "
-                   << this->trigger_mode_;
-      return;
-    }
-
   int i = 0;
   while (! this->pcic_ready_.load())
     {
@@ -367,7 +341,16 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
       if (this->ticket_buffer_.at(20) != '*')
         {
           LOG(ERROR) << "Bad ticket: " << ticket_str;
-          throw(o3d3xx::error_t(O3D3XX_PCIC_BAD_REPLY));
+
+          if ((ticket == o3d3xx::TICKET_t) &&
+              (this->ticket_buffer_.at(20) == '!'))
+            {
+              LOG(WARNING) << "Are you software triggering in free run mode?";
+            }
+          else
+            {
+              throw(o3d3xx::error_t(O3D3XX_PCIC_BAD_REPLY));
+            }
         }
 
       this->ticket_buffer_.clear();
@@ -392,21 +375,27 @@ o3d3xx::FrameGrabber::Run()
 {
   boost::asio::io_service::work work(this->io_service_);
 
+  // //
   //
-  // setup the camera for image acquistion
+  // XXX: TP I don't think this is necessary. I think it will more likely lead
+  // to error situations more often than helping out the situation. The user
+  // should take care to set the camera into "RUN" mode prior to starting the
+  // framegrabber.
   //
-  try
-    {
-      this->cam_->RequestSession();
-      this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
-      this->cam_->CancelSession();
-    }
-  catch (const o3d3xx::error_t& ex)
-    {
-      LOG(ERROR) << "Failed to setup camera for image acquisition: "
-                 << ex.what();
-      return;
-    }
+  // // setup the camera for image acquistion
+  // //
+  // try
+  //   {
+  //     this->cam_->RequestSession();
+  //     this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
+  //     this->cam_->CancelSession();
+  //   }
+  // catch (const o3d3xx::error_t& ex)
+  //   {
+  //     LOG(ERROR) << "Failed to setup camera for image acquisition: "
+  //                << ex.what();
+  //     return;
+  //   }
 
   //
   // After setting the schema, this gets called and kicks off our

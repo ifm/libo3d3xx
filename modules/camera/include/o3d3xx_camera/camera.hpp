@@ -42,6 +42,7 @@ namespace o3d3xx
   extern const std::string DEFAULT_SUBNET;
   extern const std::string DEFAULT_GW;
   extern const std::uint32_t DEFAULT_XMLRPC_PORT;
+  extern const int DEFAULT_PCIC_PORT;
   extern const int MAX_HEARTBEAT;
   extern const int NET_WAIT;
 

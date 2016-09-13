@@ -48,6 +48,7 @@ const std::string o3d3xx::DEFAULT_IP =
 const std::string o3d3xx::DEFAULT_SUBNET = "255.255.255.0";
 const std::string o3d3xx::DEFAULT_GW = "192.168.0.201";
 const std::uint32_t o3d3xx::DEFAULT_XMLRPC_PORT = 80;
+const int o3d3xx::DEFAULT_PCIC_PORT = 50010;
 const int o3d3xx::MAX_HEARTBEAT = 300; // seconds
 const int o3d3xx::NET_WAIT = 3000; // millis
 

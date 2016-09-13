@@ -1,3 +1,15 @@
+## Changes between libo3d3xx 0.4.6 and 0.4.8
+
+* NOTE: 0.4.7 was a testing branch and never made it to a release.
+* FrameGrabber ctor will not throw exceptions explicitly. This is achived by,
+  1) not introspecting the current trigger mode, 2) not explicitly setting
+  the camera into `RUN` mode, 3) Not throwing an error if we cannot discern the
+  PCIC TCP port. The intent is to make the software more stable to volatility
+  in the hardware being present or not (be it at start up or during
+  operation).
+* Software Triggering while in `FREE_RUN` mode will not cause the frame grabber
+  to throw and exception.
+
 ## Changes between libo3d3xx 0.4.5 and 0.4.6
 
 * Updates to XML-RPC protocol for FW 1.6.x
