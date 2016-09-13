@@ -118,6 +118,14 @@ Software Compatibility Matrix
     Updates to XML-RPC protocol for 1.6 firmware
     </td>
   </tr>
+  <tr>
+    <td>0.4.8</td>
+    <td>1.6.2038</td>
+    <td>O3D303</td>
+    <td>
+    Framegrabber is more robust to H/W volatility
+    </td>
+  </tr>
 </table>
 
 Features
