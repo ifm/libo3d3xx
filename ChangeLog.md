@@ -2,6 +2,10 @@
 
 * Added new device config parameter `EthernetFieldBusEndianness`
 * Added new imager config parameter `UseSimpleBinning`
+* Added new program `ex-cartesian_compare.cpp` in the *examples* module. This
+  is to allow for checking, visually, an off-board computed cloud vs. an
+  on-board computed cloud.
+* Fixed memory access [bug](https://github.com/lovepark/libo3d3xx/issues/67)
 
 ## Changes between libo3d3xx 0.4.6 and 0.4.8
 

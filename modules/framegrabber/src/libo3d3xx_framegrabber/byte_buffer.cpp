@@ -58,7 +58,7 @@ o3d3xx::get_chunk_index(const std::vector<std::uint8_t>& buff,
 {
   std::size_t idx = 8; // start of first chunk
 
-  while (buff.begin()+idx < buff.end())
+  while (buff.begin()+idx < buff.end()-6)
     {
       if (static_cast<std::uint32_t>(chunk_type) ==
           o3d3xx::mkval<std::uint32_t>(buff.data()+idx))
