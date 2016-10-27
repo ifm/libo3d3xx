@@ -1,0 +1,32 @@
+{
+	"$schema": "http://json-schema.org/draft-04/schema#",
+	"title": "O3D3xx complete configuration",
+	"type": "object",
+
+	"properties": {
+		"Device": {
+			"$ref": "device.json"
+		},
+		"Network": {
+			"$ref": "network.json"
+		},
+		"Applications": {
+			"type": "array",
+			"items": {
+				"oneOf": [ { "$ref": "application.json" }, { "type": "null" } ]
+			},
+			"minItems": 32,
+			"maxItems": 32
+		},
+
+        "Firmware": {
+            "type": "string",
+            "pattern": "[0-9]+\\.[0-9]+\\.[0-9]+"
+        },
+        
+        "SchemaVersion" : { "type" : "integer" }
+	},
+	
+	"required": [ "Device", "Network", "Applications", "Firmware" ]
+}
+	

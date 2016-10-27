@@ -49,7 +49,8 @@ o3d3xx::DeviceConfig::DeviceConfig()
     password_activated_(false),
     operating_mode_(0),
     pnio_device_name_(""),
-    ethernet_field_bus_(0)
+    ethernet_field_bus_(0),
+    ethernet_field_bus_endianness_(0)
 { }
 
 o3d3xx::DeviceConfig::DeviceConfig(
@@ -471,6 +472,18 @@ o3d3xx::DeviceConfig::SetEthernetFieldBus(int i) noexcept
   this->ethernet_field_bus_ = i;
 }
 
+int
+o3d3xx::DeviceConfig::EthernetFieldBusEndianness() const noexcept
+{
+  return this->ethernet_field_bus_endianness_;
+}
+
+void
+o3d3xx::DeviceConfig::SetEthernetFieldBusEndianness(int i) noexcept
+{
+  this->ethernet_field_bus_endianness_ = i;
+}
+
 const std::unordered_map<std::string,
                          std::function<void(o3d3xx::DeviceConfig*,
                                             const std::string&)> >
@@ -610,7 +623,11 @@ o3d3xx::DeviceConfig::mutator_map =
 
     {"EthernetFieldBus",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetEthernetFieldBus(std::stoi(val)); }}
+     { dev->SetEthernetFieldBus(std::stoi(val)); }},
+
+    {"EthernetFieldBusEndianness",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetEthernetFieldBusEndianness(std::stoi(val)); }}
   };
 
 std::string
@@ -653,6 +670,7 @@ o3d3xx::DeviceConfig::ToJSON() const
   pt.put("TemperatureIllu", this->TemperatureIllu());
   pt.put("PNIODeviceName", this->PNIODeviceName());
   pt.put("EthernetFieldBus", this->EthernetFieldBus());
+  pt.put("EthernetFieldBusEndianness", this->EthernetFieldBusEndianness());
 
   std::ostringstream buf;
   boost::property_tree::write_json(buf, pt);

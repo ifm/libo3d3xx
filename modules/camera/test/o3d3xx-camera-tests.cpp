@@ -179,7 +179,7 @@ TEST(Camera_Tests, GetDeviceConfig)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  EXPECT_EQ(params.size(), 33);
+  EXPECT_EQ(params.size(), 34);
 
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
@@ -215,6 +215,8 @@ TEST(Camera_Tests, GetDeviceConfig)
             dev->SaveRestoreStatsOnApplSwitch());
   EXPECT_EQ(std::stoi(params.at("EthernetFieldBus")),
             dev->EthernetFieldBus());
+  EXPECT_EQ(std::stoi(params.at("EthernetFieldBusEndianness")),
+            dev->EthernetFieldBusEndianness());
   EXPECT_EQ(params.at("PNIODeviceName"), dev->PNIODeviceName());
 }
 
@@ -255,11 +257,15 @@ TEST(Camera_Tests, SetDeviceConfig)
   int orig_eth_field_bus = dev->EthernetFieldBus();
   int tmp_eth_field_bus = 2;
 
+  int orig_eth_field_bus_endianness = dev->EthernetFieldBusEndianness();
+  int tmp_eth_field_bus_endianness = 1;
+
   cam->RequestSession();
   cam->SetOperatingMode(o3d3xx::Camera::operating_mode::EDIT);
   dev->SetName(tmp_name);
   dev->SetPNIODeviceName(tmp_pnio_name);
   dev->SetEthernetFieldBus(tmp_eth_field_bus);
+  dev->SetEthernetFieldBusEndianness(tmp_eth_field_bus_endianness);
   EXPECT_NO_THROW(cam->SetDeviceConfig(dev.get()));
 
   dev = cam->GetDeviceConfig();
@@ -267,16 +273,19 @@ TEST(Camera_Tests, SetDeviceConfig)
   // XXX: Cannot seem to set this value?
   //  EXPECT_EQ(tmp_pnio_name, dev->PNIODeviceName());
   EXPECT_EQ(tmp_eth_field_bus, dev->EthernetFieldBus());
+  EXPECT_EQ(tmp_eth_field_bus_endianness, dev->EthernetFieldBusEndianness());
 
   dev->SetName(orig_name);
   dev->SetPNIODeviceName(orig_pnio_name);
   dev->SetEthernetFieldBus(orig_eth_field_bus);
+  dev->SetEthernetFieldBusEndianness(orig_eth_field_bus_endianness);
   EXPECT_NO_THROW(cam->SetDeviceConfig(dev.get()));
 
   dev = cam->GetDeviceConfig();
   EXPECT_EQ(orig_name, dev->Name());
   EXPECT_EQ(orig_pnio_name, dev->PNIODeviceName());
   EXPECT_EQ(orig_eth_field_bus, dev->EthernetFieldBus());
+  EXPECT_EQ(orig_eth_field_bus_endianness, dev->EthernetFieldBusEndianness());
 }
 
 TEST(Camera_Tests, DeviceConfig_JSON)
@@ -327,6 +336,8 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->TemperatureIllu(), dev2->TemperatureIllu());
   EXPECT_EQ(dev->PNIODeviceName(), dev2->PNIODeviceName());
   EXPECT_EQ(dev->EthernetFieldBus(), dev2->EthernetFieldBus());
+  EXPECT_EQ(dev->EthernetFieldBusEndianness(),
+            dev2->EthernetFieldBusEndianness());
 }
 
 TEST(Camera_Tests, GetNetParameters)

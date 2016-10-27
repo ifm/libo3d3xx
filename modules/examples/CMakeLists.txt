@@ -80,6 +80,15 @@ target_link_libraries(ex-cartesian
                       ${OpenCV_LIBRARIES}
                       ${LIB_boost_system}
                       )
+add_executable(ex-cartesian_compare ex-cartesian_compare.cpp)
+target_link_libraries(ex-cartesian_compare
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${O3D3XX_IMAGE_LIBRARIES}
+                      ${OpenCV_LIBRARIES}
+                      ${PCL_IO_LIBRARIES}
+                      ${LIB_boost_system}
+                      )
 
 add_executable(ex-file_io ex-file_io.cpp)
 target_link_libraries(ex-file_io

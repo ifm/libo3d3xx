@@ -142,6 +142,9 @@ namespace o3d3xx
     int EthernetFieldBus() const noexcept;
     void SetEthernetFieldBus(int i) noexcept;
 
+    int EthernetFieldBusEndianness() const noexcept;
+    void SetEthernetFieldBusEndianness(int i) noexcept;
+
     //
     // NOTE: This set of accessor/mutators correspond to attributes are
     // read-only on the device
@@ -353,6 +356,11 @@ namespace o3d3xx
      * @todo needs documentation
      */
     int ethernet_field_bus_;
+
+    /**
+     * @todo needs documentation
+     */
+    int ethernet_field_bus_endianness_;
 
   }; // end: class DeviceConfig
 

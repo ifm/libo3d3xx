@@ -41,6 +41,7 @@ o3d3xx::ImagerConfig::ImagerConfig()
     enable_filter_distance_image_(true),
     enable_rectification_amplitude_image_(true),
     enable_rectification_distance_image_(true),
+    use_simple_binning_(false),
     exposure_time_(1000),
     exposure_time_list_(""),
     exposure_time_ratio_(40),
@@ -228,6 +229,18 @@ void
 o3d3xx::ImagerConfig::SetEnableRectificationDistanceImage(bool enable) noexcept
 {
   this->enable_rectification_distance_image_ = enable;
+}
+
+bool
+o3d3xx::ImagerConfig::UseSimpleBinning() const noexcept
+{
+  return this->use_simple_binning_;
+}
+
+void
+o3d3xx::ImagerConfig::SetUseSimpleBinning(bool on) noexcept
+{
+  this->use_simple_binning_ = on;
 }
 
 int
@@ -466,6 +479,10 @@ o3d3xx::ImagerConfig::mutator_map =
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetEnableRectificationDistanceImage(o3d3xx::stob(val)); }},
 
+    {"UseSimpleBinning",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetUseSimpleBinning(o3d3xx::stob(val)); }},
+
     {"ExposureTime",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetExposureTime(std::stoi(val)); }},
@@ -546,6 +563,7 @@ o3d3xx::ImagerConfig::ToJSON() const
          this->EnableRectificationAmplitudeImage());
   pt.put("EnableRectificationDistanceImage",
          this->EnableRectificationDistanceImage());
+  pt.put("UseSimpleBinning", this->UseSimpleBinning());
 
   if (boost::algorithm::ends_with(this->Type(), "high"))
     {

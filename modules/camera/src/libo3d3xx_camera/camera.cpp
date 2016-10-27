@@ -419,6 +419,13 @@ o3d3xx::Camera::SetDeviceConfig(const o3d3xx::DeviceConfig* config)
       this->_XCallDevice("setParameter", "EthernetFieldBus",
                          config->EthernetFieldBus());
     }
+
+  if (dev->EthernetFieldBusEndianness() !=
+      config->EthernetFieldBusEndianness())
+    {
+      this->_XCallDevice("setParameter", "EthernetFieldBusEndianness",
+                         config->EthernetFieldBusEndianness());
+    }
 }
 
 o3d3xx::NetConfig::Ptr
@@ -939,6 +946,15 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
       this->_XCallImager("setParameter",
                          "EnableRectificationDistanceImage",
                          config->EnableRectificationDistanceImage());
+    }
+
+  if (im->UseSimpleBinning() != config->UseSimpleBinning())
+    {
+      DLOG(INFO) << "Setting UseSimpleBinning="
+                 << config->UseSimpleBinning();
+
+      this->_XCallImager("setParameter", "UseSimpleBinning",
+                         config->UseSimpleBinning());
     }
 
   if (boost::algorithm::ends_with(im->Type(), "high"))

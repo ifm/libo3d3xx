@@ -113,6 +113,9 @@ namespace o3d3xx
     bool EnableRectificationDistanceImage() const noexcept;
     void SetEnableRectificationDistanceImage(bool enable) noexcept;
 
+    bool UseSimpleBinning() const noexcept;
+    void SetUseSimpleBinning(bool on) noexcept;
+
     int ExposureTime() const;
     void SetExposureTime(int usecs);
 
@@ -198,6 +201,9 @@ namespace o3d3xx
 
     /** Undocumented: Flag to turn on/off distance image rectification */
     bool enable_rectification_distance_image_;
+
+    /** Undocumented: Flag to turn on/off simple binning */
+    bool use_simple_binning_;
 
     /**
      * For the low dynamic range imager: this is the exposure time

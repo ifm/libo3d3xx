@@ -55,6 +55,11 @@ What is included?
 * [ex-cartesian](ex-cartesian.cpp) Shows how to compute the Cartesian data from
   the unit vectors, extrinsics, and radial distance image.
 
+* [ex-cartesian_compare](ex-cartesian_compare.cpp) Just like above, except we
+  write out the point cloud as computed by the camera to a PCD file and the one
+  we computed to a PCD file so that we can compare them visually using
+  `pcl_viewer`.
+
 * [ex-file_io](ex-file_io.cpp) Shows how to capture data from the camera and
   write the images to disk. In this example, the amplitude and radial distance
   image are written out as PNG files and the point cloud is written as a PCD.

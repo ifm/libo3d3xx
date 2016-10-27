@@ -267,6 +267,7 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("EnableFilterDistanceImage"));
       ASSERT_NO_THROW(params.at("EnableRectificationAmplitudeImage"));
       ASSERT_NO_THROW(params.at("EnableRectificationDistanceImage"));
+      ASSERT_NO_THROW(params.at("UseSimpleBinning"));
       ASSERT_NO_THROW(params.at("ExposureTimeList"));
       ASSERT_NO_THROW(params.at("FrameRate"));
       ASSERT_NO_THROW(params.at("MinimumAmplitude"));
@@ -286,21 +287,21 @@ TEST_F(AppImagerTest, GetImagerParameters)
           ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 25);
+          ASSERT_EQ(params.size(), 26);
         }
       else if (boost::algorithm::ends_with(type, "low"))
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 26);
+          ASSERT_EQ(params.size(), 27);
         }
       else
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
 
-          ASSERT_EQ(params.size(), 27);
+          ASSERT_EQ(params.size(), 28);
         }
     }
 
@@ -388,6 +389,7 @@ TEST_F(AppImagerTest, ImagerConfig)
       ASSERT_NO_THROW(im->SetEnableFilterDistanceImage(false));
       ASSERT_NO_THROW(im->SetEnableRectificationAmplitudeImage(true));
       ASSERT_NO_THROW(im->SetEnableRectificationDistanceImage(true));
+      ASSERT_NO_THROW(im->SetUseSimpleBinning(true));
 
       // mutate the config
       if (boost::algorithm::ends_with(type, "high"))
@@ -512,6 +514,7 @@ TEST_F(AppImagerTest, ImagerConfig_JSON)
             im2->EnableRectificationAmplitudeImage());
   ASSERT_EQ(im->EnableRectificationDistanceImage(),
             im2->EnableRectificationDistanceImage());
+  ASSERT_EQ(im->UseSimpleBinning(), im2->UseSimpleBinning());
 
   if (boost::algorithm::ends_with(im->Type(), "high"))
     {

@@ -1,3 +1,8 @@
+## Changes between libo3d3xx 0.4.8 and 0.4.9
+
+* Added new device config parameter `EthernetFieldBusEndianness`
+* Added new imager config parameter `UseSimpleBinning`
+
 ## Changes between libo3d3xx 0.4.6 and 0.4.8
 
 * NOTE: 0.4.7 was a testing branch and never made it to a release.
