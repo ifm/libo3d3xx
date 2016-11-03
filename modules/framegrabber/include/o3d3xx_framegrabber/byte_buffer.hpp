@@ -25,7 +25,6 @@
 namespace o3d3xx
 {
   extern const std::size_t IMG_TICKET_SZ; // bytes
-  extern const std::size_t IMG_CHUNK_HEADER_SZ; // bytes
 
   enum class pixel_format : std::uint8_t
   {

@@ -209,17 +209,22 @@ o3d3xx::ImageBuffer::Organize()
   this->amp_.create(height, width, CV_16UC1);
   this->raw_amp_.create(height, width, CV_16UC1);
 
-  // move index pointers to where pixel data starts
-  cidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
-  didx += RDIST_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
-  uidx += UVEC_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
-  aidx += AMP_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
-  raw_aidx += RAW_AMP_OK ? o3d3xx::IMG_CHUNK_HEADER_SZ : 0;
+  // move index pointers to where pixel data starts -- we assume
+  // (I think safely) that all header sizes will be uniform in the data stream,
+  // so, we use our invariant of the confidence image header
+  std::uint32_t pixel_data_offset =
+    o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+cidx+8);
+
+  cidx += pixel_data_offset;
+  didx += RDIST_OK ? pixel_data_offset : 0;
+  uidx += UVEC_OK ? pixel_data_offset : 0;
+  aidx += AMP_OK ? pixel_data_offset : 0;
+  raw_aidx += RAW_AMP_OK ? pixel_data_offset : 0;
   if (CARTESIAN_OK)
     {
-      xidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
-      yidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
-      zidx += o3d3xx::IMG_CHUNK_HEADER_SZ;
+      xidx += pixel_data_offset;
+      yidx += pixel_data_offset;
+      zidx += pixel_data_offset;
     }
 
   float bad_point = std::numeric_limits<float>::quiet_NaN();

@@ -23,7 +23,6 @@
 #include <glog/logging.h>
 
 const std::size_t o3d3xx::IMG_TICKET_SZ = 16;
-const std::size_t o3d3xx::IMG_CHUNK_HEADER_SZ = 36;
 
 bool
 o3d3xx::verify_ticket_buffer(const std::vector<std::uint8_t>& buff)

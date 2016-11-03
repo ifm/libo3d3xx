@@ -6,6 +6,8 @@
   is to allow for checking, visually, an off-board computed cloud vs. an
   on-board computed cloud.
 * Fixed memory access [bug](https://github.com/lovepark/libo3d3xx/issues/67)
+* Updated to support (in a backward compatible fashion) image chunk header
+  version 2.
 
 ## Changes between libo3d3xx 0.4.6 and 0.4.8
 

@@ -375,32 +375,6 @@ o3d3xx::FrameGrabber::Run()
 {
   boost::asio::io_service::work work(this->io_service_);
 
-  // //
-  //
-  // XXX: TP I don't think this is necessary. I think it will more likely lead
-  // to error situations more often than helping out the situation. The user
-  // should take care to set the camera into "RUN" mode prior to starting the
-  // framegrabber.
-  //
-  // // setup the camera for image acquistion
-  // //
-  // try
-  //   {
-  //     this->cam_->RequestSession();
-  //     this->cam_->SetOperatingMode(o3d3xx::Camera::operating_mode::RUN);
-  //     this->cam_->CancelSession();
-  //   }
-  // catch (const o3d3xx::error_t& ex)
-  //   {
-  //     LOG(ERROR) << "Failed to setup camera for image acquisition: "
-  //                << ex.what();
-  //     return;
-  //   }
-
-  //
-  // After setting the schema, this gets called and kicks off our
-  // data processing "loop"
-  //
   auto result_schema_write_handler =
     [&, this]
     (const boost::system::error_code& ec, std::size_t bytes_transferred)
