@@ -8,6 +8,12 @@
 * Fixed memory access [bug](https://github.com/lovepark/libo3d3xx/issues/67)
 * Updated to support (in a backward compatible fashion) image chunk header
   version 2.
+* Framegrabber now supports streaming back exposure times in-line with the
+  pixel data. See `o3d3xx-schema` for new schema mask and the JSON sent over
+  PCIC to the camera.
+* ImageBuffer allows for accessing exposure times registered to the current
+  image frame (assuming the schema mask set on the `FrameGrabber` specifies the
+  streaming of exposure times).
 
 ## Changes between libo3d3xx 0.4.6 and 0.4.8
 

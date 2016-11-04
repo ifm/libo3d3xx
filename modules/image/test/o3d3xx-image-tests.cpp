@@ -666,3 +666,141 @@ TEST(ImageBuffers_Tests, ComputeCartesian)
   EXPECT_TRUE(std::equal(z_cam.begin<std::int16_t>(), z_cam.end<std::int16_t>(),
                          z_computed.begin<std::int16_t>(), cmp));
 }
+
+TEST(ImageBuffers_Tests, ExposureTimes)
+{
+  std::string json =
+    R"(
+        {
+          "o3d3xx":
+          {
+            "Device":
+            {
+              "ActiveApplication": "1"
+            },
+            "Apps":
+            [
+              {
+                "TriggerMode": "1",
+                "Index": "1",
+                "Imager":
+                {
+                    "ExposureTime": "5000",
+                    "ExposureTimeList": "125;5000",
+                    "ExposureTimeRatio": "40",
+                    "Type":"under5m_moderate"
+                }
+              }
+           ]
+          }
+        }
+      )";
+
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+  cam->FromJSON(json);
+
+  o3d3xx::ImageBuffer::Ptr img = std::make_shared<o3d3xx::ImageBuffer>();
+  o3d3xx::FrameGrabber::Ptr fg =
+    std::make_shared<o3d3xx::FrameGrabber>(
+      cam, o3d3xx::DEFAULT_SCHEMA_MASK|o3d3xx::EXP_TIME);
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  std::vector<std::uint32_t> exposure_times = img->ExposureTimes();
+
+  EXPECT_EQ(exposure_times[0], 125);
+  EXPECT_EQ(exposure_times[1], 5000);
+  EXPECT_EQ(exposure_times[2], 0);
+
+  std::string json2 =
+    R"(
+        {
+          "o3d3xx":
+          {
+            "Device":
+            {
+              "ActiveApplication": "1"
+            },
+            "Apps":
+            [
+              {
+                "TriggerMode": "1",
+                "Index": "1",
+                "Imager":
+                {
+                    "ExposureTime": "5000",
+                    "ExposureTimeList": "5000",
+                    "Type":"under5m_low"
+                }
+              }
+           ]
+          }
+        }
+      )";
+
+  fg->Stop();
+  cam->FromJSON(json2);
+
+  img.reset(new o3d3xx::ImageBuffer());
+  fg.reset(new o3d3xx::FrameGrabber(
+                 cam, o3d3xx::DEFAULT_SCHEMA_MASK|o3d3xx::EXP_TIME));
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  exposure_times = img->ExposureTimes();
+
+  EXPECT_EQ(exposure_times[0], 5000);
+  EXPECT_EQ(exposure_times[1], 0);
+  EXPECT_EQ(exposure_times[2], 0);
+
+  std::string json3 =
+    R"(
+        {
+          "o3d3xx":
+          {
+            "Device":
+            {
+              "ActiveApplication": "1"
+            },
+            "Apps":
+            [
+              {
+                "TriggerMode": "1",
+                "Index": "1",
+                "Imager":
+                {
+                    "ExposureTimeList": "100;1000;5000",
+                    "Type":"under5m_high"
+                }
+              }
+           ]
+          }
+        }
+      )";
+
+  fg->Stop();
+  cam->FromJSON(json3);
+
+  img.reset(new o3d3xx::ImageBuffer());
+  fg.reset(new o3d3xx::FrameGrabber(
+                 cam, o3d3xx::DEFAULT_SCHEMA_MASK|o3d3xx::EXP_TIME));
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  exposure_times = img->ExposureTimes();
+
+  EXPECT_EQ(exposure_times[0], 100);
+  EXPECT_EQ(exposure_times[1], 1000);
+  EXPECT_EQ(exposure_times[2], 5000);
+
+  fg->Stop();
+  cam->FromJSON(json);
+
+  img.reset(new o3d3xx::ImageBuffer());
+  fg.reset(new o3d3xx::FrameGrabber(cam)); // <-- default schema, no exptimes
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  exposure_times = img->ExposureTimes();
+
+  EXPECT_EQ(exposure_times[0], 0);
+  EXPECT_EQ(exposure_times[1], 0);
+  EXPECT_EQ(exposure_times[2], 0);
+
+}

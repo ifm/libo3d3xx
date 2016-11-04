@@ -31,7 +31,8 @@
 o3d3xx::ImageBuffer::ImageBuffer()
   : o3d3xx::ByteBuffer(),
     cloud_(new pcl::PointCloud<o3d3xx::PointT>()),
-    extrinsics_({0., 0., 0., 0., 0., 0.})
+    extrinsics_({0., 0., 0., 0., 0., 0.}),
+    exposure_times_({0,0,0})
 { }
 
 o3d3xx::ImageBuffer::ImageBuffer(const o3d3xx::ImageBuffer& src_buff)
@@ -115,6 +116,13 @@ o3d3xx::ImageBuffer::Extrinsics()
   return this->extrinsics_;
 }
 
+std::vector<std::uint32_t>
+o3d3xx::ImageBuffer::ExposureTimes()
+{
+  this->Organize();
+  return this->exposure_times_;
+}
+
 void
 o3d3xx::ImageBuffer::Organize()
 {
@@ -127,6 +135,7 @@ o3d3xx::ImageBuffer::Organize()
   // NOTE: These could get optimized by using apriori values if necessary
   std::size_t INVALID_IDX = std::numeric_limits<std::size_t>::max();
   std::size_t xidx, yidx, zidx, aidx, raw_aidx, cidx, didx, uidx = INVALID_IDX;
+  std::size_t extidx = INVALID_IDX;
 
   xidx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::CARTESIAN_X);
@@ -144,6 +153,9 @@ o3d3xx::ImageBuffer::Organize()
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::RADIAL_DISTANCE);
   uidx =
     o3d3xx::get_chunk_index(this->bytes_, o3d3xx::image_chunk::UNIT_VECTOR_ALL);
+  extidx =
+    o3d3xx::get_chunk_index(this->bytes_,
+                            o3d3xx::image_chunk::EXTRINSIC_CALIBRATION);
 
   // We *must* have the confidence image. If we do not, we bail out now
   if (cidx == INVALID_IDX)
@@ -157,6 +169,7 @@ o3d3xx::ImageBuffer::Organize()
   bool UVEC_OK = uidx != INVALID_IDX;
   bool CARTESIAN_OK =
     (xidx != INVALID_IDX) && (yidx != INVALID_IDX) && (zidx != INVALID_IDX);
+  bool EXTRINSICS_OK = extidx != INVALID_IDX;
 
   DLOG(INFO) << "xidx=" << xidx
              << ", yidx=" << yidx
@@ -178,6 +191,7 @@ o3d3xx::ImageBuffer::Organize()
   std::size_t raw_aincr = raw_aidx != INVALID_IDX ? 2 : 0; // uint16_t
   std::size_t dincr = didx != INVALID_IDX ? 2 : 0; // uint16_t
   std::size_t uincr = uidx != INVALID_IDX ? 4 * 3 : 0; // float32 * 3
+  std::size_t extincr = extidx != INVALID_IDX ? 4 : 0; // float32
 
   // NOTE: we use the `cidx' corresponding to the confidence image because
   // it is an invariant in terms of what we send to the camera as valid pcic
@@ -226,6 +240,7 @@ o3d3xx::ImageBuffer::Organize()
       yidx += pixel_data_offset;
       zidx += pixel_data_offset;
     }
+  extidx += EXTRINSICS_OK ? pixel_data_offset : 0;
 
   float bad_point = std::numeric_limits<float>::quiet_NaN();
   std::uint16_t bad_pixel = std::numeric_limits<std::uint16_t>::quiet_NaN();
@@ -365,27 +380,93 @@ o3d3xx::ImageBuffer::Organize()
   this->cloud_->sensor_orientation_.y() = 0.0f;
   this->cloud_->sensor_orientation_.z() = 0.0f;
 
-  // Set the extrinsics. Since our schema architecture assumes the extrinsics
-  // to be an invariant, and we know where the data are a-priori, we leverage
-  // that here.
   //
-  // NOTE: The last 6-bytes of the buffer contain the sentinel data:
+  // Parse out the extrinsics
   //
-  // [115, 116, 111, 112, 13, 10] aka ['s', 't', 'o', 'p', '\r', '\n']
+  if (EXTRINSICS_OK)
+    {
+      for (std::size_t i = 0; i < 6; ++i, extidx += extincr)
+        {
+          this->extrinsics_[i] =
+            o3d3xx::mkval<float>(this->bytes_.data()+extidx);
+        }
+    }
+  else
+    {
+      LOG(WARNING) << "Extrinsics are invalid!";
+    }
+
   //
-  std::size_t last_idx = this->bytes_.size() - 1;
-  this->extrinsics_[0] = // tx
-    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 29);
-  this->extrinsics_[1] = // ty
-    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 25);
-  this->extrinsics_[2] = // tz
-    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 21);
-  this->extrinsics_[3] = // rot_x
-    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 17);
-  this->extrinsics_[4] = // rot_y
-    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 13);
-  this->extrinsics_[5] = // rot_z
-    o3d3xx::mkval<float>(this->bytes_.data() + last_idx - 9);
+  // OK, now we want to see if the exposure times are present, if they are,
+  // we want to parse them out and store them in the image buffer. Since the
+  // extrinsics are invariant and should *always* be present, we use the
+  // current index of the extrinsics (which should be pointing to either the
+  // sentinal string: 'extime' or 'stop\r\n' -- note: both strings are
+  // 6 8-bit characters long).
+  //
+  if (EXTRINSICS_OK)
+    {
+      std::size_t extime_idx = extidx;
+      int bytes_left = this->bytes_.size() - extime_idx;
+
+      //
+      // NOTE to a future me...
+      // What are these magic numbers below?
+      //
+      // Units are bytes:
+      //
+      // 6: 's','t''o''p','\r','\n'
+      //
+      // 18: 'e','x','t','i','m','e' (6 bytes)
+      //     <uint32> <uint32> <uint32> (3 exposure times)
+      // So, 6 + (3*4) = 18
+      //
+      // Basically, we are saying... we need more than the sentinal
+      // 'stop\r\n' but no more than 'extimes<uint32><uint32><uint32>stop\r\n'
+      //
+      if ((bytes_left > 6) && (bytes_left <= (18 + 6)))
+        {
+          std::string sentinel(this->bytes_.data()+extime_idx,
+                               this->bytes_.data()+extime_idx+6);
+          if (sentinel == "extime")
+            {
+              extime_idx += 6;
+              bytes_left -= 6;
+
+              // 3 exposure times
+              for (std::size_t i = 0; i < 3; ++i)
+                {
+                  if ((bytes_left - 6) <= 0)
+                    {
+                      break;
+                    }
+
+                  std::uint32_t extime =
+                    o3d3xx::mkval<std::uint32_t>(
+                      this->bytes_.data()+extime_idx);
+
+                  this->exposure_times_.at(i) = extime;
+
+                  bytes_left -= 4;
+                  extime_idx += 4;
+                }
+            }
+          else
+            {
+              std::fill(this->exposure_times_.begin(),
+                        this->exposure_times_.end(), 0);
+
+              LOG(WARNING) << "Unexpected sentinel: '"
+                           << sentinel << "'";
+            }
+        }
+    }
+  else
+    {
+      LOG(WARNING) << "Checking for exposure times skipped (cant trust extidx)";
+    }
+
+
 
   this->_SetDirty(false);
 }

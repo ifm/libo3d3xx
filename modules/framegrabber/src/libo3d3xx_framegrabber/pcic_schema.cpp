@@ -25,7 +25,8 @@ const std::uint16_t o3d3xx::IMG_RDIS = 1;  // 2^0
 const std::uint16_t o3d3xx::IMG_AMP  = 2;  // 2^1
 const std::uint16_t o3d3xx::IMG_RAMP = 4;  // 2^2
 const std::uint16_t o3d3xx::IMG_CART = 8;  // 2^3
-const std::uint16_t o3d3xx::IMG_UVEC = 16; // 2^16
+const std::uint16_t o3d3xx::IMG_UVEC = 16; // 2^4
+const std::uint16_t o3d3xx::EXP_TIME = 32; // 2^5
 
 auto __o3d3xx_schema_mask__ = []()->std::uint16_t
   {
@@ -95,10 +96,34 @@ o3d3xx::make_pcic_schema(std::uint16_t mask)
            {"type":"blob", "id":"all_unit_vector_matrices"})";
     }
 
+  // confidence_image and extrinsics are invariant
+  schema +=
+    R"(,
+           {"type":"blob", "id":"confidence_image"},
+           {"type":"blob", "id":"extrinsic_calibration"})";
+
+  if((mask & o3d3xx::EXP_TIME) == o3d3xx::EXP_TIME)
+    {
+      schema +=
+      R"(,
+           {"type":"string", "id":"exposure_times", "value":"extime"},
+           {
+            "type":"uint32", "id":"exposure_time_1",
+            "format":{"dataencoding":"binary", "order":"little"}
+           },
+           {
+             "type":"uint32", "id":"exposure_time_2",
+             "format":{"dataencoding":"binary", "order":"little"}
+           },
+           {
+             "type":"uint32", "id":"exposure_time_3",
+             "format":{"dataencoding":"binary", "order":"little"}
+           })";
+    }
+
+  // other invariants
   schema +=
   R"(,
-           {"type":"blob", "id":"confidence_image"},
-           {"type":"blob", "id":"extrinsic_calibration"},
            {"type":"string", "value":"stop", "id":"end_string"}
          ]
       }
@@ -135,6 +160,10 @@ o3d3xx::schema_mask_from_string(const std::string& in)
       else if (part == "IMG_UVEC")
         {
           mask |= o3d3xx::IMG_UVEC;
+        }
+      else if (part == "EXP_TIME")
+        {
+          mask |= o3d3xx::EXP_TIME;
         }
     }
 

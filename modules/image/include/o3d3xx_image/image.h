@@ -149,6 +149,19 @@ namespace o3d3xx
     std::vector<float> Extrinsics();
 
     /**
+     * Returns a 3-element vector containing the exposure times (usec) for the
+     * current frame. Unused exposure times are reported as 0.
+     *
+     * If all elements are reported as 0 either the exposure times are not
+     * configured to be returned back in the data stream from the camera or an
+     * error in parsing them has occured.
+     *
+     * NOTE: To get the exposure data registered to the frame, you need to make
+     * sure your current pcic schema asks for them.
+     */
+    std::vector<std::uint32_t> ExposureTimes();
+
+    /**
      * Synchronizes the parsed out image data with the internally wrapped byte
      * buffer.
      */
@@ -159,6 +172,11 @@ namespace o3d3xx
      * The extrinsic calibration data
      */
     std::vector<float> extrinsics_;
+
+    /**
+     * The exposure time data
+     */
+    std::vector<std::uint32_t> exposure_times_;
 
     /**
      * Point cloud used to hold the cartesian xyz and amplitude data (intensity
