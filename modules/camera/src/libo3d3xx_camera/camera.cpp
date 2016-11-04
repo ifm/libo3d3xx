@@ -265,6 +265,34 @@ o3d3xx::Camera::SetOperatingMode(const o3d3xx::Camera::operating_mode& mode)
   this->_XCallSession("setOperatingMode", static_cast<int>(mode));
 }
 
+void
+o3d3xx::Camera::SetTemporaryApplicationParameters(
+  const std::unordered_map<std::string, std::string>& params)
+{
+  std::map<std::string, xmlrpc_c::value> param_map;
+
+  for (const auto& kv : params)
+    {
+      std::pair<std::string, xmlrpc_c::value> member;
+
+      if ((kv.first == "ExposureTime") ||
+          (kv.first == "ExposureTimeRatio"))
+        {
+          member =
+            std::make_pair(kv.first, xmlrpc_c::value_int(std::stoi(kv.second)));
+          param_map.insert(member);
+        }
+      else
+        {
+          throw(o3d3xx::error_t(O3D3XX_INVALID_ARGUMENT));
+        }
+    }
+
+  xmlrpc_c::value_struct const params_st(param_map);
+  this->_XCallSession("setTemporaryApplicationParameters",
+                      params_st);
+}
+
 o3d3xx::DeviceConfig::Ptr
 o3d3xx::Camera::GetDeviceConfig()
 {

@@ -14,6 +14,10 @@
 * ImageBuffer allows for accessing exposure times registered to the current
   image frame (assuming the schema mask set on the `FrameGrabber` specifies the
   streaming of exposure times).
+* `Camera` now provides an interface for setting `ExposureTime` and
+  `ExposureTimeRatio` on the fly while streaming in pixel data.
+* A new program `ex-exposure_times.cpp` in the `examples` module has been added
+  to illustrate setting on-the-fly exposure times.
 
 ## Changes between libo3d3xx 0.4.6 and 0.4.8
 

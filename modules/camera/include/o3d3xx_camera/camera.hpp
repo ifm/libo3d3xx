@@ -332,6 +332,26 @@ namespace o3d3xx
      */
     void SetOperatingMode(const operating_mode& mode);
 
+    /**
+     * Sets temporary application parameters in run mode.
+     *
+     * The changes are not persistent and are lost when entering edit mode or
+     * turning the device off. The parameters "ExposureTime" and
+     * "ExposureTimeRatio" of the imager configuration are supported. All
+     * additional parameters are ignored (for now). Exposure times are clamped
+     * to their allowed range, depending on the exposure mode. The user must
+     * provide the complete set of parameters depending on the exposure mode,
+     * i.e., "ExposureTime" only for single exposure modes and both
+     * "ExposureTime" and "ExposureTimeRatio" for double exposure
+     * modes. Otherwise, behavior is undefined.
+     *
+     * @param[in] params The parameters to set on the camera.
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    void SetTemporaryApplicationParameters(
+           const std::unordered_map<std::string, std::string>& params);
+
     //---------------------------------------------
     // XMLRPC: EditMode object
     //---------------------------------------------

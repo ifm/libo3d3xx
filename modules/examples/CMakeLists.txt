@@ -105,3 +105,12 @@ target_link_libraries(ex-framegrabber_recycling
                       ${O3D3XX_FRAMEGRABBER_LIBRARIES}
                       ${LIB_boost_system}
                       )
+
+add_executable(ex-exposure_times ex-exposure_times.cpp)
+target_link_libraries(ex-exposure_times
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${O3D3XX_IMAGE_LIBRARIES}
+                      ${PCL_COMMON_LIBRARIES}
+                      ${OpenCV_LIBRARIES}
+                      )

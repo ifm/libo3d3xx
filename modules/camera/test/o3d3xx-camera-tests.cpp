@@ -388,3 +388,21 @@ TEST(Camera_Tests, NetConfig_JSON)
 
   // we do not want to compare the read-only properties
 }
+
+TEST(Camera_Tests, TemporaryParameters)
+{
+  std::unordered_map<std::string, std::string> params =
+    {
+      {"ExposureTime", "6000"}
+    };
+
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+  cam->RequestSession();
+
+  cam->SetTemporaryApplicationParameters(params);
+
+  params["ExposureTime"] = "5000";
+  params["ExposureTimeRatio"] = "40";
+
+  cam->SetTemporaryApplicationParameters(params);
+}

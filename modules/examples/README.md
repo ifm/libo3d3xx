@@ -67,3 +67,7 @@ What is included?
 * [ex-framegrabber_recycling](ex-framegrabber_recycling.cpp) Shows how to make
   your framegrabbing robust to the camera "disappearing" (e.g., due to power
   cycling, lost network, etc.).
+
+* [ex-exposure_times](ex-exposure_times.cpp) Shows how to change imager
+  exposure times on the fly while streaming in pixel data and validating the
+  setting of the exposure times registered to the frame data.
