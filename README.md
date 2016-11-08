@@ -126,6 +126,15 @@ Software Compatibility Matrix
     Framegrabber is more robust to H/W volatility
     </td>
   </tr>
+  <tr>
+    <td>0.4.9</td>
+    <td>1.8.XXX (testing was: 1.5.698)</td>
+    <td>O3D303</td>
+    <td>
+    Support for v2 image chunk headers, ability to modulate exposure times on
+    the fly.
+    </td>
+  </tr>
 </table>
 
 Features
