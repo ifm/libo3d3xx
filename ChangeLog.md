@@ -1,3 +1,12 @@
+## Changes between libo3d3xx 0.4.9 and 0.5.0
+
+* Introduced the `oem` module to enable optimized functionality for OEM's
+  developing on-camera algorithms.
+* Integrated ifm's Results Synchronization Library with the `oem` module to
+  allow for (near) zero-copy framegrabbing. There is still a single copy that
+  needs to be made to pull data out of the ifm buffers and populate the OpenCV
+  data structures.
+
 ## Changes between libo3d3xx 0.4.8 and 0.4.9
 
 * Added new device config parameter `EthernetFieldBusEndianness`

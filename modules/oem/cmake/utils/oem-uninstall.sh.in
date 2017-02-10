@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ -f @O3D3XX_OEM_ETC_DIR@/install_manifest.txt ]; then
+    while read INFILE
+    do
+        if [ -f "${INFILE}" ] || [ -L "${INFILE}" ]; then
+            rm -f "${INFILE}"
+        fi
+    done < @O3D3XX_OEM_ETC_DIR@/install_manifest.txt
+
+    rm -rf @O3D3XX_OEM_ETC_DIR@
+fi

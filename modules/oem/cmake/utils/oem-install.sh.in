@@ -1,0 +1,12 @@
+#!/bin/sh
+
+if [ -f /tmp/@TGZ_FILE@ ] && [ -f /tmp/install_manifest.txt ]; then
+    cd / && tar xvzf /tmp/@TGZ_FILE@
+    echo "" >> /tmp/install_manifest.txt
+    if [ ! -d @O3D3XX_OEM_ETC_DIR@ ]; then
+        mkdir -p @O3D3XX_OEM_ETC_DIR@
+    fi
+    cp /tmp/install_manifest.txt @O3D3XX_OEM_ETC_DIR@/
+    chown -R oem.oem @O3D3XX_OEM_ETC_DIR@
+    cd /tmp && rm @TGZ_FILE@ install_manifest.txt
+fi
