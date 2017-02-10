@@ -6,6 +6,9 @@
   allow for (near) zero-copy framegrabbing. There is still a single copy that
   needs to be made to pull data out of the ifm buffers and populate the OpenCV
   data structures.
+* Added a new command-line program (as part of the oem module) called
+  `o3d3xx-oem-jitter`. Can be used to collect data on the resultsync-based
+  framegrabber's latency jitter.
 
 ## Changes between libo3d3xx 0.4.8 and 0.4.9
 

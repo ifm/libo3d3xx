@@ -1,0 +1,121 @@
+{
+    "o3d3xx": {
+        "libo3d3xx": "409",
+        "Date": "Fri Feb 10 14:52:33 2017",
+        "HWInfo": {
+            "Connector": "#!02_A300_001_01867216_008001175",
+            "Diagnose": "#!02_D322_C25_12345678_008022488",
+            "MiraSerial": "1870-44ac-0b44-0914",
+            "MACAddress": "00:02:01:40:1C:BD",
+            "Frontend": "#!02_F341_002_12345678_008022593",
+            "Mainboard": "#!02_M381_002_12345678_008022169",
+            "Illumination": "#!02_I300_001_01867212_008001175"
+        },
+        "SWVersion": {
+            "IFM_Software": "1.8.904",
+            "Main_Application": "0.4.874",
+            "Algorithm_Version": "1.2.22",
+            "Calibration_Device": "00:02:01:40:1c:bd",
+            "ELDK": "GOLDENEYE_YOCTO_HARDFP-242-06d9c894636352a6c93711c7284d02b0c794a527",
+            "Calibration_Version": "0.6.3",
+            "Linux": "Linux version 3.14.34-rt31-yocto-standard-00005-g46e8527-dirty (jenkins@dettlx152) (gcc version 4.9.2 (GCC) ) #1 SMP PREEMPT RT Wed Feb 1 13:48:58 CET 2017",
+            "Diagnostic_Controller": "0.4.874"
+        },
+        "Device": {
+            "Name": "New sensor",
+            "Description": "",
+            "ActiveApplication": "1",
+            "PcicTcpPort": "50010",
+            "PcicProtocolVersion": "3",
+            "IOLogicType": "1",
+            "IODebouncing": "true",
+            "IOExternApplicationSwitch": "0",
+            "SessionTimeout": "30",
+            "ServiceReportPassedBuffer": "15",
+            "ServiceReportFailedBuffer": "15",
+            "ExtrinsicCalibTransX": "0",
+            "ExtrinsicCalibTransY": "0",
+            "ExtrinsicCalibTransZ": "0",
+            "ExtrinsicCalibRotX": "0",
+            "ExtrinsicCalibRotY": "0",
+            "ExtrinsicCalibRotZ": "0",
+            "EvaluationFinishedMinHoldTime": "10",
+            "SaveRestoreStatsOnApplSwitch": "true",
+            "IPAddressConfig": "0",
+            "PasswordActivated": "false",
+            "OperatingMode": "1",
+            "DeviceType": "1:2",
+            "ArticleNumber": "O3D303",
+            "ArticleStatus": "AA",
+            "UpTime": "0.80500000000000005",
+            "ImageTimestampReference": "1486657089",
+            "TemperatureFront1": "3276.6999999999998",
+            "TemperatureFront2": "3276.6999999999998",
+            "TemperatureIMX6": "51.700000762939503",
+            "TemperatureIllu": "58.700000000000003",
+            "PNIODeviceName": "",
+            "EthernetFieldBus": "1",
+            "EthernetFieldBusEndianness": "0"
+        },
+        "Net": {
+            "MACAddress": "",
+            "NetworkSpeed": "0",
+            "StaticIPv4Address": "192.168.0.69",
+            "StaticIPv4SubNetMask": "255.255.255.0",
+            "StaticIPv4Gateway": "192.168.0.201",
+            "UseDHCP": "false"
+        },
+        "Apps": [
+            {
+                "Name": "Sample Application",
+                "Description": "",
+                "TriggerMode": "1",
+                "PcicTcpResultSchema": "{ \"layouter\": \"flexible\", \"format\": { \"dataencoding\": \"ascii\" }, \"elements\": [ { \"type\": \"string\", \"value\": \"star\", \"id\": \"start_string\" }, { \"type\": \"blob\", \"id\": \"normalized_amplitude_image\" }, { \"type\": \"blob\", \"id\": \"distance_image\" }, { \"type\": \"blob\", \"id\": \"x_image\" }, { \"type\": \"blob\", \"id\": \"y_image\" }, { \"type\": \"blob\", \"id\": \"z_image\" }, { \"type\": \"blob\", \"id\": \"confidence_image\" }, { \"type\": \"blob\", \"id\": \"diagnostic_data\" }, { \"type\": \"string\", \"value\": \"stop\", \"id\": \"end_string\" } ] }",
+                "PcicEipResultSchema": "{ \"layouter\": \"flexible\", \"format\": { \"dataencoding\": \"binary\", \"order\": \"big\" }, \"elements\" : [ { \"type\": \"string\", \"value\": \"star\", \"id\": \"start_string\" }, { \"type\": \"records\", \"id\": \"models\", \"elements\": [ { \"type\": \"int16\", \"id\": \"boxFound\" }, { \"type\": \"int16\", \"id\": \"width\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"height\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"length\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"xMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"zMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yawAngle\" }, { \"type\": \"int16\", \"id\": \"qualityLength\" }, { \"type\": \"int16\", \"id\": \"qualityWidth\" }, { \"type\": \"int16\", \"id\": \"qualityHeight\" } ] }, { \"type\": \"string\", \"value\": \"stop\", \"id\": \"end_string\" } ] }",
+                "PcicPnioResultSchema": "{\"layouter\" : \"flexible\", \"format\": { \"dataencoding\": \"binary\", \"order\": \"big\" }, \"elements\" : [ { \"type\": \"string\", \"value\": \"star\", \"id\": \"start_string\" }, { \"type\": \"records\", \"id\": \"models\", \"elements\": [ { \"type\": \"int16\", \"id\": \"boxFound\" }, { \"type\": \"int16\", \"id\": \"width\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"height\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"length\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"xMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"zMidTop\", \"format\": { \"scale\": 1000 } }, { \"type\": \"int16\", \"id\": \"yawAngle\" }, { \"type\": \"int16\", \"id\": \"qualityLength\" }, { \"type\": \"int16\", \"id\": \"qualityWidth\" }, { \"type\": \"int16\", \"id\": \"qualityHeight\" } ] }, { \"type\": \"string\", \"value\": \"stop\", \"id\": \"end_string\" } ] }",
+                "LogicGraph": "{\"IOMap\": {\"OUT1\": \"RFT\",\"OUT2\": \"AQUFIN\"},\"blocks\": {\"B00001\": {\"pos\": {\"x\": 200,\"y\": 200},\"properties\": {},\"type\": \"PIN_EVENT_IMAGE_ACQUISITION_FINISHED\"},\"B00002\": {\"pos\": {\"x\": 200,\"y\": 75},\"properties\": {},\"type\": \"PIN_EVENT_READY_FOR_TRIGGER\"},\"B00003\": {\"pos\": {\"x\": 600,\"y\": 75},\"properties\": {\"pulse_duration\": 0},\"type\": \"DIGITAL_OUT1\"},\"B00005\": {\"pos\": {\"x\": 600,\"y\": 200},\"properties\": {\"pulse_duration\": 0},\"type\": \"DIGITAL_OUT2\"}},\"connectors\": {\"C00000\": {\"dst\": \"B00003\",\"dstEP\": 0,\"src\": \"B00002\",\"srcEP\": 0},\"C00001\": {\"dst\": \"B00005\",\"dstEP\": 0,\"src\": \"B00001\",\"srcEP\": 0}}}",
+                "Type": "Camera",
+                "Index": "1",
+                "Id": "297319475",
+                "Imager": {
+                    "Channel": "0",
+                    "ClippingBottom": "131",
+                    "ClippingLeft": "0",
+                    "ClippingRight": "175",
+                    "ClippingTop": "0",
+                    "ContinuousAutoExposure": "false",
+                    "EnableAmplitudeCorrection": "true",
+                    "EnableFastFrequency": "false",
+                    "EnableFilterAmplitudeImage": "true",
+                    "EnableFilterDistanceImage": "true",
+                    "EnableRectificationAmplitudeImage": "false",
+                    "EnableRectificationDistanceImage": "false",
+                    "UseSimpleBinning": "false",
+                    "ExposureTime": "5000",
+                    "ExposureTimeList": "5000",
+                    "FrameRate": "10",
+                    "MinimumAmplitude": "42",
+                    "Resolution": "0",
+                    "ClippingCuboid": "{\"XMin\": -3.402823e+38, \"XMax\": 3.402823e+38, \"YMin\": -3.402823e+38, \"YMax\": 3.402823e+38, \"ZMin\": -3.402823e+38, \"ZMax\": 3.402823e+38}",
+                    "SpatialFilterType": "0",
+                    "SymmetryThreshold": "0",
+                    "TemporalFilterType": "0",
+                    "ThreeFreqMax2FLineDistPercentage": "80",
+                    "ThreeFreqMax3FLineDistPercentage": "80",
+                    "TwoFreqMaxLineDistPercentage": "80",
+                    "Type": "under5m_low",
+                    "MaxAllowedLEDFrameRate": "23.800000000000001",
+                    "SpatialFilter": {
+                        "Type": "0",
+                        "TypeStr_": "Off"
+                    },
+                    "TemporalFilter": {
+                        "Type": "0",
+                        "TypeStr_": "Off"
+                    }
+                }
+            }
+        ]
+    }
+}
+
