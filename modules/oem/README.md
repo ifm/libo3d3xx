@@ -7,7 +7,7 @@ is to deploy an algorithm/code to be hosted directly upon the O3D303
 camera. Almost all users, including those OEM's who will be deploying code to
 the camera, have little/no reason to build the software in this module. That is
 because the headers/libraries will be included in the Poky SDK rootfs and the
-rutime libraries will already be installed on the camera. To that end, these
+runtime libraries will already be installed on the camera. To that end, these
 instructions below are for developers who are working on the `oem` module code
 itself.
 
@@ -60,11 +60,11 @@ install the software on the camera. This can be done with the following:
 
 The `deploy` target above assumes that your camera is at `192.168.0.69` (the
 default for the device), you are logging into the device as the user `oem`, and
-your SSH private key located at `~/.ssh/id_rsa.oem`. To change these you can
+your SSH private key is located at `~/.ssh/id_rsa.oem`. To change these you can
 specify `-DTARGET_IP=<ip>`, `-DTARGET_USER=<user>`, and `-DSSH_KEY=</path/key>`
 respectively.
 
-At this point, you code has been installed on the camera. You can now log in to
+At this point, the code has been installed on the camera. You can now log in to
 the camera and run the unit tests. Using the same assumed credentials as above,
 that can be done like:
 
@@ -91,7 +91,7 @@ Using the alternate framegrabber
 --------------------------------
 
 The OEM framegrabber uses the same idioms as the tcp framegrabber. To utilize
-this alternate implementation and access the pixel data, a typical patter will
+this alternate implementation and access the pixel data, a typical pattern will
 look like:
 
 ```
