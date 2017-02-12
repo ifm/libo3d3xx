@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <future>
 #include <memory>
@@ -118,14 +119,48 @@ TEST(OEM, PixelValidity)
   ASSERT_EQ(tcp_cloud->height, zc_cloud->height);
   std::size_t n_pts = tcp_cloud->points.size();
   ASSERT_EQ(n_pts, zc_cloud->points.size());
+  int n_nan = 0;
   for (std::size_t i = 0; i < n_pts; ++i)
     {
-      EXPECT_FLOAT_EQ(tcp_cloud->points[i].x, zc_cloud->points[i].x);
-      EXPECT_FLOAT_EQ(tcp_cloud->points[i].y, zc_cloud->points[i].y);
-      EXPECT_FLOAT_EQ(tcp_cloud->points[i].z, zc_cloud->points[i].z);
-      EXPECT_FLOAT_EQ(tcp_cloud->points[i].intensity,
-                      zc_cloud->points[i].intensity);
+      if (std::isnan(tcp_cloud->points[i].x))
+        {
+          EXPECT_TRUE(std::isnan(zc_cloud->points[i].x));
+          n_nan++;
+        }
+      else
+        {
+          EXPECT_FLOAT_EQ(tcp_cloud->points[i].x, zc_cloud->points[i].x);
+        }
+
+      if (std::isnan(tcp_cloud->points[i].y))
+        {
+          EXPECT_TRUE(std::isnan(zc_cloud->points[i].y));
+        }
+      else
+        {
+          EXPECT_FLOAT_EQ(tcp_cloud->points[i].y, zc_cloud->points[i].y);
+        }
+
+      if (std::isnan(tcp_cloud->points[i].z))
+        {
+          EXPECT_TRUE(std::isnan(zc_cloud->points[i].z));
+        }
+      else
+        {
+          EXPECT_FLOAT_EQ(tcp_cloud->points[i].z, zc_cloud->points[i].z);
+        }
+
+      if (std::isnan(tcp_cloud->points[i].intensity))
+        {
+          EXPECT_TRUE(std::isnan(zc_cloud->points[i].intensity));
+        }
+      else
+        {
+          EXPECT_FLOAT_EQ(tcp_cloud->points[i].intensity,
+                          zc_cloud->points[i].intensity);
+        }
     }
+  EXPECT_FALSE(n_nan == n_pts); // bad test if all pixels are bad!
 
   // compare the extrinsics
   const std::vector<float>& tcp_extrinsics = im_tcp->Extrinsics();
