@@ -40,19 +40,18 @@ T median2d(const cv::Mat& arr)
   std::size_t sz = arr.rows*arr.cols;
 
   cv::Mat a1d = arr.reshape(1, 1);
-  std::nth_element(a1d.begin<float>(), a1d.begin<float>() + sz/2,
-                   a1d.end<float>());
+  std::nth_element(a1d.begin<T>(), a1d.begin<T>() + sz/2, a1d.end<T>());
 
   if (sz > 0)
     {
       if (sz % 2 == 0)
         {
           median =
-            (a1d.at<float>(0,sz/2-1)+a1d.at<float>(0,sz/2))/2.;
+            (a1d.at<T>(0,sz/2-1)+a1d.at<T>(0,sz/2))/2.;
         }
       else
         {
-          median = a1d.at<float>(0,sz/2);
+          median = a1d.at<T>(0,sz/2);
         }
     }
 
