@@ -33,6 +33,40 @@
 
 namespace po = boost::program_options;
 
+template<typename T>
+T median2d(const cv::Mat& arr)
+{
+  T median = 0;
+  std::size_t sz = arr.rows*arr.cols;
+
+  cv::Mat a1d = arr.reshape(1, 1);
+  std::nth_element(a1d.begin<float>(), a1d.begin<float>() + sz/2,
+                   a1d.end<float>());
+
+  if (sz > 0)
+    {
+      if (sz % 2 == 0)
+        {
+          median =
+            (a1d.at<float>(0,sz/2-1)+a1d.at<float>(0,sz/2))/2.;
+        }
+      else
+        {
+          median = a1d.at<float>(0,sz/2);
+        }
+    }
+
+  return median;
+}
+
+template<typename T>
+T mad(const cv::Mat& arr, T center)
+{
+  cv::Mat arr_d;
+  cv::absdiff(arr, center, arr_d);
+  return median2d<T>(arr_d);
+}
+
 int main(int argc, const char** argv)
 {
   std::string camera_ip;
@@ -99,9 +133,12 @@ int main(int argc, const char** argv)
         }
 
       cv::Scalar mean, stddev;
+      float median = median2d<float>(arr);
       cv::meanStdDev(arr, mean, stddev);
       std::cout << "Mean:   " << mean[0] << " ms" << std::endl;
+      std::cout << "Median: " <<  median << " ms" << std::endl;
       std::cout << "Stddev: " << stddev[0] << " ms" << std::endl;
+      std::cout << "MAD:    " << mad(arr, median) << " ms" << std::endl;
 
       if (outfile != "-")
         {
