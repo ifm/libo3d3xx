@@ -22,6 +22,7 @@
 #include <memory>
 #include <ratio>
 #include <string>
+#include <vector>
 #include <boost/program_options.hpp>
 #include <o3d3xx_camera.h>
 #include <o3d3xx_oem.h>
@@ -39,19 +40,20 @@ T median2d(const cv::Mat& arr)
   T median = 0;
   std::size_t sz = arr.rows*arr.cols;
 
-  cv::Mat a1d = arr.reshape(1, 1);
-  std::nth_element(a1d.begin<T>(), a1d.begin<T>() + sz/2, a1d.end<T>());
+  std::vector<T> arr_cp(sz);
+  std::copy(arr.begin<T>(), arr.end<T>(), arr_cp.begin());
+  std::nth_element(arr_cp.begin(), arr_cp.begin() + sz/2, arr_cp.end());
 
   if (sz > 0)
     {
       if (sz % 2 == 0)
         {
           median =
-            (a1d.at<T>(0,sz/2-1)+a1d.at<T>(0,sz/2))/2.;
+            (arr_cp.at(sz/2-1)+arr_cp.at(sz/2))/2.;
         }
       else
         {
-          median = a1d.at<T>(0,sz/2);
+          median = arr_cp.at(sz/2);
         }
     }
 
