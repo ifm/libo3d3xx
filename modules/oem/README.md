@@ -111,3 +111,9 @@ look like:
 A more complete example is available by reviewing the source code to the
 provided [o3d3xx-oem-jitter](src/bin/o3d3xx-oem-jitter.cpp) command line
 utility.
+
+Using the o3d3xx-oem-jitter tool
+--------------------------------
+
+Please see [this Jupyter Notebook](doc/o3d3xx-oem-jitter.ipynb) for exemplary
+usage and analysis.
