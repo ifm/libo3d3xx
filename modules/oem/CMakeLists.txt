@@ -1,5 +1,5 @@
 project(O3D3XX_OEM CXX)
-cmake_minimum_required(VERSION 3.5.1)
+cmake_minimum_required(VERSION 2.8.12)
 set(O3D3XX_OEM_MODULE_NAME "libo3d3xx-oem")
 
 if(NOT CMAKE_CROSSCOMPILING)
