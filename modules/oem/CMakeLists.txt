@@ -79,9 +79,7 @@ find_package(PCL 1.7 REQUIRED COMPONENTS common)
 ## Manage our compiler and linker flags
 ################################################
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
-set(CMAKE_CXX_EXTENSIONS OFF) # OFF -> -std=c++11, ON -> -std=gnu++11
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED true)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-literal-suffix -s")
 
 file(COPY ${O3D3XX_OEM_SOURCE_DIR}/include
