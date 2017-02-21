@@ -1,4 +1,4 @@
-project(O3D3XX_OEM CXX)
+project(O3D3XX_OEM CXX C)
 cmake_minimum_required(VERSION 2.8.12)
 set(O3D3XX_OEM_MODULE_NAME "libo3d3xx-oem")
 
@@ -79,8 +79,8 @@ find_package(PCL 1.7 REQUIRED COMPONENTS common)
 ## Manage our compiler and linker flags
 ################################################
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
-set(CMAKE_CXX_EXTENSIONS OFF) # OFF -> -std=c++14, ON -> -std=gnu++14
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_EXTENSIONS OFF) # OFF -> -std=c++11, ON -> -std=gnu++11
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED true)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-literal-suffix -s")
 
