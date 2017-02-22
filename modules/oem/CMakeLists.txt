@@ -81,7 +81,7 @@ find_package(PCL 1.7 REQUIRED COMPONENTS common)
 ################################################
 set(CMAKE_BUILD_TYPE Release) # Release or Debug
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-literal-suffix -s")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-literal-suffix")
 
 file(COPY ${O3D3XX_OEM_SOURCE_DIR}/include
   DESTINATION ${O3D3XX_OEM_BINARY_DIR}
