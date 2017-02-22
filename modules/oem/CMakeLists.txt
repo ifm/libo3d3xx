@@ -17,6 +17,7 @@ set(O3D3XX_OEM_ETC_DIR "/opt/oem/etc/o3d3xx_oem"
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_EXE_JITTER "Build o3d3xx-oem-jitter" ON)
 option(INSTALL_HEADERS "Add headers to install package" OFF)
+option(INSTALL_SUPPLEMENTARY "Add supplementary files to install package" ON)
 
 # For deploying to the camera
 set(TARGET_IP "192.168.0.69" CACHE STRING "IP address of the camera")
@@ -134,20 +135,22 @@ install(FILES
   DESTINATION lib/o3d3xx_oem
   )
 
-file(COPY ${O3D3XX_OEM_SOURCE_DIR}/etc
-  DESTINATION ${O3D3XX_OEM_BINARY_DIR}
-  )
-configure_file(
-  ${O3D3XX_OEM_BINARY_DIR}/etc/setup.bash.in
-  ${O3D3XX_OEM_BINARY_DIR}/etc/setup.bash
-  @ONLY
-  )
-install(DIRECTORY ${O3D3XX_OEM_BINARY_DIR}/etc/
-  DESTINATION ${O3D3XX_OEM_ETC_DIR}
-  PATTERN "*.in" EXCLUDE
-  PATTERN ".git" EXCLUDE
-  PATTERN "*~" EXCLUDE
-  )
+if(INSTALL_SUPPLEMENTARY)
+  file(COPY ${O3D3XX_OEM_SOURCE_DIR}/etc
+    DESTINATION ${O3D3XX_OEM_BINARY_DIR}
+    )
+  configure_file(
+    ${O3D3XX_OEM_BINARY_DIR}/etc/setup.bash.in
+    ${O3D3XX_OEM_BINARY_DIR}/etc/setup.bash
+    @ONLY
+    )
+  install(DIRECTORY ${O3D3XX_OEM_BINARY_DIR}/etc/
+    DESTINATION ${O3D3XX_OEM_ETC_DIR}
+    PATTERN "*.in" EXCLUDE
+    PATTERN ".git" EXCLUDE
+    PATTERN "*~" EXCLUDE
+    )
+endif()
 
 ################################################
 ## Manage packaging
