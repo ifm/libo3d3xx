@@ -389,7 +389,8 @@ TEST(Camera_Tests, NetConfig_JSON)
   // we do not want to compare the read-only properties
 }
 
-TEST(Camera_Tests, TemporaryParameters)
+// XXX: Re-enable for 1.8.x firmware
+TEST(Camera_Tests, DISABLED_TemporaryParameters)
 {
   std::unordered_map<std::string, std::string> params =
     {

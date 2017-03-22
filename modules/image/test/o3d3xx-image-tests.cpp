@@ -667,7 +667,7 @@ TEST(ImageBuffers_Tests, ComputeCartesian)
                          z_computed.begin<std::int16_t>(), cmp));
 }
 
-TEST(ImageBuffers_Tests, ExposureTimes)
+TEST(ImageBuffers_Tests, DISABLED_ExposureTimes)
 {
   std::string json =
     R"(

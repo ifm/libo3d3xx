@@ -128,12 +128,18 @@ Software Compatibility Matrix
   </tr>
   <tr>
     <td>0.4.9</td>
-    <td>1.8.XXX (testing was: 1.5.698, 1.5.759)</td>
+    <td>1.6.2114</td>
     <td>O3D303</td>
     <td>
     Support for v2 image chunk headers, ability to modulate exposure times on
     the fly.
     </td>
+  </tr>
+  <tr>
+    <td>0.5.0</td>
+    <td>1.6.2114</td>
+    <td>O3D303</td>
+    <td>Addition of the oem module</td>
   </tr>
 </table>
 

@@ -9,6 +9,11 @@
 * Added a new command-line program (as part of the oem module) called
   `o3d3xx-oem-jitter`. Can be used to collect data on the resultsync-based
   framegrabber's latency jitter.
+* Brought library compatibility up-to-date with ifm 1.6.2114 firmware. NOTE:
+  0.4.9 and 0.5.0 are ahead of the public ifm firmwares, so, I am disabling the
+  unit tests for setting temporary application parameters and registering the
+  exposure times to the image buffer. These will be re-enabled with a 1.8.xxx
+  version of the ifm firmware.
 
 ## Changes between libo3d3xx 0.4.8 and 0.4.9
 
