@@ -29,7 +29,7 @@ TEST(ImageBuffers_Tests, Cloud)
   o3d3xx::ImageBuffer::Ptr img =
     o3d3xx::ImageBuffer::Ptr(new o3d3xx::ImageBuffer());
 
-  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 10000));
 
   pcl::PointCloud<o3d3xx::PointT>::Ptr cloud = img->Cloud();
   EXPECT_TRUE(cloud.use_count() == 2);
@@ -553,7 +553,7 @@ TEST(ImageBuffers_Tests, ComputeCartesian)
   //
   o3d3xx::FrameGrabber::Ptr fg =
     std::make_shared<o3d3xx::FrameGrabber>(cam, o3d3xx::IMG_UVEC);
-  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 10000));
   cv::Mat uvec = img->UnitVectors();
 
   //
