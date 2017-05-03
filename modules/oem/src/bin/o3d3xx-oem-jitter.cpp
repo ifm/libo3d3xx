@@ -42,7 +42,7 @@ T median2d(const cv::Mat& arr)
 
   std::vector<T> arr_cp(sz);
   std::copy(arr.begin<T>(), arr.end<T>(), arr_cp.begin());
-  std::nth_element(arr_cp.begin(), arr_cp.begin() + sz/2, arr_cp.end());
+  std::sort(arr_cp.begin(), arr_cp.end());
 
   if (sz > 0)
     {
