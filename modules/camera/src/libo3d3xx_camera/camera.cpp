@@ -275,8 +275,9 @@ o3d3xx::Camera::SetTemporaryApplicationParameters(
     {
       std::pair<std::string, xmlrpc_c::value> member;
 
-      if ((kv.first == "ExposureTime") ||
-          (kv.first == "ExposureTimeRatio"))
+      if ((kv.first == "imager_001/ExposureTime") ||
+          (kv.first == "imager_001/ExposureTimeRatio") ||
+          (kv.first == "imager_001/Channel"))
         {
           member =
             std::make_pair(kv.first, xmlrpc_c::value_int(std::stoi(kv.second)));
