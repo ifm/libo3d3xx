@@ -88,8 +88,8 @@ int main(int argc, const char **argv)
   // on-the-fly. We seed it with data consistent with our config above
   std::unordered_map<std::string, std::string> params =
     {
-      {"ExposureTime", "5000"},
-      {"ExposureTimeRatio", "40"}
+      {"imager_001/ExposureTime", "5000"},
+      {"imager_001/ExposureTimeRatio", "40"}
     };
 
   // create a session with the camera so we can modulate the exposure times
