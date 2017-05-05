@@ -394,7 +394,7 @@ TEST(Camera_Tests, DISABLED_TemporaryParameters)
 {
   std::unordered_map<std::string, std::string> params =
     {
-      {"ExposureTime", "6000"}
+      {"imager_001/ExposureTime", "6000"}
     };
 
   o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
@@ -402,8 +402,8 @@ TEST(Camera_Tests, DISABLED_TemporaryParameters)
 
   cam->SetTemporaryApplicationParameters(params);
 
-  params["ExposureTime"] = "5000";
-  params["ExposureTimeRatio"] = "40";
+  params["imager_001/ExposureTime"] = "5000";
+  params["imager_001/ExposureTimeRatio"] = "40";
 
   cam->SetTemporaryApplicationParameters(params);
 }
