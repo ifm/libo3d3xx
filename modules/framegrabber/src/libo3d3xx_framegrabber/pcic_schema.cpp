@@ -21,12 +21,13 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 
-const std::uint16_t o3d3xx::IMG_RDIS = 1;  // 2^0
-const std::uint16_t o3d3xx::IMG_AMP  = 2;  // 2^1
-const std::uint16_t o3d3xx::IMG_RAMP = 4;  // 2^2
-const std::uint16_t o3d3xx::IMG_CART = 8;  // 2^3
-const std::uint16_t o3d3xx::IMG_UVEC = 16; // 2^4
-const std::uint16_t o3d3xx::EXP_TIME = 32; // 2^5
+const std::uint16_t o3d3xx::IMG_RDIS = 1;   // 2^0
+const std::uint16_t o3d3xx::IMG_AMP  = 2;   // 2^1
+const std::uint16_t o3d3xx::IMG_RAMP = 4;   // 2^2
+const std::uint16_t o3d3xx::IMG_CART = 8;   // 2^3
+const std::uint16_t o3d3xx::IMG_UVEC = 16;  // 2^4
+const std::uint16_t o3d3xx::EXP_TIME = 32;  // 2^5
+const std::uint16_t o3d3xx::ILLU_TEMP = 64; // 2^6
 
 auto __o3d3xx_schema_mask__ = []()->std::uint16_t
   {
