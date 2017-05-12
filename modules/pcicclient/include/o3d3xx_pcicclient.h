@@ -94,7 +94,7 @@ namespace o3d3xx
      * The State provides information which buffer is currently
      * used in writing to and reading from network
      */
-    enum State { PRE_CONTENT, CONTENT, POST_CONTENT };
+    enum class State { PRE_CONTENT, CONTENT, POST_CONTENT };
 
     /**
      * Connects to the camera

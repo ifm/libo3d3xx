@@ -205,7 +205,7 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
       int length;
       switch(state)
 	{
-	case PRE_CONTENT:
+	case State::PRE_CONTENT:
 	  length_str.assign(this->in_pre_content_buffer_.begin()+5,
 			    this->in_pre_content_buffer_.begin()+14);
 	  length = std::stoi(length_str);
@@ -213,11 +213,11 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
 	  this->DoRead(State::CONTENT);
 	  break;
 
-	case CONTENT:
+	case State::CONTENT:
 	  this->DoRead(State::POST_CONTENT);
 	  break;
 
-	case POST_CONTENT:
+	case State::POST_CONTENT:
 	  ticket_str.assign(this->in_pre_content_buffer_.begin(),
 			    this->in_pre_content_buffer_.begin()+4);
 	  ticket = std::stoi(ticket_str);
@@ -241,9 +241,9 @@ o3d3xx::PCICClient::ReadBufferByState(State state)
 {
   switch(state)
     {
-    case PRE_CONTENT: return this->in_pre_content_buffer_;
-    case CONTENT: return this->in_content_buffer_;
-    case POST_CONTENT: return this->in_post_content_buffer_;
+    case State::PRE_CONTENT: return this->in_pre_content_buffer_;
+    case State::CONTENT: return this->in_content_buffer_;
+    case State::POST_CONTENT: return this->in_post_content_buffer_;
     }
 }
 
@@ -281,15 +281,15 @@ o3d3xx::PCICClient::WriteHandler(State state, const boost::system::error_code& e
     {
       switch(state)
 	{
-	case PRE_CONTENT:
+	case State::PRE_CONTENT:
 	  this->DoWrite(State::CONTENT);
 	  break;
 
-	case CONTENT:
+	case State::CONTENT:
 	  this->DoWrite(State::POST_CONTENT);
 	  break;
 
-	case POST_CONTENT:
+	case State::POST_CONTENT:
 	  this->out_completed_ = true;
 	  this->out_cv_.notify_all();
 	  break;
@@ -302,9 +302,9 @@ o3d3xx::PCICClient::WriteBufferByState(State state)
 {
   switch(state)
     {
-    case PRE_CONTENT: return this->out_pre_content_buffer_;
-    case CONTENT: return this->out_content_buffer_;
-    case POST_CONTENT: return this->out_post_content_buffer_;
+    case State::PRE_CONTENT: return this->out_pre_content_buffer_;
+    case State::CONTENT: return this->out_content_buffer_;
+    case State::POST_CONTENT: return this->out_post_content_buffer_;
     }
 }
 
