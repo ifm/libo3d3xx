@@ -41,16 +41,28 @@ protected:
   int old_active_idx_ = -1;
 };
 
-TEST_F(PCICClientTest, InvalidCommandLength)
+TEST_F(PCICClientTest, IncomingResponseMessage)
 {
   o3d3xx::PCICClient::Ptr pc = std::make_shared<o3d3xx::PCICClient>(cam_);
 
-  std::string result = pc->Call("C?");
-  EXPECT_GT(result.size(), 0);
-
-  result = pc->Call("Ca?");
-  EXPECT_STREQ(result.c_str(), "?");
+  for(int i = 0; i < 5; ++i)
+    {
+      std::string result = pc->Call("C?");
+      EXPECT_GT(result.size(), 0);
+    }
 
   pc->Stop();
 }
 
+TEST_F(PCICClientTest, InvalidCommandLength)
+{
+  o3d3xx::PCICClient::Ptr pc = std::make_shared<o3d3xx::PCICClient>(cam_);
+
+  for(int i = 0; i < 5; ++i)
+    {
+      std::string result = pc->Call("Ca?");
+      EXPECT_STREQ(result.c_str(), "?");
+    }
+
+  pc->Stop();
+}

@@ -174,6 +174,11 @@ namespace o3d3xx
   private:
 
     /**
+     * Init command sequence
+     */
+    static const std::string init_command;
+
+    /**
      * Shared pointer to the camera this PCIC client will communicate with.
      */
     o3d3xx::Camera::Ptr cam_;

@@ -24,6 +24,11 @@
 #include <glog/logging.h>
 #include "o3d3xx_camera/camera.hpp"
 
+
+
+// Init command sequency to turn off all asynchronous messages
+const std::string o3d3xx::PCICClient::init_command = "9999L000000008\r\n9999p0\r\n";
+
 o3d3xx::PCICClient::PCICClient(o3d3xx::Camera::Ptr cam)
   : cam_(cam),
     connected_(false),
@@ -183,8 +188,19 @@ void
 o3d3xx::PCICClient::ConnectHandler(const boost::system::error_code& ec)
 {
   if(ec) { throw o3d3xx::error_t(ec.value()); }
-  this->connected_.store(true);
   this->DoRead(State::PRE_CONTENT);
+
+  // Write init command sequence to turn off asynchronous messages
+  boost::asio::async_write(this->sock_,
+			   boost::asio::buffer(&init_command[0],
+					       init_command.size()),
+			   [&, this]
+			   (const boost::system::error_code& ec,
+			    std::size_t bytes_transferred)
+			   {
+			     if (ec) { throw o3d3xx::error_t(ec.value()); }
+			     this->connected_.store(true);
+			   });
 }
 
 void
