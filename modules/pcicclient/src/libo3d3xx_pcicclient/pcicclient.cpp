@@ -29,12 +29,12 @@ o3d3xx::PCICClient::PCICClient(o3d3xx::Camera::Ptr cam)
     connected_(false),
     io_service_(),
     sock_(io_service_),
-    in_pre_content_buffer_(20),
+    in_pre_content_buffer_(20, ' '),
     in_content_buffer_(),
-    in_post_content_buffer_(2),
-    out_pre_content_buffer_(20),
+    in_post_content_buffer_(2, ' '),
+    out_pre_content_buffer_(20, ' '),
     out_content_buffer_(),
-    out_post_content_buffer_({'\r','\n'})
+    out_post_content_buffer_("\r\n")
 {
   try
     {
@@ -87,8 +87,8 @@ o3d3xx::PCICClient::Stop()
 }
 
 void
-o3d3xx::PCICClient::Call(const std::vector<std::uint8_t>&& request,
-			 std::function<void(std::vector<std::uint8_t>& response)> callback)
+o3d3xx::PCICClient::Call(const std::string&& request,
+			 std::function<void(std::string& response)> callback)
 {
   // TODO Better solution for this connection waiting ..
   int i = 0;
@@ -118,11 +118,8 @@ o3d3xx::PCICClient::Call(const std::vector<std::uint8_t>&& request,
   std::ostringstream pre_content_ss;
   pre_content_ss << ticket_id << 'L' << std::setw(9) << std::setfill('0')
 		 << (request.size()+6) << "\r\n" << ticket_id;
-  std::string pre_content_str = pre_content_ss.str();
+  this->out_pre_content_buffer_ = pre_content_ss.str();
 
-  // Fill buffers
-  std::copy(pre_content_str.begin(), pre_content_str.end(),
-	    this->out_pre_content_buffer_.begin());
   this->out_content_buffer_ = std::move(request);
 
   DLOG(INFO) << "Client sending request";
@@ -170,7 +167,7 @@ o3d3xx::PCICClient::ConnectHandler(const boost::system::error_code& ec)
 void
 o3d3xx::PCICClient::DoRead(State state, int bytes_remaining)
 {
-  std::vector<std::uint8_t> &buffer = this->ReadBufferByState(state);
+  std::string &buffer = this->InBufferByState(state);
   if(bytes_remaining==UNSET)
     {
       bytes_remaining = buffer.size();
@@ -199,16 +196,12 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
     }
   else
     {
-      std::string ticket_str;
       int ticket;
-      std::string length_str;
       int length;
       switch(state)
 	{
 	case State::PRE_CONTENT:
-	  length_str.assign(this->in_pre_content_buffer_.begin()+5,
-			    this->in_pre_content_buffer_.begin()+14);
-	  length = std::stoi(length_str);
+	  length = std::stoi(this->in_pre_content_buffer_.substr(5, 9));
 	  this->in_content_buffer_.resize(length-6);
 	  this->DoRead(State::CONTENT);
 	  break;
@@ -218,11 +211,9 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
 	  break;
 
 	case State::POST_CONTENT:
-	  ticket_str.assign(this->in_pre_content_buffer_.begin(),
-			    this->in_pre_content_buffer_.begin()+4);
-	  ticket = std::stoi(ticket_str);
+	  ticket = std::stoi(this->in_pre_content_buffer_.substr(0, 4));
 	  this->out_mutex_.lock();
-	  if(this->pending_calls_.find(ticket)!=pending_calls_.end())
+	  if(this->pending_calls_.find(ticket)!=this->pending_calls_.end())
 	    {
 	      this->pending_calls_[ticket](this->in_content_buffer_);
 	      this->pending_calls_.erase(ticket);
@@ -236,8 +227,8 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
 
 }
 
-std::vector<std::uint8_t>&
-o3d3xx::PCICClient::ReadBufferByState(State state)
+std::string&
+o3d3xx::PCICClient::InBufferByState(State state)
 {
   switch(state)
     {
@@ -250,7 +241,7 @@ o3d3xx::PCICClient::ReadBufferByState(State state)
 void
 o3d3xx::PCICClient::DoWrite(State state, int bytes_remaining)
 {
-  std::vector<std::uint8_t> &buffer = this->WriteBufferByState(state);
+  std::string &buffer = this->OutBufferByState(state);
   if(bytes_remaining==UNSET)
     {
       bytes_remaining = buffer.size();
@@ -297,8 +288,8 @@ o3d3xx::PCICClient::WriteHandler(State state, const boost::system::error_code& e
     }
 }
 
-std::vector<std::uint8_t>&
-o3d3xx::PCICClient::WriteBufferByState(State state)
+std::string&
+o3d3xx::PCICClient::OutBufferByState(State state)
 {
   switch(state)
     {

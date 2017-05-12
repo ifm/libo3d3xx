@@ -51,13 +51,10 @@ TEST_F(PCICClientTest, Connect)
       //      EXPECT_TRUE(fg->WaitForFrame(buff.get(), 1000));
       bool response = false;
 
-      pc->Call(std::vector<std::uint8_t>(
-        {'C','?'}), [=](std::vector<std::uint8_t> content)
+      pc->Call("C?", [=](std::string content)
         {
 	  std::cout << "ready " << i << " " << std::endl;
-          std::string s;
-          s.assign(content.begin(), content.end());
-          std::cout << s.size() << " " << s << std::endl;
+          std::cout << content.size() << " " << content << std::endl;
         }
         );
 

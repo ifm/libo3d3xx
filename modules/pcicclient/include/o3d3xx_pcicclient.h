@@ -20,8 +20,8 @@
 #include <condition_variable>
 #include <map>
 #include <mutex>
+#include <string>
 #include <thread>
-#include <vector>
 #include <boost/asio.hpp>
 #include <boost/system/system_error.hpp>
 #include "o3d3xx_camera/camera.hpp"
@@ -77,15 +77,15 @@ namespace o3d3xx
      * the receiving thread will be blocked until the response callback
      * returns.
      *
-     * @param[in] request Vector containing the complete command
+     * @param[in] request String containing the plain command
      * (without any header information, like ticket, length, etc.)
      *
      * @param[in] callback Function, called after receiving the response
-     * from the camera, providing the complete response data by a vector
+     * from the camera, providing the plain response data as string
      * (without any header information, like ticket, length, etc.)
      */
-    void Call(const std::vector<std::uint8_t>&& request,
-	      std::function<void(std::vector<std::uint8_t>& response)> callback);
+    void Call(const std::string&& request,
+	      std::function<void(std::string& response)> callback);
 
   private:
 
@@ -117,12 +117,15 @@ namespace o3d3xx
      * case an incoming message is completely received, does
      * the callback (if existent).
      */
-    void ReadHandler(State state, const boost::system::error_code& ec, std::size_t bytes_transferred, std::size_t bytes_remaining);
+    void ReadHandler(State state, const boost::system::error_code& ec,
+		     std::size_t bytes_transferred,
+		     std::size_t bytes_remaining);
 
     /**
-     * Returns buffer to be filled depending on specified reading state
+     * Returns buffer to be filled from network depending on
+     * specified reading state
      */
-    std::vector<uint8_t>& ReadBufferByState(State state);
+    std::string& InBufferByState(State state);
 
     /**
      * Writes data to network from one of the three "out" buffers
@@ -134,12 +137,15 @@ namespace o3d3xx
      * Handles DoWrite results: Triggers further writes and in
      * case a request is completely sent, unblocks calling thread.
      */
-    void WriteHandler(State state, const boost::system::error_code& ec, std::size_t bytes_transferred, std::size_t bytes_remaining);
+    void WriteHandler(State state, const boost::system::error_code& ec,
+		      std::size_t bytes_transferred,
+		      std::size_t bytes_remaining);
 
     /**
-     * Returns buffer to be read from depending on specified state
+     * Returns buffer containing data to be written to network
+     * depending on specified writing state
      */
-    std::vector<uint8_t>& WriteBufferByState(State state);
+    std::string& OutBufferByState(State state);
 
     /**
      * Finds and returns the next free ticket id
@@ -200,39 +206,39 @@ namespace o3d3xx
      * Maps PCIC tickets to callbacks. When receiving an incoming message,
      * the accordant callback can be found (and triggered).
      */
-    std::map<int, std::function<void(std::vector<std::uint8_t>& content)>> pending_calls_;
+    std::map<int, std::function<void(std::string& content)>> pending_calls_;
 
     /**
      * Pre-content buffer for incoming messages (<ticket><length>\r\n<ticket>)
      */
-    std::vector<std::uint8_t> in_pre_content_buffer_;
+    std::string in_pre_content_buffer_;
 
     /**
      * Content buffer for incoming messages, which is provided
      * through the callback to the caller
      */
-    std::vector<std::uint8_t> in_content_buffer_;
+    std::string in_content_buffer_;
 
     /**
      * Post-content buffer for incoming messages (\r\n)
      */
-    std::vector<std::uint8_t> in_post_content_buffer_;
+    std::string in_post_content_buffer_;
     
     /**
      * Pre-content buffer for outgoing requests (<ticket><length>\r\n<ticket>)
      */
-    std::vector<std::uint8_t> out_pre_content_buffer_;
+    std::string out_pre_content_buffer_;
 
     /**
      * Content buffer for outgoing requests, which is provided
      * by the caller
      */
-    std::vector<std::uint8_t> out_content_buffer_;
+    std::string out_content_buffer_;
 
     /**
      * Post-content buffer for outgoing messages (\r\n)
      */
-    std::vector<std::uint8_t> out_post_content_buffer_;
+    std::string out_post_content_buffer_;
 
     /**
      * Flag that indicates whether an incoming messages is completely read.
