@@ -16,7 +16,6 @@ set(CMAKE_BUILD_TYPE Release) # Release or Debug
 option(BUILD_TESTS "Build unit tests" ON)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(BUILD_STATIC_LIBS "Build static libraries" ON)
-option(BUILD_EXE_HZ "Build o3d3xx-hz" ON)
 option(BUILD_EXE_SCHEMA "Build o3d3xx-schema" ON)
 
 set(TARGET_IP "192.168.0.68")
