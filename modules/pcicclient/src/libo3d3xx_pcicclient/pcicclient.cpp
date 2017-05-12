@@ -87,7 +87,7 @@ o3d3xx::PCICClient::Stop()
 }
 
 void
-o3d3xx::PCICClient::Call(const std::string&& request,
+o3d3xx::PCICClient::Call(const std::string& request,
 			 std::function<void(std::string& response)> callback)
 {
   // TODO Better solution for this connection waiting ..
@@ -107,7 +107,7 @@ o3d3xx::PCICClient::Call(const std::string&& request,
   // PCICClient is unbuffered, so block further calls
   std::unique_lock<std::mutex> lock(this->out_mutex_);
 
-  this->out_completed_ = false;
+  this->out_completed_.store(false);
 
   int ticket_id = this->NextTicketId();
 
@@ -118,9 +118,10 @@ o3d3xx::PCICClient::Call(const std::string&& request,
   std::ostringstream pre_content_ss;
   pre_content_ss << ticket_id << 'L' << std::setw(9) << std::setfill('0')
 		 << (request.size()+6) << "\r\n" << ticket_id;
-  this->out_pre_content_buffer_ = pre_content_ss.str();
 
-  this->out_content_buffer_ = std::move(request);
+  // Prepare buffers
+  this->out_pre_content_buffer_ = pre_content_ss.str();
+  this->out_content_buffer_ = request;
 
   DLOG(INFO) << "Client sending request";
 
@@ -128,11 +129,35 @@ o3d3xx::PCICClient::Call(const std::string&& request,
   this->DoWrite(State::PRE_CONTENT);
 
   // Wait until sending is complete
-  while(!this->out_completed_)
+  while(!this->out_completed_.load())
     {
       this->out_cv_.wait(lock);
     }
   lock.unlock();
+}
+
+std::string
+o3d3xx::PCICClient::Call(const std::string& request)
+{
+  std::atomic_bool has_result(false);
+  std::string result;
+
+  Call(request, [&](std::string& content)
+       {
+	 // Copy content, notify and leave callback
+	 result = content;
+	 has_result.store(true);
+	 this->in_cv_.notify_all();
+       });
+
+  std::unique_lock<std::mutex> lock(this->in_mutex_);
+  while(!has_result.load())
+    {
+      this->in_cv_.wait(lock);
+    }
+  lock.unlock();
+
+  return result;
 }
 
 void
@@ -281,7 +306,7 @@ o3d3xx::PCICClient::WriteHandler(State state, const boost::system::error_code& e
 	  break;
 
 	case State::POST_CONTENT:
-	  this->out_completed_ = true;
+	  this->out_completed_.store(true);
 	  this->out_cv_.notify_all();
 	  break;
 	}

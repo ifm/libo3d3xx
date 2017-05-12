@@ -17,6 +17,7 @@
 #ifndef __O3D3XX_PCIC_CLIENT_H__
 #define __O3D3XX_PCIC_CLIENT_H__
 
+#include <atomic>
 #include <condition_variable>
 #include <map>
 #include <mutex>
@@ -84,8 +85,21 @@ namespace o3d3xx
      * from the camera, providing the plain response data as string
      * (without any header information, like ticket, length, etc.)
      */
-    void Call(const std::string&& request,
+    void Call(const std::string& request,
 	      std::function<void(std::string& response)> callback);
+
+    /**
+     * Sends a PCIC command to the camera and returns the response
+     * as soon as it has been received. In the meanwhile, this call
+     * is blocked.
+     *
+     * @param[in] request String containing the plain command
+     * (without any header infomration, like ticket, length, etc.)
+     *
+     * @return Copy of received plain response data as string
+     * (without any header information, like ticket, length, etc.)
+     */
+    std::string Call(const std::string& request);
 
   private:
 
@@ -144,6 +158,7 @@ namespace o3d3xx
     /**
      * Returns buffer containing data to be written to network
      * depending on specified writing state
+     *
      */
     std::string& OutBufferByState(State state);
 
@@ -172,7 +187,7 @@ namespace o3d3xx
     /**
      * Flag indicating that client is connected.
      */
-    std::atomic<bool> connected_;
+    std::atomic_bool connected_;
 
     /**
      * Flag which is used as default parameter in DoRead and DoWrite
@@ -243,7 +258,7 @@ namespace o3d3xx
     /**
      * Flag that indicates whether an incoming messages is completely read.
      */
-    bool out_completed_;
+    std::atomic_bool out_completed_;
 
     /**
      * Ensures single outgoing message
@@ -254,6 +269,16 @@ namespace o3d3xx
      * Condition variable used to unblock call
      */
     std::condition_variable out_cv_;
+
+    /**
+     * Ensures incoming response (used in synchronous Call)
+     */
+    std::mutex in_mutex_;
+
+    /**
+     * Condition variable used to unblock synchronous Call
+     */
+    std::condition_variable in_cv_;
 
   }; // end: class PCICClient
   
