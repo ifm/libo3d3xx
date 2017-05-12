@@ -33,7 +33,6 @@ o3d3xx::PCICClient::PCICClient(o3d3xx::Camera::Ptr cam)
     in_content_buffer_(),
     in_post_content_buffer_(2, ' '),
     out_pre_content_buffer_(20, ' '),
-    out_content_buffer_(),
     out_post_content_buffer_("\r\n")
 {
   try
@@ -88,7 +87,7 @@ o3d3xx::PCICClient::Stop()
 
 void
 o3d3xx::PCICClient::Call(const std::string& request,
-			 std::function<void(std::string& response)> callback)
+			 std::function<void(const std::string& response)> callback)
 {
   // TODO Better solution for this connection waiting ..
   int i = 0;
@@ -119,14 +118,13 @@ o3d3xx::PCICClient::Call(const std::string& request,
   pre_content_ss << ticket_id << 'L' << std::setw(9) << std::setfill('0')
 		 << (request.size()+6) << "\r\n" << ticket_id;
 
-  // Prepare buffers
+  // Prepare pre content buffer
   this->out_pre_content_buffer_ = pre_content_ss.str();
-  this->out_content_buffer_ = request;
 
   DLOG(INFO) << "Client sending request";
 
   // Send command
-  this->DoWrite(State::PRE_CONTENT);
+  this->DoWrite(State::PRE_CONTENT, request);
 
   // Wait until sending is complete
   while(!this->out_completed_.load())
@@ -142,7 +140,7 @@ o3d3xx::PCICClient::Call(const std::string& request)
   std::atomic_bool has_result(false);
   std::string result;
 
-  Call(request, [&](std::string& content)
+  Call(request, [&](const std::string& content)
        {
 	 // Copy content, notify and leave callback
 	 result = content;
@@ -264,45 +262,53 @@ o3d3xx::PCICClient::InBufferByState(State state)
 }
 
 void
-o3d3xx::PCICClient::DoWrite(State state, int bytes_remaining)
+o3d3xx::PCICClient::DoWrite(State state,
+			    const std::string& out_content_buffer,
+			    int bytes_remaining)
 {
-  std::string &buffer = this->OutBufferByState(state);
+  const std::string &buffer = this->OutBufferByState(state, out_content_buffer);
   if(bytes_remaining==UNSET)
     {
       bytes_remaining = buffer.size();
     }
 
   this->sock_.async_write_some(
-			      boost::asio::buffer(&buffer[buffer.size()-bytes_remaining], 
+			      boost::asio::buffer(&buffer[buffer.size()
+							  -bytes_remaining], 
 						  bytes_remaining), 
 			      std::bind(&o3d3xx::PCICClient::WriteHandler, 
 					this,
 					state,
 					std::placeholders::_1, 
 					std::placeholders::_2,
+					out_content_buffer,
 					bytes_remaining));
 }
 
 void
-o3d3xx::PCICClient::WriteHandler(State state, const boost::system::error_code& ec,
-				 std::size_t bytes_transferred, std::size_t bytes_remaining)
+o3d3xx::PCICClient::WriteHandler(State state,
+				 const boost::system::error_code& ec,
+				 std::size_t bytes_transferred,
+				 const std::string& out_content_buffer,
+				 std::size_t bytes_remaining)
 {
   if(ec) { throw o3d3xx::error_t(ec.value()); }
   
   if(bytes_remaining - bytes_transferred > 0)
     {
-      this->DoWrite(state, bytes_remaining - bytes_transferred);
+      this->DoWrite(state, out_content_buffer,
+		    bytes_remaining - bytes_transferred);
     }
   else
     {
       switch(state)
 	{
 	case State::PRE_CONTENT:
-	  this->DoWrite(State::CONTENT);
+	  this->DoWrite(State::CONTENT, out_content_buffer);
 	  break;
 
 	case State::CONTENT:
-	  this->DoWrite(State::POST_CONTENT);
+	  this->DoWrite(State::POST_CONTENT, out_content_buffer);
 	  break;
 
 	case State::POST_CONTENT:
@@ -313,13 +319,14 @@ o3d3xx::PCICClient::WriteHandler(State state, const boost::system::error_code& e
     }
 }
 
-std::string&
-o3d3xx::PCICClient::OutBufferByState(State state)
+const std::string&
+o3d3xx::PCICClient::OutBufferByState(State state,
+				     const std::string& out_content_buffer)
 {
   switch(state)
     {
     case State::PRE_CONTENT: return this->out_pre_content_buffer_;
-    case State::CONTENT: return this->out_content_buffer_;
+    case State::CONTENT: return out_content_buffer;
     case State::POST_CONTENT: return this->out_post_content_buffer_;
     }
 }

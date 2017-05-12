@@ -86,7 +86,7 @@ namespace o3d3xx
      * (without any header information, like ticket, length, etc.)
      */
     void Call(const std::string& request,
-	      std::function<void(std::string& response)> callback);
+	      std::function<void(const std::string& response)> callback);
 
     /**
      * Sends a PCIC command to the camera and returns the response
@@ -145,22 +145,26 @@ namespace o3d3xx
      * Writes data to network from one of the three "out" buffers
      * depending on current writing state.
      */
-    void DoWrite(State state, int bytes_remaining = UNSET);
+    void DoWrite(State state,
+		 const std::string &out_content_buffer,
+		 int bytes_remaining = UNSET);
 
     /**
      * Handles DoWrite results: Triggers further writes and in
      * case a request is completely sent, unblocks calling thread.
      */
-    void WriteHandler(State state, const boost::system::error_code& ec,
+    void WriteHandler(State state,
+		      const boost::system::error_code& ec,
 		      std::size_t bytes_transferred,
+		      const std::string& out_content_buffer,
 		      std::size_t bytes_remaining);
 
     /**
      * Returns buffer containing data to be written to network
      * depending on specified writing state
-     *
      */
-    std::string& OutBufferByState(State state);
+    const std::string& OutBufferByState(State state,
+					const std::string& out_content_buffer);
 
     /**
      * Finds and returns the next free ticket id
@@ -221,7 +225,7 @@ namespace o3d3xx
      * Maps PCIC tickets to callbacks. When receiving an incoming message,
      * the accordant callback can be found (and triggered).
      */
-    std::map<int, std::function<void(std::string& content)>> pending_calls_;
+    std::map<int, std::function<void(const std::string& content)>> pending_calls_;
 
     /**
      * Pre-content buffer for incoming messages (<ticket><length>\r\n<ticket>)
@@ -243,12 +247,6 @@ namespace o3d3xx
      * Pre-content buffer for outgoing requests (<ticket><length>\r\n<ticket>)
      */
     std::string out_pre_content_buffer_;
-
-    /**
-     * Content buffer for outgoing requests, which is provided
-     * by the caller
-     */
-    std::string out_content_buffer_;
 
     /**
      * Post-content buffer for outgoing messages (\r\n)
