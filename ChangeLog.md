@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.5.0 and 0.5.1
+
+* Merged @cfreundl PR89: Integration of resultsync 0.2
+
 ## Changes between libo3d3xx 0.4.9 and 0.5.0
 
 * Introduced the `oem` module to enable optimized functionality for OEM's
