@@ -18,6 +18,8 @@
 #include <cstdint>
 #include <limits>
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
 #include <opencv2/core/core.hpp>
 #include <o3d3xx_camera/err.h>
 #include <o3d3xx_framegrabber/byte_buffer.hpp>
@@ -29,7 +31,8 @@
 o3d3xx::oem::ImageBuffer::ImageBuffer()
   : cloud_(new pcl::PointCloud<o3d3xx::oem::PointT>()),
     extrinsics_({0.,0.,0.,0.,0.,0.}),
-    exposure_times_({0,0,0})
+    exposure_times_({0,0,0}),
+    illu_temperature_(INVALID_TEMPERATURE)
 {
   this->cloud_->sensor_origin_.setZero();
   this->cloud_->sensor_orientation_.w() = 1.0f;
@@ -90,6 +93,12 @@ std::vector<std::uint32_t>
 o3d3xx::oem::ImageBuffer::ExposureTimes()
 {
   return this->exposure_times_;
+}
+
+float
+o3d3xx::oem::ImageBuffer::IlluTemperature()
+{
+  return this->illu_temperature_;
 }
 
 void
@@ -440,8 +449,55 @@ o3d3xx::oem::ImageBuffer::Organize(ifm::resultsync::Frame* frame,
       this->extrinsics_[i] = o3d3xx::mkval<float>(ext_ptr + extidx);
     }
 
-  //
-  // XXX: it is not clear if I can get exposure times, need to chat with ifm
-  // about this.
-  //
+  if ((mask & o3d3xx::EXP_TIME) == o3d3xx::EXP_TIME)
+  {
+    try
+    {
+      std::string raw_model_result = frame->getInfo("ModelResult");
+      boost::property_tree::ptree pt;
+      std::istringstream is(raw_model_result);
+      is.seekg(0, is.beg);
+      boost::property_tree::read_json(is, pt);
+
+      uint32_t exposure_time_1 = pt.get<uint32_t>("ExposureTime1", 0);
+      uint32_t exposure_time_2 = pt.get<uint32_t>("ExposureTime2", 0);
+      uint32_t exposure_time_3 = pt.get<uint32_t>("ExposureTime3", 0);
+
+      exposure_times_.at(0) = exposure_time_1;
+      exposure_times_.at(1) = exposure_time_2;
+      exposure_times_.at(2) = exposure_time_3;
+    }
+    catch (const boost::property_tree::ptree_bad_path& ex)
+    {
+      LOG(WARNING) << "In `Organize(...)', skipping exposure times";
+      LOG(WARNING) << "ptree_bad_path: " << ex.what();
+    }
+  }
+  else
+  {
+    exposure_times_ = { 0, 0, 0 };
+  }
+
+  if ((mask & o3d3xx::ILLU_TEMP) == o3d3xx::ILLU_TEMP)
+  {
+    try
+    {
+      std::string raw_diagnostic_data = frame->getInfo("DiagnosticData");
+      boost::property_tree::ptree pt;
+      std::istringstream is(raw_diagnostic_data);
+      is.seekg(0, is.beg);
+      boost::property_tree::read_json(is, pt);
+
+      illu_temperature_ = pt.get<float>("TemperatureIllu", 3276.7f);
+    }
+    catch (const boost::property_tree::ptree_bad_path& ex)
+    {
+      LOG(WARNING) << "In `Organize(...)', skipping illu temperature";
+      LOG(WARNING) << "ptree_bad_path: " << ex.what();
+    }
+  }
+  else
+  {
+    illu_temperature_ = INVALID_TEMPERATURE;
+  }
 }

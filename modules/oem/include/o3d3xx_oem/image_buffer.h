@@ -140,6 +140,21 @@ namespace oem
     std::vector<std::uint32_t> ExposureTimes();
 
     /**
+     * Constant used to label temperature values as invalid
+     */
+    static constexpr float INVALID_TEMPERATURE = 3276.7f;
+
+    /**
+     * Returns the readout of the illumination temperature sensor for the
+     * current frame. The unit is degrees Celsius.
+     *
+     * The used framegrabber object needs to be configured for the output
+     * of this temperature value. If this is not the case, this method will
+     * always return #INVALID_TEMPERATURE.
+     */
+    float IlluTemperature();
+
+    /**
      * Organizes the passed in frame data into the internally wrapped data
      * structures according to the desired results as specified by the mask.
      *
@@ -154,6 +169,7 @@ namespace oem
   protected:
     std::vector<float> extrinsics_;
     std::vector<std::uint32_t> exposure_times_;
+    float illu_temperature_;
     pcl::PointCloud<o3d3xx::oem::PointT>::Ptr cloud_;
     cv::Mat depth_;
     cv::Mat uvec_;

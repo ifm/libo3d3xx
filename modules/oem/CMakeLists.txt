@@ -65,6 +65,7 @@ find_package(o3d3xx_camera REQUIRED)
 find_package(o3d3xx_framegrabber REQUIRED)
 find_package(o3d3xx_image REQUIRED)
 find_package(PCL 1.7 REQUIRED COMPONENTS common)
+find_package(resultsync 0.2 REQUIRED)
 #
 # NOTE: As of this writing, the file:
 #
