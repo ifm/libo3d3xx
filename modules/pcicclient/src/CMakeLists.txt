@@ -1,0 +1,2 @@
+add_subdirectory(libo3d3xx_pcicclient)
+add_subdirectory(bin)

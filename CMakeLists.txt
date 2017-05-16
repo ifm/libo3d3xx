@@ -62,6 +62,27 @@ ExternalProject_Add_Step(O3D3XX_FRAMEGRABBER
   )
 
 ################################################
+## o3d3xx-pcicclient module
+################################################
+
+ExternalProject_Add(O3D3XX_PCICCLIENT
+  DEPENDS O3D3XX_CAMERA
+  SOURCE_DIR ${O3D3XX_SOURCE_DIR}/modules/pcicclient
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=/usr
+  TEST_BEFORE_INSTALL 1
+  TEST_COMMAND make check
+  INSTALL_COMMAND sudo ${O3D3XX_INSTALL_CMD} install
+  )
+
+ExternalProject_Add_Step(O3D3XX_PCICCLIENT
+  package
+  DEPENDEES test
+  DEPENDERS install
+  COMMAND ${CMAKE_COMMAND} -E chdir .  make package
+  WORKING_DIRECTORY O3D3XX_PCICCLIENT-prefix/src/O3D3XX_PCICCLIENT-build
+  )
+
+################################################
 ## o3d3xx-image module
 ################################################
 
