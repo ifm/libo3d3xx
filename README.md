@@ -141,6 +141,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Addition of the oem module</td>
   </tr>
+  <tr>
+    <td>0.6.0</td>
+    <td>1.6.2114</td>
+    <td>O3D303</td>
+    <td>Addition of the pcicclient module</td>
+  </tr>
 </table>
 
 Features
