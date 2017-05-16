@@ -382,3 +382,10 @@ AUTHORS
 -------
 
 Tom Panzarella <tom@loveparkrobotics.com>
+
+With contributions by:
+
+* [Christoph Freundl](https://github.com/cfreundl)
+* [Christian Ege](https://github.com/graugans)
+* [Stefan Kuhn](https://github.com/stefan-kuhn)
+* [Michael Beardsworth](https://github.com/mbeards)
