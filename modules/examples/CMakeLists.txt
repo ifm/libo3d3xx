@@ -114,3 +114,8 @@ target_link_libraries(ex-exposure_times
                       ${PCL_COMMON_LIBRARIES}
                       ${OpenCV_LIBRARIES}
                       )
+add_executable(ex-change_ip ex-change_ip.cpp)
+target_link_libraries(ex-change_ip
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${LIB_boost_system}
+                      )

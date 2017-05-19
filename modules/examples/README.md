@@ -71,3 +71,6 @@ What is included?
 * [ex-exposure_times](ex-exposure_times.cpp) Shows how to change imager
   exposure times on the fly while streaming in pixel data and validating the
   setting of the exposure times registered to the frame data.
+
+* [ex-change_ip](ex-change_ip.cpp) Shows how to change the IPv4 address of
+  the camera.
