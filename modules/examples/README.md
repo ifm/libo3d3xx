@@ -74,3 +74,6 @@ What is included?
 
 * [ex-change_ip](ex-change_ip.cpp) Shows how to change the IPv4 address of
   the camera.
+
+* [ex-pcicclient_set_io](ex-pcicclient_set_io.cpp) Shows how to set digital IOs
+  of the camera.
