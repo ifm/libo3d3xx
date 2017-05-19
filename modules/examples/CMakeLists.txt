@@ -24,6 +24,7 @@ include(o3d3xx_version)
 find_package(o3d3xx_camera ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(o3d3xx_framegrabber ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(o3d3xx_image ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
+find_package(o3d3xx_pcicclient ${O3D3XX_VERSION_STRING} EXACT REQUIRED)
 find_package(PCL 1.7.1 REQUIRED COMPONENTS common io)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
@@ -117,5 +118,11 @@ target_link_libraries(ex-exposure_times
 add_executable(ex-change_ip ex-change_ip.cpp)
 target_link_libraries(ex-change_ip
                       ${O3D3XX_CAMERA_LIBRARIES}
+                      ${LIB_boost_system}
+                      )
+add_executable(ex-pcicclient_set_io ex-pcicclient_set_io.cpp)
+target_link_libraries(ex-pcicclient_set_io
+                      ${O3D3XX_CAMERA_LIBRARIES}
+		      ${O3D3XX_PCICCLIENT_LIBRARIES}
                       ${LIB_boost_system}
                       )
