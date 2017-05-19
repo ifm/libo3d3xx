@@ -69,7 +69,7 @@ int main(int argc, char** argv)
   pcic->Call("o020"); // OUT2 off
   for(int i = 0; i < 10; ++i)
     {
-      std::cout << "Pass " << (i+1) << "/" << 25 << std::endl;
+      std::cout << "Pass " << (i+1) << "/" << 10 << std::endl;
 
       pcic->Call("o011"); // OUT1 on
       std::cout << "State: " << pcic->Call("O01?") << " " << pcic->Call("O02?") << std::endl;
