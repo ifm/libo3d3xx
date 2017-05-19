@@ -64,20 +64,30 @@ int main(int argc, char** argv)
   // Create pcic interface
   o3d3xx::PCICClient::Ptr pcic = std::make_shared<o3d3xx::PCICClient>(cam);
 
-  // Start setting IOs (and led flashing) for ~10 seconds
+  // Start setting IOs (and led flashing)
   pcic->Call("o010"); // OUT1 off
   pcic->Call("o020"); // OUT2 off
-  for(int i = 0; i < 25; ++i)
+  for(int i = 0; i < 10; ++i)
     {
       std::cout << "Pass " << (i+1) << "/" << 25 << std::endl;
+
       pcic->Call("o011"); // OUT1 on
+      std::cout << "State: " << pcic->Call("O01?") << " " << pcic->Call("O02?") << std::endl;
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
       pcic->Call("o021"); // OUT2 on
+      std::cout << "State: " << pcic->Call("O01?") << " " << pcic->Call("O02?") << std::endl;
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
       pcic->Call("o010"); // OUT1 off
+      std::cout << "State: " << pcic->Call("O01?") << " " << pcic->Call("O02?") << std::endl;
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
       pcic->Call("o020"); // OUT2 off
+      std::cout << "State: " << pcic->Call("O01?") << " " << pcic->Call("O02?") << std::endl;
       std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+      std::cout << std::endl;
     }
 
   return 0;
