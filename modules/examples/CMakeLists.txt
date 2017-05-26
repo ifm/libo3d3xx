@@ -126,3 +126,10 @@ target_link_libraries(ex-pcicclient_set_io
 		      ${O3D3XX_PCICCLIENT_LIBRARIES}
                       ${LIB_boost_system}
                       )
+
+add_executable(ex-pcicclient_async_messages ex-pcicclient_async_messages.cpp)
+target_link_libraries(ex-pcicclient_async_messages
+                      ${O3D3XX_CAMERA_LIBRARIES}
+		      ${O3D3XX_PCICCLIENT_LIBRARIES}
+                      ${LIB_boost_system}
+                      )
