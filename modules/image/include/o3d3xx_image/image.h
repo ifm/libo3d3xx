@@ -162,6 +162,14 @@ namespace o3d3xx
     std::vector<std::uint32_t> ExposureTimes();
 
     /**
+     * Returns the temperature of the illumination unit.
+     *
+     * NOTE: To get the temperature of the illumination unit to the frame, you
+     * need to make sure your current pcic schema asks for it.
+     */
+    float IlluTemp();
+
+    /**
      * Synchronizes the parsed out image data with the internally wrapped byte
      * buffer.
      */
@@ -177,6 +185,11 @@ namespace o3d3xx
      * The exposure time data
      */
     std::vector<std::uint32_t> exposure_times_;
+
+    /**
+     * The temperature of the illumination unit
+     */
+    float illu_temp_;
 
     /**
      * Point cloud used to hold the cartesian xyz and amplitude data (intensity
