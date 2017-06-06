@@ -71,12 +71,13 @@ namespace o3d3xx
 
     /**
      * Sends a PCIC command to the camera and returns the response
-     * asynchronously through a callback.
+     * asynchronously through a callback (, which is automatically
+     * removed internally after the callback returns).
      *
      * Note: Since the PCICClient is unbuffered, the calling thread
-     * will be blocked until the request is completely sent. Also,
-     * the receiving thread will be blocked until the response callback
-     * returns.
+     * will be blocked while the request is not completely sent. Also,
+     * the receiving thread will be blocked while the response callback
+     * has not returned.
      *
      * @param[in] request String containing the plain command
      * (without any header information, like ticket, length, etc.)
@@ -84,8 +85,11 @@ namespace o3d3xx
      * @param[in] callback Function, called after receiving the response
      * from the camera, providing the plain response data as string
      * (without any header information, like ticket, length, etc.)
+     *
+     * @return Callback id, which can be used to cancel this Call before
+     * receiving the response.
      */
-    void Call(const std::string& request,
+    long Call(const std::string& request,
 	      std::function<void(const std::string& response)> callback);
 
     /**
@@ -101,11 +105,52 @@ namespace o3d3xx
      */
     std::string Call(const std::string& request);
 
+    /**
+     * Sets the specified callback for receiving asynchronous error messages
+     * until it is replaced by a new callback or canceled via @see CancelCallback.
+     *
+     * Note: Since the PCICClient is unbuffered, the receiving thread will be
+     * blocked while the error callback has not returned.
+     *
+     * @param[in] callback Function, called after receiving an error message
+     * from camera (without any header information, like ticket, length, etc.)
+     *
+     * @return Callback id, which can be used to cancel receiving errors.
+     */
+    long SetErrorCallback(std::function<void(const std::string& error)> callback);
+
+    /**
+     * Sets the specified callback for receiving asynchronous notification
+     * messages until it is replaced by a new callback or canceled via
+     * @see CancelCallback.
+     *
+     * Note: Since the PCICClient is unbuffered, the receiving thread will be
+     * blocked while the notification callback has not returned.
+     *
+     * @param[in] callback Function, called after receiving an notification message
+     * from camera (without any header information, like ticket, length, etc.)
+     *
+     * @return Callback id, which can be used to cancel receiving notifications.
+     */
+    long SetNotificationCallback(std::function<void(const std::string& notification)> callback);
+
+    /**
+
+     * Cancels registered callbacks. Must be called in case references/pointers
+     * provided through callbacks get invalid. If callback id isn't present internally
+     * anymore, i.e. if callback was replaced, already canceled or
+     * automatically removed (in case of the Call method), it is simply ignored.
+     *
+     * @param[in] callback_id Callback id, returned by methods which take a callback
+     * as parameter.
+     */
+    void CancelCallback(long callback_id);
+
   private:
 
     /**
      * Commands consist of content data surrounded by some meta data.
-     * The State provides information which buffer is currently
+     * The State enum provides information which buffer is currently
      * used in writing to and reading from network
      */
     enum class State { PRE_CONTENT, CONTENT, POST_CONTENT };
@@ -161,15 +206,21 @@ namespace o3d3xx
 
     /**
      * Returns buffer containing data to be written to network
-     * depending on specified writing state
+     * depending on specified writing state. (In case of state CONTENT,
+     * the specified out_content_buffer is returned.)
      */
     const std::string& OutBufferByState(State state,
 					const std::string& out_content_buffer);
 
     /**
-     * Finds and returns the next free ticket id
+     * Finds and returns the next free ticket for a command
      */
-    int NextTicketId();
+    int NextCommandTicket();
+
+    /**
+     * Calculates and returns next callback id
+     */
+    long NextCallbackId();
 
   private:
 
@@ -225,12 +276,28 @@ namespace o3d3xx
      * communicates directly with the sensor.
      */
     std::unique_ptr<std::thread> thread_;
+
+    /**
+     * Sequential id for callbacks. Used in two-stage mapping:
+     * 1) ticket to callback id
+     * 2) callback id to callback
+     * Using callback ids for cancelling callbacks instead of tickets eliminates
+     * the risk of cancelling a newer callback with the same ticket.
+     */
+    long current_callback_id_;
     
     /**
-     * Maps PCIC tickets to callbacks. When receiving an incoming message,
+     * Maps PCIC tickets to callback ids. When receiving an incoming message,
+     * the accordant callback id and thus the pending callback can be found via
+     * pending_callbacks_
+     */
+    std::map<int, long> ticket_to_callback_id_;
+
+    /**
+     * Maps callback ids to callbacks. When receiving an incoming message,
      * the accordant callback can be found (and triggered).
      */
-    std::map<int, std::function<void(const std::string& content)>> pending_calls_;
+    std::map<long, std::function<void(const std::string& content)>> pending_callbacks_;
 
     /**
      * Pre-content buffer for incoming messages (<ticket><length>\r\n<ticket>)

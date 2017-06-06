@@ -25,15 +25,16 @@
 #include "o3d3xx_camera/camera.hpp"
 
 
-
-// Init command sequency to turn off all asynchronous messages
-const std::string o3d3xx::PCICClient::init_command = "9999L000000008\r\n9999p0\r\n";
+// Init command sequence to deactivate asynchronous result messages and
+// activate asynchronous error and notification messages (command: p6)
+const std::string o3d3xx::PCICClient::init_command = "9999L000000008\r\n9999p6\r\n";
 
 o3d3xx::PCICClient::PCICClient(o3d3xx::Camera::Ptr cam)
   : cam_(cam),
     connected_(false),
     io_service_(),
     sock_(io_service_),
+    current_callback_id_(0),
     in_pre_content_buffer_(20, ' '),
     in_content_buffer_(),
     in_post_content_buffer_(2, ' '),
@@ -90,7 +91,7 @@ o3d3xx::PCICClient::Stop()
     throw o3d3xx::error_t(O3D3XX_THREAD_INTERRUPTED); });
 }
 
-void
+long
 o3d3xx::PCICClient::Call(const std::string& request,
 			 std::function<void(const std::string& response)> callback)
 {
@@ -104,7 +105,7 @@ o3d3xx::PCICClient::Call(const std::string& request,
       if (i > 2000)
         {
           LOG(WARNING) << "connected_ flag not set!";
-          return;
+          return -1;
         }
     }
 
@@ -113,15 +114,18 @@ o3d3xx::PCICClient::Call(const std::string& request,
 
   this->out_completed_.store(false);
 
-  int ticket_id = this->NextTicketId();
+  // Get next command ticket and callback id
+  int ticket = this->NextCommandTicket();
+  long callback_id = this->NextCallbackId();
 
-  // Add callback to pending callbacks
-  this->pending_calls_[ticket_id] = callback;
+  // Add mappings: ticket -> callback id; callback id -> callback
+  this->ticket_to_callback_id_[ticket] = callback_id;
+  this->pending_callbacks_[callback_id] = callback;
 
   // Transform ticket and length to string
   std::ostringstream pre_content_ss;
-  pre_content_ss << ticket_id << 'L' << std::setw(9) << std::setfill('0')
-		 << (request.size()+6) << "\r\n" << ticket_id;
+  pre_content_ss << ticket << 'L' << std::setw(9) << std::setfill('0')
+		 << (request.size()+6) << "\r\n" << ticket;
 
   // Prepare pre content buffer
   this->out_pre_content_buffer_ = pre_content_ss.str();
@@ -137,6 +141,8 @@ o3d3xx::PCICClient::Call(const std::string& request,
       this->out_cv_.wait(lock);
     }
   lock.unlock();
+
+  return callback_id;
 }
 
 std::string
@@ -161,6 +167,42 @@ o3d3xx::PCICClient::Call(const std::string& request)
   lock.unlock();
 
   return result;
+}
+
+long
+o3d3xx::PCICClient
+::SetErrorCallback(std::function<void(const std::string& error)> callback)
+{
+  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  long callback_id = this->NextCallbackId();
+
+  // Asynchronous error messages always have ticket '0001'
+  this->ticket_to_callback_id_[1] = callback_id;
+  this->pending_callbacks_[callback_id] = callback;
+  lock.unlock();
+  return callback_id;
+}
+
+long
+o3d3xx::PCICClient
+::SetNotificationCallback(std::function<void(const std::string& notification)> callback)
+{
+  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  long callback_id = this->NextCallbackId();
+
+  // Asynchronous notification messages always have ticket '0010'
+  this->ticket_to_callback_id_[10] = callback_id;
+  this->pending_callbacks_[callback_id] = callback;
+  lock.unlock();
+  return callback_id;
+}
+
+void
+o3d3xx::PCICClient::CancelCallback(long callback_id)
+{
+  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  this->pending_callbacks_.erase(callback_id);
+  lock.unlock();
 }
 
 void
@@ -252,18 +294,35 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
 	case State::POST_CONTENT:
 	  ticket = std::stoi(this->in_pre_content_buffer_.substr(0, 4));
 	  this->out_mutex_.lock();
-	  if(this->pending_calls_.find(ticket)!=this->pending_calls_.end())
+	  try
 	    {
-	      this->pending_calls_[ticket](this->in_content_buffer_);
-	      this->pending_calls_.erase(ticket);
+	      // Get callback id
+	      long callback_id = this->ticket_to_callback_id_.at(ticket);
+
+	      // Erase mapping if it is a one-time ticket triggered by a Call method
+	      if(ticket >= 1000 && ticket <= 9999)
+		{
+		  this->ticket_to_callback_id_.erase(ticket);
+		}
+
+	      // Execute callback
+	      this->pending_callbacks_.at(callback_id)(this->in_content_buffer_);
+
+	      // Erase mapping if it is a one-time ticket triggered by a Call method
+	      if(ticket >= 1000 && ticket <= 9999)
+		{
+		  this->pending_callbacks_.erase(callback_id);
+		}
+	    }
+	  catch(std::out_of_range ex)
+	    {
+	      DLOG(INFO) << "No callback for ticket " << ticket << " found!";
 	    }
 	  this->out_mutex_.unlock();
 	  this->DoRead(State::PRE_CONTENT);
 	  break;
 	}
     }
-
-
 }
 
 std::string&
@@ -348,15 +407,32 @@ o3d3xx::PCICClient::OutBufferByState(State state,
 }
 
 int
-o3d3xx::PCICClient::NextTicketId()
+o3d3xx::PCICClient::NextCommandTicket()
 {
-  int ticket_id = 1000;
-  if(!this->pending_calls_.empty())
+  int ticket = 1000;
+  if(!this->ticket_to_callback_id_.empty())
     {
-      ticket_id = (this->pending_calls_.rbegin()->first)-1000;
-      while(this->pending_calls_.find(((++ticket_id)%9000) + 1000)
-	    != this->pending_calls_.end());
-      ticket_id = (ticket_id%9000) + 1000;
+      ticket = (this->ticket_to_callback_id_.rbegin()->first)-1000;
+
+      // Ignore error/notification message tickets when generating
+      // new command tickets
+      if(ticket<0) { ticket = 0; }
+
+      while(this->ticket_to_callback_id_.find(((++ticket)%9000) + 1000)
+	    != this->ticket_to_callback_id_.end());
+      ticket = (ticket%9000) + 1000;
     }
-  return ticket_id;
+  return ticket;
+}
+
+long
+o3d3xx::PCICClient::NextCallbackId()
+{
+  // In case of long overflow, reset to 1
+  if(++this->current_callback_id_ <= 0)
+    {
+      this->current_callback_id_ = 1;
+    }
+
+  return this->current_callback_id_;
 }

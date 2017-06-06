@@ -77,3 +77,6 @@ What is included?
 
 * [ex-pcicclient_set_io](ex-pcicclient_set_io.cpp) Shows how to set digital IOs
   of the camera.
+
+* [ex-pcicclient_async_messages](ex-pcicclient_async_messages.cpp) Shows how to
+  receive notification (and error) message via PCIC from the camera.
