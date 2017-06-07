@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.6.0 and 0.7.0
+
+* Merged @stefan-kuhn PR95: Pcicclient async messages integration
+
 ## Changes between libo3d3xx 0.5.0 and 0.6.0
 
 * Merged @cfreundl PR89: Integration of resultsync 0.2

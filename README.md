@@ -147,6 +147,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Addition of the pcicclient module</td>
   </tr>
+  <tr>
+    <td>0.7.0</td>
+    <td>1.6.2114</td>
+    <td>O3D303</td>
+    <td>Illu temp, pcic async messages</td>
+  </tr>
 </table>
 
 Features
