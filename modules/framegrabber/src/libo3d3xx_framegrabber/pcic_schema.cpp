@@ -122,6 +122,17 @@ o3d3xx::make_pcic_schema(std::uint16_t mask)
            })";
     }
 
+  if((mask & o3d3xx::ILLU_TEMP) == o3d3xx::ILLU_TEMP)
+    {
+      schema +=
+	R"(,
+             {"type":"string", "id":"temp_illu", "value":"temp_illu"},
+             {
+              "type":"float32", "id":"temp_illu",
+              "format":{"dataencoding":"binary", "order":"little"}
+             })";
+    }
+
   // other invariants
   schema +=
   R"(,
@@ -166,6 +177,10 @@ o3d3xx::schema_mask_from_string(const std::string& in)
         {
           mask |= o3d3xx::EXP_TIME;
         }
+      else if (part == "ILLU_TEMP")
+	{
+	  mask |= o3d3xx::ILLU_TEMP;
+	}
     }
 
   return mask;

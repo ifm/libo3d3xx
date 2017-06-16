@@ -75,7 +75,9 @@ int main(int argc, const char** argv)
                     << '\t' << "IMG_UVEC: "
                     << (int) o3d3xx::IMG_UVEC << std::endl
                     << '\t' << "EXP_TIME: "
-                    << (int) o3d3xx::EXP_TIME << std::endl;
+                    << (int) o3d3xx::EXP_TIME << std::endl
+	            << '\t' << "ILLU_TEMP: "
+		    << (int) o3d3xx::ILLU_TEMP << std::endl;
           return 0;
         }
 
