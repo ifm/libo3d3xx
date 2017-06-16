@@ -1,6 +1,7 @@
 ## Changes between libo3d3xx 0.6.0 and 0.7.0
 
 * Merged @stefan-kuhn PR95: Pcicclient async messages integration
+* Merged @stefan-kuhn PR96: Integrate illu temp
 
 ## Changes between libo3d3xx 0.5.0 and 0.6.0
 
