@@ -123,6 +123,13 @@ o3d3xx::ImageBuffer::ExposureTimes()
   return this->exposure_times_;
 }
 
+float
+o3d3xx::ImageBuffer::IlluTemp()
+{
+  this->Organize();
+  return this->illu_temp_;
+}
+
 void
 o3d3xx::ImageBuffer::Organize()
 {
@@ -397,73 +404,71 @@ o3d3xx::ImageBuffer::Organize()
     }
 
   //
-  // OK, now we want to see if the exposure times are present, if they are,
-  // we want to parse them out and store them in the image buffer. Since the
-  // extrinsics are invariant and should *always* be present, we use the
-  // current index of the extrinsics (which should be pointing to either the
-  // sentinal string: 'extime' or 'stop\r\n' -- note: both strings are
-  // 6 8-bit characters long).
-  //
+  // OK, now we want to see if the temp illu and exposure times are present,
+  // if they are, we want to parse them out and store them in the image buffer.
+  // Since the extrinsics are invariant and should *always* be present, we use
+  // the current index of the extrinsics.
   if (EXTRINSICS_OK)
     {
       std::size_t extime_idx = extidx;
       int bytes_left = this->bytes_.size() - extime_idx;
 
-      //
-      // NOTE to a future me...
-      // What are these magic numbers below?
-      //
-      // Units are bytes:
-      //
-      // 6: 's','t''o''p','\r','\n'
-      //
-      // 18: 'e','x','t','i','m','e' (6 bytes)
-      //     <uint32> <uint32> <uint32> (3 exposure times)
-      // So, 6 + (3*4) = 18
-      //
-      // Basically, we are saying... we need more than the sentinal
-      // 'stop\r\n' but no more than 'extimes<uint32><uint32><uint32>stop\r\n'
-      //
-      if ((bytes_left > 6) && (bytes_left <= (18 + 6)))
-        {
-          std::string sentinel(this->bytes_.data()+extime_idx,
-                               this->bytes_.data()+extime_idx+6);
-          if (sentinel == "extime")
-            {
-              extime_idx += 6;
-              bytes_left -= 6;
+      // Read extime (6 bytes string + 3x 4 bytes uint32_t)
+      if(bytes_left >= 18
+	 && std::equal(this->bytes_.begin() + extidx,
+		       this->bytes_.begin() + extidx + 6,
+		       std::begin("extime")))
+	{
+	  extime_idx += 6;
+	  bytes_left -= 6;
 
-              // 3 exposure times
-              for (std::size_t i = 0; i < 3; ++i)
-                {
-                  if ((bytes_left - 6) <= 0)
-                    {
-                      break;
-                    }
+	  // 3 exposure times
+	  for (std::size_t i = 0; i < 3; ++i)
+	    {
+	      if ((bytes_left - 6) <= 0)
+		{
+		  break;
+		}
+	      
+	      std::uint32_t extime =
+		o3d3xx::mkval<std::uint32_t>(
+	          this->bytes_.data()+extime_idx);
+	      
+	      this->exposure_times_.at(i) = extime;
+	      
+	      extime_idx += 4;
+	      bytes_left -= 4;
+	    }
+	}
+      else
+	{
+	  std::fill(this->exposure_times_.begin(),
+		    this->exposure_times_.end(), 0);
+	}
 
-                  std::uint32_t extime =
-                    o3d3xx::mkval<std::uint32_t>(
-                      this->bytes_.data()+extime_idx);
+      // Read temp_illu (9 bytes string + 4 bytes float)
+      if(bytes_left >= 13
+	 && std::equal(this->bytes_.begin() + extidx,
+		       this->bytes_.begin() + extidx + 8,
+		       std::begin("temp_illu")))
+	{
+	  extime_idx += 9;
+	  bytes_left -= 9;
 
-                  this->exposure_times_.at(i) = extime;
+	  this->illu_temp_ =
+	    o3d3xx::mkval<float>(this->bytes_.data() + extime_idx);
 
-                  bytes_left -= 4;
-                  extime_idx += 4;
-                }
-            }
-          else
-            {
-              std::fill(this->exposure_times_.begin(),
-                        this->exposure_times_.end(), 0);
-
-              LOG(WARNING) << "Unexpected sentinel: '"
-                           << sentinel << "'";
-            }
-        }
+	  extime_idx += 4;
+	  bytes_left -= 4;
+	}
+      else
+	{
+	  this->illu_temp_ = 0;
+	}
     }
   else
     {
-      LOG(WARNING) << "Checking for exposure times skipped (cant trust extidx)";
+      LOG(WARNING) << "Checking for illu temp and exposure times skipped (cant trust extidx)";
     }
 
 

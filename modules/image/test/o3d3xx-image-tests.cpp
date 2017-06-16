@@ -804,3 +804,47 @@ TEST(ImageBuffers_Tests, DISABLED_ExposureTimes)
   EXPECT_EQ(exposure_times[2], 0);
 
 }
+
+TEST(ImageBuffers_Tests, DISABLED_IlluTemp)
+{
+  std::string json =
+    R"(
+        {
+          "o3d3xx":
+          {
+            "Device":
+            {
+              "ActiveApplication": "1"
+            },
+            "Apps":
+            [
+              {
+                "TriggerMode": "1",
+                "Index": "1",
+                "Imager":
+                {
+                    "ExposureTime": "5000",
+                    "ExposureTimeList": "125;5000",
+                    "ExposureTimeRatio": "40",
+                    "Type":"under5m_moderate"
+                }
+              }
+           ]
+          }
+        }
+      )";
+
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+  cam->FromJSON(json);
+
+  o3d3xx::ImageBuffer::Ptr img = std::make_shared<o3d3xx::ImageBuffer>();
+  o3d3xx::FrameGrabber::Ptr fg =
+    std::make_shared<o3d3xx::FrameGrabber>(
+      cam, o3d3xx::DEFAULT_SCHEMA_MASK|o3d3xx::ILLU_TEMP);
+
+  EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+  float illu_temp = img->IlluTemp();
+
+  EXPECT_GT(illu_temp, 10);
+  EXPECT_LT(illu_temp, 90);
+}
