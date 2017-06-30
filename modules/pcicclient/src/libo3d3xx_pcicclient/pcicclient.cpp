@@ -110,9 +110,13 @@ o3d3xx::PCICClient::Call(const std::string& request,
     }
 
   // PCICClient is unbuffered, so block further calls
-  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  std::unique_lock<std::mutex> out_mutex_lock(this->out_mutex_);
 
   this->out_completed_.store(false);
+
+  // Sync access to ticket and id generation
+  // as well as to ticket/id and id/callback maps
+  std::unique_lock<std::mutex> data_sync_lock(this->data_sync_mutex_);
 
   // Get next command ticket and callback id
   int ticket = this->NextCommandTicket();
@@ -121,6 +125,9 @@ o3d3xx::PCICClient::Call(const std::string& request,
   // Add mappings: ticket -> callback id; callback id -> callback
   this->ticket_to_callback_id_[ticket] = callback_id;
   this->pending_callbacks_[callback_id] = callback;
+
+  data_sync_lock.unlock();
+
 
   // Transform ticket and length to string
   std::ostringstream pre_content_ss;
@@ -138,9 +145,9 @@ o3d3xx::PCICClient::Call(const std::string& request,
   // Wait until sending is complete
   while(!this->out_completed_.load())
     {
-      this->out_cv_.wait(lock);
+      this->out_cv_.wait(out_mutex_lock);
     }
-  lock.unlock();
+  out_mutex_lock.unlock();
 
   return callback_id;
 }
@@ -173,7 +180,7 @@ long
 o3d3xx::PCICClient
 ::SetErrorCallback(std::function<void(const std::string& error)> callback)
 {
-  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  std::unique_lock<std::mutex> lock(this->data_sync_mutex_);
   long callback_id = this->NextCallbackId();
 
   // Asynchronous error messages always have ticket '0001'
@@ -187,7 +194,7 @@ long
 o3d3xx::PCICClient
 ::SetNotificationCallback(std::function<void(const std::string& notification)> callback)
 {
-  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  std::unique_lock<std::mutex> lock(this->data_sync_mutex_);
   long callback_id = this->NextCallbackId();
 
   // Asynchronous notification messages always have ticket '0010'
@@ -200,7 +207,7 @@ o3d3xx::PCICClient
 void
 o3d3xx::PCICClient::CancelCallback(long callback_id)
 {
-  std::unique_lock<std::mutex> lock(this->out_mutex_);
+  std::unique_lock<std::mutex> lock(this->data_sync_mutex_);
   this->pending_callbacks_.erase(callback_id);
   lock.unlock();
 }
@@ -293,7 +300,7 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
 
 	case State::POST_CONTENT:
 	  ticket = std::stoi(this->in_pre_content_buffer_.substr(0, 4));
-	  this->out_mutex_.lock();
+	  this->data_sync_mutex_.lock();
 	  try
 	    {
 	      // Get callback id
@@ -318,7 +325,7 @@ o3d3xx::PCICClient::ReadHandler(State state, const boost::system::error_code& ec
 	    {
 	      DLOG(INFO) << "No callback for ticket " << ticket << " found!";
 	    }
-	  this->out_mutex_.unlock();
+	  this->data_sync_mutex_.unlock();
 	  this->DoRead(State::PRE_CONTENT);
 	  break;
 	}
