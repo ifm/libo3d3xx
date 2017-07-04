@@ -162,6 +162,7 @@ o3d3xx::PCICClient::Call(const std::string& request)
        {
 	 // Copy content, notify and leave callback
 	 result = content;
+	 std::unique_lock<std::mutex> lock(this->in_mutex_);
 	 has_result.store(true);
 	 this->in_cv_.notify_all();
        });
@@ -394,6 +395,7 @@ o3d3xx::PCICClient::WriteHandler(State state,
 	  break;
 
 	case State::POST_CONTENT:
+	  std::unique_lock<std::mutex> lock(this->out_mutex_);
 	  this->out_completed_.store(true);
 	  this->out_cv_.notify_all();
 	  break;
