@@ -331,6 +331,12 @@ namespace o3d3xx
     std::atomic_bool out_completed_;
 
     /**
+     * Ensures synchronized access to ticket and id generation
+     * as well as ticket/id and id/callback maps
+     */
+    std::mutex data_sync_mutex_;
+
+    /**
      * Ensures single outgoing message
      */
     std::mutex out_mutex_;
