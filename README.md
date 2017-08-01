@@ -153,6 +153,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Illu temp, pcic async messages</td>
   </tr>
+  <tr>
+    <td>0.7.1</td>
+    <td>1.6.2114</td>
+    <td>O3D303</td>
+    <td>Deadlock bug fix</td>
+  </tr>
 </table>
 
 Features

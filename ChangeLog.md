@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.6.0 and 0.7.1
+
+* Merged @stefan-kuhn PR101: Deadlock bug fix
+
 ## Changes between libo3d3xx 0.6.0 and 0.7.0
 
 * Merged @stefan-kuhn PR95: Pcicclient async messages integration
