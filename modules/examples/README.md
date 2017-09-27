@@ -80,3 +80,8 @@ What is included?
 
 * [ex-pcicclient_async_messages](ex-pcicclient_async_messages.cpp) Shows how to
   receive notification (and error) message via PCIC from the camera.
+
+* [ex-fast_app_switch](ex-fast_app_switch.cpp) Shows how to switch between two
+  different applications on the camera over PCIC. For convenience is prints out
+  some (rough) timing metrics. NOTE: This assumes you have a camera capable of
+  running the 100k pixel imager.

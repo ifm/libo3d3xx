@@ -123,13 +123,23 @@ target_link_libraries(ex-change_ip
 add_executable(ex-pcicclient_set_io ex-pcicclient_set_io.cpp)
 target_link_libraries(ex-pcicclient_set_io
                       ${O3D3XX_CAMERA_LIBRARIES}
-		      ${O3D3XX_PCICCLIENT_LIBRARIES}
+                      ${O3D3XX_PCICCLIENT_LIBRARIES}
                       ${LIB_boost_system}
                       )
 
 add_executable(ex-pcicclient_async_messages ex-pcicclient_async_messages.cpp)
 target_link_libraries(ex-pcicclient_async_messages
                       ${O3D3XX_CAMERA_LIBRARIES}
-		      ${O3D3XX_PCICCLIENT_LIBRARIES}
+                      ${O3D3XX_PCICCLIENT_LIBRARIES}
+                      ${LIB_boost_system}
+                      )
+
+add_executable(ex-fast_app_switch ex-fast_app_switch.cpp)
+target_link_libraries(ex-fast_app_switch
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${O3D3XX_IMAGE_LIBRARIES}
+                      ${O3D3XX_PCICCLIENT_LIBRARIES}
+                      ${OpenCV_LIBRARIES}
                       ${LIB_boost_system}
                       )
