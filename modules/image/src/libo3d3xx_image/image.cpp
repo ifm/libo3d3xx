@@ -32,7 +32,8 @@ o3d3xx::ImageBuffer::ImageBuffer()
   : o3d3xx::ByteBuffer(),
     cloud_(new pcl::PointCloud<o3d3xx::PointT>()),
     extrinsics_({0., 0., 0., 0., 0., 0.}),
-    exposure_times_({0,0,0})
+    exposure_times_({0,0,0}),
+    time_stamp_(std::chrono::system_clock::now())
 { }
 
 o3d3xx::ImageBuffer::ImageBuffer(const o3d3xx::ImageBuffer& src_buff)
@@ -130,6 +131,14 @@ o3d3xx::ImageBuffer::IlluTemp()
   return this->illu_temp_;
 }
 
+o3d3xx::TimePointT
+o3d3xx::ImageBuffer::TimeStamp()
+{
+  this->Organize();
+  return this->time_stamp_;
+}
+
+
 void
 o3d3xx::ImageBuffer::Organize()
 {
@@ -168,6 +177,27 @@ o3d3xx::ImageBuffer::Organize()
   if (cidx == INVALID_IDX)
     {
       throw o3d3xx::error_t(O3D3XX_IMG_CHUNK_NOT_FOUND);
+    }
+
+  const std::uint32_t header_version =  o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+cidx+12);
+  // for the *big* time stamp minimum header version 2 is needed
+  if( header_version > 1 )
+    {
+      // Retrieve the timespamp information from the confidence data
+      const std::uint32_t timestampSec =
+        o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+cidx+40);
+      const std::uint32_t timestampNsec =
+        o3d3xx::mkval<std::uint32_t>(this->bytes_.data()+cidx+44);
+      // convert the time stamp into a TimePointT
+      this->time_stamp_ = std::chrono::system_clock::time_point {
+                            std::chrono::seconds{timestampSec}
+                            + std::chrono::nanoseconds{timestampNsec}
+                          };
+    }
+  else
+    {
+      // There is no *big* time stamp in chunk version 1
+      this->time_stamp_ = std::chrono::system_clock::now();
     }
 
   bool AMP_OK = aidx != INVALID_IDX;

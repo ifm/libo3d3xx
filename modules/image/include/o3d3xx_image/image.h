@@ -21,6 +21,7 @@
 #include <cstdint>
 #include <memory>
 #include <vector>
+#include <chrono>
 #include <opencv2/core/core.hpp>
 #include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
@@ -29,6 +30,7 @@
 namespace o3d3xx
 {
   using PointT = pcl::PointXYZI;
+  using TimePointT = std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>;
 
   /**
    * The ImageBuffer class is used to hold time synchronized images from the
@@ -170,6 +172,14 @@ namespace o3d3xx
     float IlluTemp();
 
     /**
+     * Returns the time stamp of the image data.
+     *
+     * NOTE: To get the timestamp of the confidence data, you
+     * need to make sure your current pcic schema mask have enabled confidence data.
+     */
+    o3d3xx::TimePointT TimeStamp();
+
+    /**
      * Synchronizes the parsed out image data with the internally wrapped byte
      * buffer.
      */
@@ -191,6 +201,10 @@ namespace o3d3xx
      */
     float illu_temp_;
 
+    /**
+     * The timestamp of the image data
+     */
+    o3d3xx::TimePointT time_stamp_;
     /**
      * Point cloud used to hold the cartesian xyz and amplitude data (intensity
      * channel).
