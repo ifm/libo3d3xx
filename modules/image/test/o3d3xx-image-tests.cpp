@@ -848,3 +848,54 @@ TEST(ImageBuffers_Tests, DISABLED_IlluTemp)
   EXPECT_GT(illu_temp, 10);
   EXPECT_LT(illu_temp, 90);
 }
+
+TEST(ImageBuffers_Tests, TimeStamp)
+{
+  std::string json =
+    R"(
+        {
+          "o3d3xx":
+          {
+            "Device":
+            {
+              "ActiveApplication": "1"
+            },
+            "Apps":
+            [
+              {
+                "TriggerMode": "1",
+                "Index": "1",
+                "Imager":
+                {
+                    "ExposureTime": "5000",
+                    "ExposureTimeList": "125;5000",
+                    "ExposureTimeRatio": "40",
+                    "Type":"under5m_moderate"
+                }
+              }
+           ]
+          }
+        }
+      )";
+
+  o3d3xx::Camera::Ptr cam = std::make_shared<o3d3xx::Camera>();
+  cam->FromJSON(json);
+
+  o3d3xx::ImageBuffer::Ptr img = std::make_shared<o3d3xx::ImageBuffer>();
+  o3d3xx::FrameGrabber::Ptr fg =
+    std::make_shared<o3d3xx::FrameGrabber>(
+      cam, o3d3xx::DEFAULT_SCHEMA_MASK);
+
+  std::array<o3d3xx::TimePointT, 2> tps;
+  // get two consecutive timestamps
+  for (o3d3xx::TimePointT& t : tps)
+  {
+      EXPECT_TRUE(fg->WaitForFrame(img.get(), 1000));
+      t = img->TimeStamp();
+  }
+  // the first time point need to be smaller than the second one
+  EXPECT_LT(tps[0],tps[1]);
+  auto tdiff = std::chrono::duration_cast<std::chrono::milliseconds>(
+                 tps[1] - tps[0]).count();
+  EXPECT_GT(tdiff,20);
+}
