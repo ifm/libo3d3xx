@@ -159,6 +159,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Deadlock bug fix</td>
   </tr>
+  <tr>
+    <td>0.7.2</td>
+    <td>1.6.2114</td>
+    <td>O3D303</td>
+    <td>Time stamped image buffers</td>
+  </tr>
 </table>
 
 Features
