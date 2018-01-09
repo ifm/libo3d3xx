@@ -85,3 +85,6 @@ What is included?
   different applications on the camera over PCIC. For convenience is prints out
   some (rough) timing metrics. NOTE: This assumes you have a camera capable of
   running the 100k pixel imager.
+
+* [ex-oem_is_booted](ex-oem_is_booted.cpp) Shows how to check if the camera
+  has completly booted.
