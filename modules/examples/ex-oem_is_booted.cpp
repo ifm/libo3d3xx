@@ -26,18 +26,36 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include <chrono>
 #include "o3d3xx_camera.h"
 
 bool wait_for_camera(o3d3xx::Camera::Ptr cam, int seconds)
 {
     seconds = std::max(seconds,1);
-    std::unordered_map<std::string, std::string> sw_version = cam->GetSWVersion();
-    while(sw_version["Algorithm_Version"].empty() && (seconds > 0))
+    std::unordered_map<std::string, std::string> sw_version;
+    auto start = std::chrono::high_resolution_clock::now();
+    std::chrono::duration<double> duration;
+    bool isValid=false;
+
+    while( (!isValid) && (duration < std::chrono::seconds( seconds ) ) )
     {
-        std::this_thread::sleep_for (std::chrono::seconds(1));
-        seconds--;
+        try
+        {
+             sw_version = cam->GetSWVersion();
+        }
+        catch ( ... )
+        {
+            // Not able to get SW version
+        }
+        duration = std::chrono::high_resolution_clock::now() - start;
+
+        if(sw_version["Algorithm_Version"].empty())
+            std::this_thread::sleep_for (std::chrono::seconds(1));
+        else
+            isValid=true;
     }
-    return (seconds > 0);
+
+    return ( isValid );
 }
 
 int main(int argc, const char **argv)
@@ -46,7 +64,7 @@ int main(int argc, const char **argv)
     o3d3xx::Logging::Init();
     o3d3xx::Camera::Ptr cam = o3d3xx::Camera::Ptr(new o3d3xx::Camera());
 
-    std::cout << "Waiting for the camera to operate: ";
+    std::cout << "Waiting for the camera to operate: " << std::flush;
     if(wait_for_camera(cam, seconds_to_wait))
     {
         std::cout << "[done]" << std::endl;
