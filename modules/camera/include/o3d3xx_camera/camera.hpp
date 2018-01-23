@@ -272,6 +272,16 @@ namespace o3d3xx
     std::vector<app_entry_t> GetApplicationList();
 
     /**
+     * Delivers the trace log from the camera
+     * A session is not required to call this function.
+     *
+     * @return A `vector' of `std::string' for each entry in the tracelog
+     *
+     * @throw o3d3xx::error_t upon error
+     */
+    std::vector<std::string> GetTraceLogs(int count);
+
+    /**
      * Reboot the sensor
      *
      * @param[in] mode The system mode that should be booted into after
