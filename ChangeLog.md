@@ -1,4 +1,4 @@
-## Changes between libo3d3xx 0.7.1 and 0.7.2
+## Changes between libo3d3xx 0.7.2 and 0.7.3
 
 * Merged @graugans PR120: o3d3xx-trace
 
