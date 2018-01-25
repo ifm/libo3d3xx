@@ -68,6 +68,26 @@ else()
 endif(BUILD_EXE_LS)
 
 #-----------------------------------------------
+# o3d3xx-trace
+#-----------------------------------------------
+if(BUILD_EXE_TRACE)
+  add_executable(o3d3xx-trace o3d3xx-trace.cpp)
+
+  if(BUILD_SHARED_LIBS)
+    target_link_libraries(o3d3xx-trace o3d3xx_camera_shared)
+  else()
+    target_link_libraries(o3d3xx-trace o3d3xx_camera_static)
+  endif(BUILD_SHARED_LIBS)
+
+  install(TARGETS o3d3xx-trace DESTINATION bin)
+
+  list(APPEND O3D3XX_CAMERA_EXE_TARGETS o3d3xx-trace)
+else()
+  message(STATUS "Skipping o3d3xx-trace")
+endif(BUILD_EXE_TRACE)
+
+
+#-----------------------------------------------
 # o3d3xx-dump
 #-----------------------------------------------
 if(BUILD_EXE_DUMP)

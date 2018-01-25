@@ -1,5 +1,9 @@
 ## Changes between libo3d3xx 0.7.1 and 0.7.2
 
+* Merged @graugans PR120: o3d3xx-trace
+
+## Changes between libo3d3xx 0.7.1 and 0.7.2
+
 * Merged @graugans PR117: Add support for the result data time stamp
 
 ## Changes between libo3d3xx 0.6.0 and 0.7.1

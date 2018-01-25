@@ -214,6 +214,24 @@ o3d3xx::Camera::Reboot(const boot_mode& mode)
   this->_XCallMain("reboot", static_cast<int>(mode));
 }
 
+
+std::vector<std::string>
+o3d3xx::Camera::GetTraceLogs(int count)
+{
+  xmlrpc_c::value_array result(this->_XCallMain("getTraceLogs",count));
+  std::vector<xmlrpc_c::value> const res_vec(result.vectorValueValue());
+
+  std::vector<std::string> retval;
+  for (auto& entry : res_vec)
+    {
+      xmlrpc_c::value_string const entry_str(entry);
+      retval.push_back(static_cast<std::string>(entry_str));
+    }
+  return retval;
+}
+
+
+
 std::string
 o3d3xx::Camera::RequestSession()
 {

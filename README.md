@@ -165,6 +165,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Time stamped image buffers</td>
   </tr>
+  <tr>
+    <td>0.7.3</td>
+    <td>1.6.2114</td>
+    <td>O3D303</td>
+    <td>Added o3d3xx-trace</td>
+  </tr>
 </table>
 
 Features
