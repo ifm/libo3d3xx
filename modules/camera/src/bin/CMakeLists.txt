@@ -84,7 +84,7 @@ if(BUILD_EXE_TRACE)
   list(APPEND O3D3XX_CAMERA_EXE_TARGETS o3d3xx-trace)
 else()
   message(STATUS "Skipping o3d3xx-trace")
-endif(BUILD_EXE_LS)
+endif(BUILD_EXE_TRACE)
 
 
 #-----------------------------------------------
