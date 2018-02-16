@@ -89,6 +89,6 @@ What is included?
 * [ex-oem_is_booted](ex-oem_is_booted.cpp) Shows how to check if the camera
   has completly booted.
 
-* [ex-pcic_dos_attack](ex-pcic_dos_attck.cpp) Demonstrates a *denial of service
+* [ex-pcic_dos_attack](ex-pcic_dos_attack.cpp) Demonstrates a *denial of service
   attack* on pcic. It demonstrates behavior of the framegrabber when all allowable PCIC
-  connections have be exhausted.
+  connections have been exhausted.
