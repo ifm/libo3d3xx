@@ -255,6 +255,11 @@ TEST_F(AppImagerTest, GetImagerParameters)
       //     std::cout << kv.first << " --> " << kv.second << std::endl;
       //   }
 
+      ASSERT_NO_THROW(params.at("AutoExposureReferencePointX"));
+      ASSERT_NO_THROW(params.at("AutoExposureReferencePointY"));
+      ASSERT_NO_THROW(params.at("AutoExposureReferenceROI"));
+      ASSERT_NO_THROW(params.at("AutoExposureReferenceType"));
+      ASSERT_NO_THROW(params.at("AutoExposureMaxExposureTime"));
       ASSERT_NO_THROW(params.at("Channel"));
       ASSERT_NO_THROW(params.at("ClippingBottom"));
       ASSERT_NO_THROW(params.at("ClippingLeft"));
@@ -287,21 +292,21 @@ TEST_F(AppImagerTest, GetImagerParameters)
           ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 26);
+          ASSERT_EQ(params.size(), 31);
         }
       else if (boost::algorithm::ends_with(type, "low"))
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 27);
+          ASSERT_EQ(params.size(), 32);
         }
       else
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
 
-          ASSERT_EQ(params.size(), 28);
+          ASSERT_EQ(params.size(), 33);
         }
     }
 

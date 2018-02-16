@@ -1,3 +1,8 @@
+## Changes between libo3d3xx 0.7.3 and 0.7.4
+
+* Updated XMLRPC protocol for 1.20.x firmwares
+* Made framegrabber robust to exhausted PCIC connections and async messages.
+
 ## Changes between libo3d3xx 0.7.2 and 0.7.3
 
 * Merged @graugans PR120: o3d3xx-trace

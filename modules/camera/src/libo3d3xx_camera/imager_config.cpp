@@ -29,7 +29,12 @@
 #include "o3d3xx_camera/util.h"
 
 o3d3xx::ImagerConfig::ImagerConfig()
-  : channel_(0),
+  : auto_exposure_reference_point_x_(88),
+    auto_exposure_reference_point_y_(66),
+    auto_exposure_reference_type_(0),
+    auto_exposure_max_exposure_time_(10000),
+    auto_exposure_reference_roi_(""),
+    channel_(0),
     clipping_bottom_(131),
     clipping_left_(0),
     clipping_right_(175),
@@ -84,6 +89,67 @@ o3d3xx::ImagerConfig::ImagerConfig(
                      << kv.first << "=" << kv.second;
         }
     }
+}
+
+int
+o3d3xx::ImagerConfig::AutoExposureReferencePointX() const noexcept
+{
+  return this->auto_exposure_reference_point_x_;
+}
+
+void
+o3d3xx::ImagerConfig::SetAutoExposureReferencePointX(int x) noexcept
+{
+  this->auto_exposure_reference_point_x_ = x;
+}
+
+int
+o3d3xx::ImagerConfig::AutoExposureReferencePointY() const noexcept
+{
+  return this->auto_exposure_reference_point_y_;
+}
+
+void
+o3d3xx::ImagerConfig::SetAutoExposureReferencePointY(int y) noexcept
+{
+  this->auto_exposure_reference_point_y_ = y;
+}
+
+int
+o3d3xx::ImagerConfig::AutoExposureReferenceType() const noexcept
+{
+  return this->auto_exposure_reference_type_;
+}
+
+void
+o3d3xx::ImagerConfig::SetAutoExposureReferenceType(int t) noexcept
+{
+  this->auto_exposure_reference_type_ = t;
+}
+
+int
+o3d3xx::ImagerConfig::AutoExposureMaxExposureTime() const noexcept
+{
+  return this->auto_exposure_max_exposure_time_;
+}
+
+void
+o3d3xx::ImagerConfig::SetAutoExposureMaxExposureTime(int t) noexcept
+{
+  this->auto_exposure_max_exposure_time_ = t;
+}
+
+std::string
+o3d3xx::ImagerConfig::AutoExposureReferenceROI() const noexcept
+{
+  return this->auto_exposure_reference_roi_;
+}
+
+void
+o3d3xx::ImagerConfig::SetAutoExposureReferenceROI(
+  const std::string& s) noexcept
+{
+  this->auto_exposure_reference_roi_ = s;
 }
 
 int
@@ -431,6 +497,26 @@ const std::unordered_map<std::string,
                                             const std::string&)> >
 o3d3xx::ImagerConfig::mutator_map =
   {
+    {"AutoExposureReferencePointX",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetAutoExposureReferencePointX(std::stoi(val)); }},
+
+    {"AutoExposureReferencePointY",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetAutoExposureReferencePointY(std::stoi(val)); }},
+
+    {"AutoExposureReferenceType",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetAutoExposureReferenceType(std::stoi(val)); }},
+
+    {"AutoExposureMaxExposureTime",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetAutoExposureMaxExposureTime(std::stoi(val)); }},
+
+    {"AutoExposureReferenceROI",
+     [](o3d3xx::ImagerConfig* im, const std::string& val)
+     { im->SetAutoExposureReferenceROI(val); }},
+
     {"Channel",
      [](o3d3xx::ImagerConfig* im, const std::string& val)
      { im->SetChannel(std::stoi(val)); }},
@@ -549,6 +635,11 @@ o3d3xx::ImagerConfig::ToJSON() const
 {
   boost::property_tree::ptree pt;
 
+  pt.put("AutoExposureReferencePointX", this->AutoExposureReferencePointX());
+  pt.put("AutoExposureReferencePointY", this->AutoExposureReferencePointY());
+  pt.put("AutoExposureReferenceType", this->AutoExposureReferenceType());
+  pt.put("AutoExposureMaxExposureTime", this->AutoExposureMaxExposureTime());
+  pt.put("AutoExposureReferenceROI", this->AutoExposureReferenceROI());
   pt.put("Channel", this->Channel());
   pt.put("ClippingBottom", this->ClippingBottom());
   pt.put("ClippingLeft", this->ClippingLeft());

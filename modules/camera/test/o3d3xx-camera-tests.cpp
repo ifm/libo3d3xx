@@ -179,7 +179,7 @@ TEST(Camera_Tests, GetDeviceConfig)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  EXPECT_EQ(params.size(), 34);
+  EXPECT_EQ(params.size(), 35);
 
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
@@ -218,6 +218,8 @@ TEST(Camera_Tests, GetDeviceConfig)
   EXPECT_EQ(std::stoi(params.at("EthernetFieldBusEndianness")),
             dev->EthernetFieldBusEndianness());
   EXPECT_EQ(params.at("PNIODeviceName"), dev->PNIODeviceName());
+  EXPECT_EQ(o3d3xx::stob(params.at("EnableAcquisitionFinishedPCIC")),
+            dev->EnableAcquisitionFinishedPCIC());
 }
 
 TEST(Camera_Tests, ActivateDisablePassword)
@@ -338,6 +340,8 @@ TEST(Camera_Tests, DeviceConfig_JSON)
   EXPECT_EQ(dev->EthernetFieldBus(), dev2->EthernetFieldBus());
   EXPECT_EQ(dev->EthernetFieldBusEndianness(),
             dev2->EthernetFieldBusEndianness());
+  EXPECT_EQ(dev->EnableAcquisitionFinishedPCIC(),
+            dev2->EnableAcquisitionFinishedPCIC());
 }
 
 TEST(Camera_Tests, GetNetParameters)

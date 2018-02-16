@@ -77,6 +77,21 @@ namespace o3d3xx
     std::string ToJSON() const;
 
     // Accessor / Mutators
+    int AutoExposureReferencePointX() const noexcept;
+    void SetAutoExposureReferencePointX(int x) noexcept;
+
+    int AutoExposureReferencePointY() const noexcept;
+    void SetAutoExposureReferencePointY(int y) noexcept;
+
+    int AutoExposureReferenceType() const noexcept;
+    void SetAutoExposureReferenceType(int t) noexcept;
+
+    int AutoExposureMaxExposureTime() const noexcept;
+    void SetAutoExposureMaxExposureTime(int t) noexcept;
+
+    std::string AutoExposureReferenceROI() const noexcept;
+    void SetAutoExposureReferenceROI(const std::string& s) noexcept;
+
     int Channel() const noexcept;
     void SetChannel(int channel) noexcept;
 
@@ -166,6 +181,13 @@ namespace o3d3xx
     void SetMaxAllowedLEDFrameRate(double rate) noexcept;
 
   protected:
+    /** Auto-exposure settings */
+    int auto_exposure_reference_point_x_;
+    int auto_exposure_reference_point_y_;
+    int auto_exposure_reference_type_;
+    int auto_exposure_max_exposure_time_;
+    std::string auto_exposure_reference_roi_;
+
     /** channel */
     int channel_;
 

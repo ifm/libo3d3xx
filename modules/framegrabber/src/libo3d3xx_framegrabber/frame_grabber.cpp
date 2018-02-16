@@ -365,8 +365,19 @@ o3d3xx::FrameGrabber::TicketHandler(const boost::system::error_code& ec,
     }
   else
     {
-      LOG(ERROR) << "Unexpected ticket: " << ticket;
-      throw(std::logic_error("Unexpected ticket type: " + ticket));
+      LOG(WARNING) << "Unexpected ticket: " << ticket;
+      LOG(WARNING) << "Ticket Full: '" << ticket_str << "'";
+      //throw(std::logic_error("Unexpected ticket type: " + ticket));
+
+      this->ticket_buffer_.clear();
+      this->ticket_buffer_.resize(o3d3xx::TICKET_ID_SZ);
+      this->sock_.async_read_some(
+        boost::asio::buffer(this->ticket_buffer_.data(),
+                            o3d3xx::TICKET_ID_SZ),
+        std::bind(&o3d3xx::FrameGrabber::TicketHandler, this,
+                  std::placeholders::_1, std::placeholders::_2, 0));
+
+      return;
     }
 }
 

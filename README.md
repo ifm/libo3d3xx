@@ -171,6 +171,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Added o3d3xx-trace</td>
   </tr>
+  <tr>
+    <td>0.7.4</td>
+    <td>1.20.973</td>
+    <td>O3D303</td>
+    <td>Support for auto-exposure parameters</td>
+  </tr>
 </table>
 
 Features

@@ -50,7 +50,8 @@ o3d3xx::DeviceConfig::DeviceConfig()
     operating_mode_(0),
     pnio_device_name_(""),
     ethernet_field_bus_(0),
-    ethernet_field_bus_endianness_(0)
+    ethernet_field_bus_endianness_(0),
+    enable_acquisition_finished_pcic_(false)
 { }
 
 o3d3xx::DeviceConfig::DeviceConfig(
@@ -484,6 +485,18 @@ o3d3xx::DeviceConfig::SetEthernetFieldBusEndianness(int i) noexcept
   this->ethernet_field_bus_endianness_ = i;
 }
 
+bool
+o3d3xx::DeviceConfig::EnableAcquisitionFinishedPCIC() const noexcept
+{
+  return this->enable_acquisition_finished_pcic_;
+}
+
+void
+o3d3xx::DeviceConfig::SetEnableAcquisitionFinishedPCIC(bool on) noexcept
+{
+  this->enable_acquisition_finished_pcic_ = on;
+}
+
 const std::unordered_map<std::string,
                          std::function<void(o3d3xx::DeviceConfig*,
                                             const std::string&)> >
@@ -564,6 +577,10 @@ o3d3xx::DeviceConfig::mutator_map =
     {"SaveRestoreStatsOnApplSwitch",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetSaveRestoreStatsOnApplSwitch(o3d3xx::stob(val)); }},
+
+    {"EnableAcquisitionFinishedPCIC",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetEnableAcquisitionFinishedPCIC(o3d3xx::stob(val)); }},
 
     //
     // Read-only parameters on the camera
@@ -671,6 +688,8 @@ o3d3xx::DeviceConfig::ToJSON() const
   pt.put("PNIODeviceName", this->PNIODeviceName());
   pt.put("EthernetFieldBus", this->EthernetFieldBus());
   pt.put("EthernetFieldBusEndianness", this->EthernetFieldBusEndianness());
+  pt.put("EnableAcquisitionFinishedPCIC",
+         this->EnableAcquisitionFinishedPCIC());
 
   std::ostringstream buf;
   boost::property_tree::write_json(buf, pt);

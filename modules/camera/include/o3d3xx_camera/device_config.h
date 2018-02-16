@@ -185,6 +185,9 @@ namespace o3d3xx
     double TemperatureIllu() const noexcept;
     void SetTemperatureIllu(double d) noexcept;
 
+    bool EnableAcquisitionFinishedPCIC() const noexcept;
+    void SetEnableAcquisitionFinishedPCIC(bool on) noexcept;
+
   protected:
     /**
      * User-defined name of the device (max 64 characters)
@@ -361,6 +364,11 @@ namespace o3d3xx
      * @todo needs documentation
      */
     int ethernet_field_bus_endianness_;
+
+    /**
+     * @todo needs documentation
+     */
+    bool enable_acquisition_finished_pcic_;
 
   }; // end: class DeviceConfig
 

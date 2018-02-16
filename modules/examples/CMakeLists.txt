@@ -29,7 +29,7 @@ find_package(PCL 1.7.1 REQUIRED COMPONENTS common io)
 find_package(OpenCV REQUIRED)
 find_package(Boost REQUIRED COMPONENTS system)
 
-
+find_package(Threads REQUIRED)
 find_library(LIB_boost_system NAMES boost_system)
 
 # Fix this: https://bugs.launchpad.net/ubuntu/+source/vtk6/+bug/1573234
@@ -144,7 +144,19 @@ target_link_libraries(ex-fast_app_switch
                       ${OpenCV_LIBRARIES}
                       ${LIB_boost_system}
                       )
+
 add_executable(ex-oem_is_booted ex-oem_is_booted.cpp)
 target_link_libraries(ex-oem_is_booted
                       ${O3D3XX_CAMERA_LIBRARIES}
-)
+                      )
+
+add_executable(ex-pcic_dos_attack ex-pcic_dos_attack.cpp)
+target_link_libraries(ex-pcic_dos_attack
+                      ${O3D3XX_CAMERA_LIBRARIES}
+                      ${O3D3XX_FRAMEGRABBER_LIBRARIES}
+                      ${O3D3XX_IMAGE_LIBRARIES}
+                      ${O3D3XX_PCICCLIENT_LIBRARIES}
+                      ${OpenCV_LIBRARIES}
+                      ${LIB_boost_system}
+                      ${CMAKE_THREAD_LIBS_INIT}
+                      )
