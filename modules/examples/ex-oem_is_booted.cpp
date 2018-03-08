@@ -33,8 +33,8 @@ bool wait_for_camera(o3d3xx::Camera::Ptr cam, int seconds)
 {
     seconds = std::max(seconds,1);
     std::unordered_map<std::string, std::string> sw_version;
-    auto start = std::chrono::high_resolution_clock::now();
-    std::chrono::duration<double> duration;
+    auto start = std::chrono::steady_clock::now();
+    std::chrono::duration<double> duration(0);
     bool isValid=false;
 
     while( (!isValid) && (duration < std::chrono::seconds( seconds ) ) )
@@ -47,7 +47,7 @@ bool wait_for_camera(o3d3xx::Camera::Ptr cam, int seconds)
         {
             // Not able to get SW version
         }
-        duration = std::chrono::high_resolution_clock::now() - start;
+        duration = std::chrono::steady_clock::now() - start;
 
         if(sw_version["Algorithm_Version"].empty())
             std::this_thread::sleep_for (std::chrono::seconds(1));
