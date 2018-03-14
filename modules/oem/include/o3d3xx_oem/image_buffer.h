@@ -21,6 +21,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <chrono>
 #include <opencv2/core/core.hpp>
 #include <o3d3xx_framegrabber/pcic_schema.h>
 #include <pcl/point_cloud.h>
@@ -32,6 +33,7 @@ namespace o3d3xx
 namespace oem
 {
   using PointT = pcl::PointXYZI;
+  using TimePointT = std::chrono::time_point<std::chrono::system_clock, std::chrono::nanoseconds>;
 
   /**
    * The ImageBuffer class is used to hold time synchronized images from the
@@ -155,6 +157,11 @@ namespace oem
     float IlluTemperature();
 
     /**
+     * Returns the time stamp of the image data.
+     */
+    o3d3xx::oem::TimePointT TimeStamp();
+
+    /**
      * Organizes the passed in frame data into the internally wrapped data
      * structures according to the desired results as specified by the mask.
      *
@@ -170,6 +177,10 @@ namespace oem
     std::vector<float> extrinsics_;
     std::vector<std::uint32_t> exposure_times_;
     float illu_temperature_;
+    /**
+     * The timestamp of the image data
+     */
+    o3d3xx::oem::TimePointT time_stamp_;
     pcl::PointCloud<o3d3xx::oem::PointT>::Ptr cloud_;
     cv::Mat depth_;
     cv::Mat uvec_;

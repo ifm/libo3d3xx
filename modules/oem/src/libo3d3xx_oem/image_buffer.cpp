@@ -32,7 +32,8 @@ o3d3xx::oem::ImageBuffer::ImageBuffer()
   : cloud_(new pcl::PointCloud<o3d3xx::oem::PointT>()),
     extrinsics_({0.,0.,0.,0.,0.,0.}),
     exposure_times_({0,0,0}),
-    illu_temperature_(INVALID_TEMPERATURE)
+    illu_temperature_(INVALID_TEMPERATURE),
+    time_stamp_(std::chrono::system_clock::now())
 {
   this->cloud_->sensor_origin_.setZero();
   this->cloud_->sensor_orientation_.w() = 1.0f;
@@ -101,6 +102,12 @@ o3d3xx::oem::ImageBuffer::IlluTemperature()
   return this->illu_temperature_;
 }
 
+o3d3xx::oem::TimePointT
+o3d3xx::oem::ImageBuffer::TimeStamp()
+{
+  return this->time_stamp_;
+}
+
 void
 o3d3xx::oem::ImageBuffer::Organize(ifm::resultsync::Frame* frame,
                                    std::uint16_t mask)
@@ -154,6 +161,27 @@ o3d3xx::oem::ImageBuffer::Organize(ifm::resultsync::Frame* frame,
   std::uint32_t num_points = width * height;
   std::uint32_t pixel_data_offset =
     o3d3xx::mkval<std::uint32_t>(conf_ptr+cidx+8);
+
+  const std::uint32_t header_version =  o3d3xx::mkval<std::uint32_t>(conf_ptr+cidx+12);
+  // for the *big* time stamp minimum header version 2 is needed
+  if( header_version > 1 )
+    {
+      // Retrieve the timestamp information from the confidence data
+      const std::uint32_t timestampSec =
+        o3d3xx::mkval<std::uint32_t>(conf_ptr+cidx+40);
+      const std::uint32_t timestampNsec =
+        o3d3xx::mkval<std::uint32_t>(conf_ptr+cidx+44);
+      // convert the time stamp into a TimePointT
+      this->time_stamp_ = std::chrono::system_clock::time_point {
+                            std::chrono::seconds{timestampSec}
+                            + std::chrono::nanoseconds{timestampNsec}
+                          };
+    }
+  else
+    {
+      // There is no *big* time stamp in chunk version 1
+      this->time_stamp_ = std::chrono::system_clock::now();
+    }
 
   cidx += pixel_data_offset; // advance to beginning of pixel data
 
@@ -500,4 +528,5 @@ o3d3xx::oem::ImageBuffer::Organize(ifm::resultsync::Frame* frame,
   {
     illu_temperature_ = INVALID_TEMPERATURE;
   }
+
 }
