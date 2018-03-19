@@ -177,6 +177,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Support for auto-exposure parameters</td>
   </tr>
+  <tr>
+    <td>0.7.5</td>
+    <td>1.20.1029</td>
+    <td>O3D303</td>
+    <td>Support for auto-exposure parameters</td>
+  </tr>
 </table>
 
 Features

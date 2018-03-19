@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.7.4 and 0.7.5
+
+* Added timestamp support for images grabbed with the oem module
+
 ## Changes between libo3d3xx 0.7.3 and 0.7.4
 
 * Updated XMLRPC protocol for 1.20.x firmwares
