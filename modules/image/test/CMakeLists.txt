@@ -2,7 +2,7 @@ find_library(LIB_boost_system NAMES boost_system)
 
 set(GTEST_CMAKE_DIR "/usr/src/gtest")
 enable_testing()
-add_subdirectory(${GTEST_CMAKE_DIR} gtest_bin)
+add_subdirectory(${GTEST_CMAKE_DIR} gtest_bin EXCLUDE_FROM_ALL)
 file(GLOB IMAGE_TEST_SOURCES *.cpp)
 add_executable(o3d3xx-image-tests
                ${IMAGE_TEST_SOURCES})
