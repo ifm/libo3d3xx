@@ -240,7 +240,7 @@ if(BUILD_EXE_VIEWER)
     set(CPACK_DEBIAN_PACKAGE_DEPENDS
       "${CPACK_DEBIAN_PACKAGE_DEPENDS},
        libvtk6-dev,
-       libpcl1.7,
+       libpcl-dev,
        libopencv-highgui-dev,
        libopencv-contrib-dev")
   else()
