@@ -189,6 +189,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Ethernet/IP assembly size configuration and PCIC schema auto update</td>
   </tr>
+  <tr>
+    <td>0.7.7</td>
+    <td>1.23.1522</td>
+    <td>O3D303</td>
+    <td>Support for building with Ubuntu 18.04 toolchain</td>
+  </tr>
 </table>
 
 Features
@@ -257,6 +263,7 @@ validated:
 
 * g++ 4.8.x on Ubuntu Linux 14.04 LTS
 * g++ 5.3.x on Ubuntu Linux 16.04 LTS
+* g++ 7.3.x on Ubuntu Linux 18.04 LTS
 
 Installation (from source)
 --------------------------

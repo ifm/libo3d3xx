@@ -1,3 +1,7 @@
+## Changes between libo3d3xx 0.7.6 and 0.7.7
+
+* Updated cmake/packaging scripts to support the Ubuntu 18.04 toolchain
+
 ## Changes between libo3d3xx 0.7.5 and 0.7.6
 
 * Makes unit tests pass for the 1.23.1522 firmware (json dumps still do not
