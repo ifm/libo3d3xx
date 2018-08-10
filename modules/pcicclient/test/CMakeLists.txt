@@ -1,6 +1,6 @@
 set(GTEST_CMAKE_DIR "/usr/src/gtest")
 enable_testing()
-add_subdirectory(${GTEST_CMAKE_DIR} gtest_bin)
+add_subdirectory(${GTEST_CMAKE_DIR} gtest_bin EXCLUDE_FROM_ALL)
 file(GLOB PCICCLIENT_TEST_SOURCES *.cpp)
 add_executable(o3d3xx-pcicclient-tests
                ${PCICCLIENT_TEST_SOURCES})
