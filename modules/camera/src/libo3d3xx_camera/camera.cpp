@@ -1019,7 +1019,7 @@ o3d3xx::Camera::SetImagerConfig(const o3d3xx::ImagerConfig* config)
                              "ExposureTime", config->ExposureTime());
         }
     }
-  else
+  else if (boost::algorithm::ends_with(im->Type(), "moderate"))
     {
       if (im->ExposureTime() != config->ExposureTime())
         {

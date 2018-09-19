@@ -179,7 +179,7 @@ TEST(Camera_Tests, GetDeviceConfig)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  EXPECT_EQ(params.size(), 35);
+  EXPECT_EQ(params.size(), 38);
 
   EXPECT_EQ(params.at("Name"), dev->Name());
   EXPECT_EQ(params.at("Description"), dev->Description());
@@ -220,6 +220,12 @@ TEST(Camera_Tests, GetDeviceConfig)
   EXPECT_EQ(params.at("PNIODeviceName"), dev->PNIODeviceName());
   EXPECT_EQ(o3d3xx::stob(params.at("EnableAcquisitionFinishedPCIC")),
             dev->EnableAcquisitionFinishedPCIC());
+  EXPECT_EQ(std::stoi(params.at("EIPProducingSize")),
+            dev->EIPProducingSize());
+  EXPECT_EQ(std::stoi(params.at("EIPConsumingSize")),
+            dev->EIPConsumingSize());
+  EXPECT_EQ(o3d3xx::stob(params.at("PcicTcpSchemaAutoUpdate")),
+            dev->PcicTcpSchemaAutoUpdate());
 }
 
 TEST(Camera_Tests, ActivateDisablePassword)

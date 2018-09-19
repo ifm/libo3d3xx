@@ -188,6 +188,16 @@ namespace o3d3xx
     bool EnableAcquisitionFinishedPCIC() const noexcept;
     void SetEnableAcquisitionFinishedPCIC(bool on) noexcept;
 
+    int EIPProducingSize() const noexcept;
+    void SetEIPProducingSize(int i) noexcept;
+
+    int EIPConsumingSize() const noexcept;
+    void SetEIPConsumingSize(int i) noexcept;
+
+    bool PcicTcpSchemaAutoUpdate() const noexcept;
+    void SetPcicTcpSchemaAutoUpdate(bool on) noexcept;
+
+
   protected:
     /**
      * User-defined name of the device (max 64 characters)
@@ -369,6 +379,21 @@ namespace o3d3xx
      * @todo needs documentation
      */
     bool enable_acquisition_finished_pcic_;
+
+    /**
+     * @todo needs documentation
+     */
+    int eip_producing_size_;
+
+    /**
+     * @todo needs documentation
+     */
+    int eip_consuming_size_;
+
+    /**
+     * @todo needs documentation
+     */
+    bool pcic_tcp_schema_auto_update_;
 
   }; // end: class DeviceConfig
 

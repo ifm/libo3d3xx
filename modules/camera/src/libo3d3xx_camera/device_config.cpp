@@ -51,7 +51,10 @@ o3d3xx::DeviceConfig::DeviceConfig()
     pnio_device_name_(""),
     ethernet_field_bus_(0),
     ethernet_field_bus_endianness_(0),
-    enable_acquisition_finished_pcic_(false)
+    enable_acquisition_finished_pcic_(false),
+    eip_producing_size_(0),
+    eip_consuming_size_(0),
+    pcic_tcp_schema_auto_update_(false)
 { }
 
 o3d3xx::DeviceConfig::DeviceConfig(
@@ -497,11 +500,47 @@ o3d3xx::DeviceConfig::SetEnableAcquisitionFinishedPCIC(bool on) noexcept
   this->enable_acquisition_finished_pcic_ = on;
 }
 
+int
+o3d3xx::DeviceConfig::EIPProducingSize() const noexcept
+{
+  return this->eip_producing_size_;
+}
+
+void
+o3d3xx::DeviceConfig::SetEIPProducingSize(int i) noexcept
+{
+  this->eip_producing_size_ = i;
+}
+
+int
+o3d3xx::DeviceConfig::EIPConsumingSize() const noexcept
+{
+  return this->eip_consuming_size_;
+}
+
+void
+o3d3xx::DeviceConfig::SetEIPConsumingSize(int i) noexcept
+{
+  this->eip_consuming_size_ = i;
+}
+
+bool
+o3d3xx::DeviceConfig::PcicTcpSchemaAutoUpdate() const noexcept
+{
+  return this->pcic_tcp_schema_auto_update_;
+}
+
+void
+o3d3xx::DeviceConfig::SetPcicTcpSchemaAutoUpdate(bool on) noexcept
+{
+  this->pcic_tcp_schema_auto_update_ = on;
+}
+
 const std::unordered_map<std::string,
                          std::function<void(o3d3xx::DeviceConfig*,
                                             const std::string&)> >
 o3d3xx::DeviceConfig::mutator_map =
-  {
+{
     {"Name",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetName(val); }},
@@ -644,8 +683,20 @@ o3d3xx::DeviceConfig::mutator_map =
 
     {"EthernetFieldBusEndianness",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
-     { dev->SetEthernetFieldBusEndianness(std::stoi(val)); }}
-  };
+     { dev->SetEthernetFieldBusEndianness(std::stoi(val)); }},
+
+    {"EIPProducingSize",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetEIPProducingSize(std::stoi(val)); }},
+
+    {"EIPConsumingSize",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetEIPConsumingSize(std::stoi(val)); }},
+
+    {"PcicTcpSchemaAutoUpdate",
+     [](o3d3xx::DeviceConfig* dev, const std::string& val)
+     { dev->SetPcicTcpSchemaAutoUpdate(o3d3xx::stob(val)); }}
+};
 
 std::string
 o3d3xx::DeviceConfig::ToJSON() const
