@@ -540,7 +540,7 @@ const std::unordered_map<std::string,
                          std::function<void(o3d3xx::DeviceConfig*,
                                             const std::string&)> >
 o3d3xx::DeviceConfig::mutator_map =
-{
+  {
     {"Name",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetName(val); }},
@@ -696,7 +696,7 @@ o3d3xx::DeviceConfig::mutator_map =
     {"PcicTcpSchemaAutoUpdate",
      [](o3d3xx::DeviceConfig* dev, const std::string& val)
      { dev->SetPcicTcpSchemaAutoUpdate(o3d3xx::stob(val)); }}
-};
+  };
 
 std::string
 o3d3xx::DeviceConfig::ToJSON() const

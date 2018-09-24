@@ -289,9 +289,9 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("ContinuousUserFrameCalibration"));
 
       if(!boost::algorithm::ends_with(type, "depalletizing_upto_30m_high"))
-      {
+        {
           ASSERT_NO_THROW(params.at("Channel"));
-      }
+        }
 
       if (boost::algorithm::ends_with(type, "high"))
         {
@@ -299,13 +299,13 @@ TEST_F(AppImagerTest, GetImagerParameters)
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
           if(boost::algorithm::ends_with(type, "depalletizing_upto_30m_high"))
-          {
-             ASSERT_EQ(params.size(), 31);
-          }
+            {
+              ASSERT_EQ(params.size(), 31);
+            }
           else
-          {
-            ASSERT_EQ(params.size(), 32);
-          }
+            {
+              ASSERT_EQ(params.size(), 32);
+            }
         }
       else if (boost::algorithm::ends_with(type, "low"))
         {
