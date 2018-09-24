@@ -361,37 +361,40 @@ namespace o3d3xx
     double temp_illu_;
 
     /**
-     * @todo needs documentation
+     * The Profinet device name 
      */
     std::string pnio_device_name_;
 
     /**
-     * @todo needs documentation
+     * Select the ethernet fieldbus 
      */
     int ethernet_field_bus_;
 
     /**
-     * @todo needs documentation
+     * Selects the Endianess of the fieldbus
      */
     int ethernet_field_bus_endianness_;
 
     /**
-     * @todo needs documentation
+     * Enable the asynchronous notification for the
+     * acquisition finished signal over PCIC
      */
     bool enable_acquisition_finished_pcic_;
 
     /**
-     * @todo needs documentation
+     * Ethernet/IP producing assembly size
      */
     int eip_producing_size_;
 
     /**
-     * @todo needs documentation
+     * Ethernet/IP consuming assembly size
      */
     int eip_consuming_size_;
 
     /**
-     * @todo needs documentation
+     * This enables the PCIC auto schema update.
+     * When enabled the default schema will be updated on all
+     * open connections
      */
     bool pcic_tcp_schema_auto_update_;
 
