@@ -128,7 +128,7 @@ TEST_F(AppImagerTest, GetAppParameters)
   //     std::cout << kv.first << "=" << kv.second << std::endl;
   //   }
 
-  ASSERT_EQ(params.size(), 9);
+  ASSERT_EQ(params.size(), 10);
 
   ASSERT_NO_THROW(params.at("Name"));
   ASSERT_NO_THROW(params.at("Description"));
@@ -139,6 +139,7 @@ TEST_F(AppImagerTest, GetAppParameters)
   ASSERT_NO_THROW(params.at("TemplateInfo"));
   ASSERT_NO_THROW(params.at("Type"));
   ASSERT_NO_THROW(params.at("LogicGraph"));
+  ASSERT_NO_THROW(params.at("RtspOverlayStyle"));
 
   cam_->StopEditingApplication();
   cam_->DeleteApplication(new_idx);
@@ -260,7 +261,6 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("AutoExposureReferenceROI"));
       ASSERT_NO_THROW(params.at("AutoExposureReferenceType"));
       ASSERT_NO_THROW(params.at("AutoExposureMaxExposureTime"));
-      ASSERT_NO_THROW(params.at("Channel"));
       ASSERT_NO_THROW(params.at("ClippingBottom"));
       ASSERT_NO_THROW(params.at("ClippingLeft"));
       ASSERT_NO_THROW(params.at("ClippingRight"));
@@ -286,27 +286,40 @@ TEST_F(AppImagerTest, GetImagerParameters)
       ASSERT_NO_THROW(params.at("TwoFreqMaxLineDistPercentage"));
       ASSERT_NO_THROW(params.at("Type"));
       ASSERT_NO_THROW(params.at("MaxAllowedLEDFrameRate"));
+      ASSERT_NO_THROW(params.at("ContinuousUserFrameCalibration"));
+
+      if(!boost::algorithm::ends_with(type, "depalletizing_upto_30m_high"))
+        {
+          ASSERT_NO_THROW(params.at("Channel"));
+        }
 
       if (boost::algorithm::ends_with(type, "high"))
         {
           ASSERT_THROW(params.at("ExposureTime"), std::out_of_range);
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 31);
+          if(boost::algorithm::ends_with(type, "depalletizing_upto_30m_high"))
+            {
+              ASSERT_EQ(params.size(), 31);
+            }
+          else
+            {
+              ASSERT_EQ(params.size(), 32);
+            }
         }
       else if (boost::algorithm::ends_with(type, "low"))
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_THROW(params.at("ExposureTimeRatio"), std::out_of_range);
 
-          ASSERT_EQ(params.size(), 32);
+          ASSERT_EQ(params.size(), 33);
         }
-      else
+      else if (boost::algorithm::ends_with(type, "moderate"))
         {
           ASSERT_NO_THROW(params.at("ExposureTime"));
           ASSERT_NO_THROW(params.at("ExposureTimeRatio"));
 
-          ASSERT_EQ(params.size(), 33);
+          ASSERT_EQ(params.size(), 34);
         }
     }
 
@@ -405,7 +418,7 @@ TEST_F(AppImagerTest, ImagerConfig)
         {
           ASSERT_NO_THROW(im->SetExposureTime(2000));
         }
-      else
+      else if (boost::algorithm::ends_with(type, "moderate"))
         {
           ASSERT_NO_THROW(im->SetExposureTime(2000));
           ASSERT_NO_THROW(im->SetExposureTimeRatio(5));
@@ -436,7 +449,7 @@ TEST_F(AppImagerTest, ImagerConfig)
         {
           ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
         }
-      else
+      else if (boost::algorithm::ends_with(type, "moderate"))
         {
           ASSERT_EQ(im2->ExposureTime(), im->ExposureTime());
           ASSERT_EQ(im2->ExposureTimeRatio(),
@@ -580,7 +593,7 @@ TEST_F(AppImagerTest, Exposure)
         {
           ASSERT_NO_THROW(im->SetExposureTime(2000));
         }
-      else
+      else if (boost::algorithm::ends_with(type, "moderate"))
         {
           ASSERT_NO_THROW(im->SetExposureTime(2000));
           ASSERT_NO_THROW(im->SetExposureTimeRatio(5));
@@ -607,7 +620,7 @@ TEST_F(AppImagerTest, Exposure)
           ASSERT_EQ(exposure_strings.size(), 1);
           ASSERT_EQ(std::atoi(exposure_strings.at(0).c_str()), 2000);
         }
-      else
+      else if (boost::algorithm::ends_with(type, "moderate"))
         {
           ASSERT_EQ(exposure_strings.size(), 2);
           ASSERT_EQ(std::atoi(exposure_strings.at(0).c_str()), 2000/5);

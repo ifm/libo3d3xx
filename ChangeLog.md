@@ -1,3 +1,8 @@
+## Changes between libo3d3xx 0.7.5 and 0.7.6
+
+* Makes unit tests pass for the 1.23.1522 firmware (json dumps still do not
+  expose the new parameters).
+
 ## Changes between libo3d3xx 0.7.4 and 0.7.5
 
 * Added timestamp support for images grabbed with the oem module

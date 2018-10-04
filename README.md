@@ -183,6 +183,12 @@ Software Compatibility Matrix
     <td>O3D303</td>
     <td>Timestamp support in OEM image module</td>
   </tr>
+  <tr>
+    <td>0.7.6</td>
+    <td>1.23.1522</td>
+    <td>O3D303</td>
+    <td>Ethernet/IP assembly size configuration and PCIC schema auto update</td>
+  </tr>
 </table>
 
 Features
