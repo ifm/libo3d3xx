@@ -84,7 +84,9 @@ get_ubuntu_version(${UBUNTU_VERSION})
 ################################################
 ## Bring in dependent projects
 ################################################
-find_package(XMLRPC REQUIRED c++ client)
+if (NOT CMAKE_CROSSCOMPILING)
+  find_package(XMLRPC REQUIRED c++ client)
+endif()
 find_package(Boost REQUIRED COMPONENTS program_options system)
 
 ################################################

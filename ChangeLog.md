@@ -1,6 +1,9 @@
 ## Changes between libo3d3xx 0.7.6 and 0.7.7
 
 * Updated cmake/packaging scripts to support the Ubuntu 18.04 toolchain
+* Disabled FindXMLRPC CMake module when cross compiling. This fixes a build
+  failure when cross compiling for the O3D303 with CMake 3.10.2 on Ubuntu
+  18.04)
 
 ## Changes between libo3d3xx 0.7.5 and 0.7.6
 
