@@ -4,6 +4,7 @@
 * Disabled FindXMLRPC CMake module when cross compiling. This fixes a build
   failure when cross compiling for the O3D303 with CMake 3.10.2 on Ubuntu
   18.04)
+* Backported PR#180 from ifm3d to handle spurious wakeups in WaitForFrame
 
 ## Changes between libo3d3xx 0.7.5 and 0.7.6
 

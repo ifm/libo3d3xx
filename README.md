@@ -193,7 +193,7 @@ Software Compatibility Matrix
     <td>0.7.7</td>
     <td>1.25.4073</td>
     <td>O3D303</td>
-    <td>Support for building with Ubuntu 18.04 toolchain</td>
+    <td>Support for building with Ubuntu 18.04 toolchain, bugfixes</td>
   </tr>
 </table>
 
