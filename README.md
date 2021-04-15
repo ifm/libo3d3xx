@@ -1,10 +1,13 @@
+> NON-EMBEDDED use cases
+> --------
+> :warning: **DEPRECATION NOTICE** This library has been superceded by ifm3d and
+> will soon be deprecated entirely. Users should use [ifm3d](https://github.com/ifm/ifm3d) instead.
+>
+> EMBEDDED use cases
+> --------
+> For now libo3d3xx is still needed and  supported for embedded  deployments to the O3D3XX.
 
-> :warning: **DEPRECATION NOTICE**: This library has been superceded by
-> [ifm3d](https://github.com/ifm/ifm3d) and will soon be deprecated
-> entirely. For now `libo3d3xx` is still needed and supported for embedded
-> deployments to the O3D3XX.
-> 
-> For non-embedded use cases, users should use `ifm3d` instead.
+
 
 libo3d3xx
 =========
