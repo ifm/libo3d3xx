@@ -15,6 +15,9 @@ if(BUILD_EXE_VIEWER)
   add_executable(o3d3xx-viewer o3d3xx-viewer.cpp)
 
   if(BUILD_SHARED_LIBS)
+
+    target_compile_definitions(o3d3xx-viewer PUBLIC ${PCL_DEFINITIONS})
+    target_compile_options(o3d3xx-viewer PUBLIC ${PCL_COMPILE_OPTIONS})
     target_link_libraries(o3d3xx-viewer
       o3d3xx_image_shared
       ${O3D3XX_CAMERA_LIBRARIES}
