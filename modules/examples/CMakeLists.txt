@@ -72,6 +72,7 @@ target_link_libraries(ex-100k
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${PCL_COMMON_LIBRARIES}
                       ${OpenCV_LIBRARIES}
+                      ${LIB_boost_system}
                       )
 
 add_executable(ex-cartesian ex-cartesian.cpp)
@@ -99,6 +100,7 @@ target_link_libraries(ex-file_io
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${PCL_IO_LIBRARIES}
                       ${OpenCV_LIBRARIES}
+                      ${LIB_boost_system}
                       )
 
 add_executable(ex-framegrabber_recycling ex-framegrabber_recycling.cpp)
@@ -115,6 +117,7 @@ target_link_libraries(ex-exposure_times
                       ${O3D3XX_IMAGE_LIBRARIES}
                       ${PCL_COMMON_LIBRARIES}
                       ${OpenCV_LIBRARIES}
+                      ${LIB_boost_system}
                       )
 add_executable(ex-change_ip ex-change_ip.cpp)
 target_link_libraries(ex-change_ip
